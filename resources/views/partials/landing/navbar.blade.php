@@ -1,24 +1,33 @@
-<header class="main-header">
+<header
+    class="main-header"
+    id="mainHeader"
+>
 
     <div class="container navbar-container">
 
+
         {{-- BRAND --}}
-        <a href="{{ route('home') }}" class="brand">
+
+        <a
+            href="{{ route('home') }}"
+            class="brand"
+        >
 
             <img
-                src="{{ asset('images/logo/logo-sumut.png') }}"
-                alt="Logo Sumatera Utara"
+                src="{{ asset('images/logo-dpmptsp.png') }}"
+                alt="Logo DPMPTSP Sumatera Utara"
                 class="brand-logo"
             >
+
 
             <div class="brand-text">
 
                 <strong>
-                    DASHBOARD EXECUTIVE
+                    DPMPTSP
                 </strong>
 
                 <span>
-                    SUMATERA INVESTMENT
+                    PROVINSI SUMATERA UTARA
                 </span>
 
             </div>
@@ -26,30 +35,38 @@
         </a>
 
 
-        {{-- MOBILE MENU BUTTON --}}
+
+        {{-- MOBILE BUTTON --}}
+
         <button
+            type="button"
             class="mobile-menu-button"
             id="mobileMenuButton"
-            aria-label="Buka menu"
+            aria-label="Buka menu navigasi"
         >
+
             <i class="fa-solid fa-bars"></i>
+
         </button>
 
 
+
         {{-- NAVIGATION --}}
+
         <nav
             class="main-navigation"
             id="mainNavigation"
         >
+
 
             <a
                 href="{{ route('home') }}"
                 class="nav-link
                 {{ request()->routeIs('home') ? 'active' : '' }}"
             >
-                <i class="fa-solid fa-house"></i>
 
                 Beranda
+
             </a>
 
 
@@ -58,9 +75,9 @@
                 class="nav-link
                 {{ request()->routeIs('about') ? 'active' : '' }}"
             >
-                <i class="fa-solid fa-puzzle-piece"></i>
 
-                Tentang Laman
+                Tentang
+
             </a>
 
 
@@ -69,9 +86,9 @@
                 class="nav-link
                 {{ request()->routeIs('dashboard') ? 'active' : '' }}"
             >
-                <i class="fa-solid fa-grip"></i>
 
                 Dashboard
+
             </a>
 
 
@@ -80,9 +97,9 @@
                 class="nav-link
                 {{ request()->routeIs('investment.map') ? 'active' : '' }}"
             >
-                <i class="fa-regular fa-map"></i>
 
                 Peta Investasi
+
             </a>
 
 
@@ -91,33 +108,29 @@
                 class="nav-link
                 {{ request()->routeIs('contact') ? 'active' : '' }}"
             >
-                <i class="fa-regular fa-envelope"></i>
 
                 Kontak
+
+            </a>
+
+
+            <a
+                href="{{ route('faq') }}"
+                class="nav-link
+                {{ request()->routeIs('faq') ? 'active' : '' }}"
+            >
+
+                FAQ
+
             </a>
 
         </nav>
 
 
-        {{-- ACTIONS --}}
-        <div class="navbar-actions">
 
-            <form class="search-box">
+        {{-- LOGIN --}}
 
-                <input
-                    type="search"
-                    placeholder="Cari informasi..."
-                    aria-label="Cari informasi"
-                >
-
-                <button type="submit">
-
-                    <i class="fa-solid fa-magnifying-glass"></i>
-
-                </button>
-
-            </form>
-
+        <div class="navbar-action">
 
             @auth
 
@@ -125,9 +138,11 @@
                     href="{{ route('dashboard') }}"
                     class="login-button"
                 >
+
                     <i class="fa-solid fa-grip"></i>
 
                     Dashboard
+
                 </a>
 
             @else
@@ -136,14 +151,17 @@
                     href="{{ route('login') }}"
                     class="login-button"
                 >
+
                     <i class="fa-regular fa-user"></i>
 
                     Login
+
                 </a>
 
             @endauth
 
         </div>
+
 
     </div>
 
