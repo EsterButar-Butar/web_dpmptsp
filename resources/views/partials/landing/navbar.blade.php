@@ -6,7 +6,9 @@
     <div class="container navbar-container">
 
 
-        {{-- BRAND --}}
+        {{-- =====================================================
+             BRAND
+        ====================================================== --}}
 
         <a
             href="{{ route('home') }}"
@@ -36,13 +38,17 @@
 
 
 
-        {{-- MOBILE BUTTON --}}
+        {{-- =====================================================
+             MOBILE BUTTON
+        ====================================================== --}}
 
         <button
             type="button"
             class="mobile-menu-button"
             id="mobileMenuButton"
             aria-label="Buka menu navigasi"
+            aria-controls="mainNavigation"
+            aria-expanded="false"
         >
 
             <i class="fa-solid fa-bars"></i>
@@ -51,13 +57,17 @@
 
 
 
-        {{-- NAVIGATION --}}
+        {{-- =====================================================
+             NAVIGATION
+        ====================================================== --}}
 
         <nav
             class="main-navigation"
             id="mainNavigation"
         >
 
+
+            {{-- BERANDA --}}
 
             <a
                 href="{{ route('home') }}"
@@ -70,6 +80,9 @@
             </a>
 
 
+
+            {{-- TENTANG --}}
+
             <a
                 href="{{ route('about') }}"
                 class="nav-link
@@ -80,6 +93,9 @@
 
             </a>
 
+
+
+            {{-- DASHBOARD --}}
 
             <a
                 href="{{ route('dashboard') }}"
@@ -92,6 +108,9 @@
             </a>
 
 
+
+            {{-- PETA INVESTASI --}}
+
             <a
                 href="{{ route('investment.map') }}"
                 class="nav-link
@@ -102,6 +121,9 @@
 
             </a>
 
+
+
+            {{-- KONTAK --}}
 
             <a
                 href="{{ route('contact') }}"
@@ -114,6 +136,9 @@
             </a>
 
 
+
+            {{-- FAQ --}}
+
             <a
                 href="{{ route('faq') }}"
                 class="nav-link
@@ -124,28 +149,21 @@
 
             </a>
 
+
         </nav>
 
 
 
-        {{-- LOGIN --}}
+        {{-- =====================================================
+             LOGIN / DASHBOARD BUTTON
+        ====================================================== --}}
 
         <div class="navbar-action">
 
-            @auth
 
-                <a
-                    href="{{ route('dashboard') }}"
-                    class="login-button"
-                >
+            {{-- BELUM LOGIN --}}
 
-                    <i class="fa-solid fa-grip"></i>
-
-                    Dashboard
-
-                </a>
-
-            @else
+            @guest
 
                 <a
                     href="{{ route('login') }}"
@@ -154,11 +172,32 @@
 
                     <i class="fa-regular fa-user"></i>
 
-                    Login
+                    <span>
+                        Login
+                    </span>
 
                 </a>
 
-            @endauth
+
+            {{-- SUDAH LOGIN --}}
+
+            @else
+
+                <a
+                    href="{{ route('dashboard') }}"
+                    class="login-button"
+                >
+
+                    <i class="fa-solid fa-gauge-high"></i>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+            @endguest
+
 
         </div>
 

@@ -6,8 +6,12 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Public Landing Pages
+| PUBLIC LANDING PAGES
 |--------------------------------------------------------------------------
+|
+| Halaman publik yang dapat diakses oleh semua pengunjung
+| tanpa harus melakukan autentikasi.
+|
 */
 
 Route::get('/', function () {
@@ -37,50 +41,164 @@ Route::get('/faq', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Dashboard
+| DASHBOARD REDIRECT
 |--------------------------------------------------------------------------
+|
+| Route /dashboard menjadi pintu masuk utama setelah pengguna login.
+|
+| admin    → admin.dashboard
+| operator → operator.dashboard
+| user     → user.dashboard
+|
 */
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware([
-    'auth',
-    'verified'
-])->name('dashboard');
+
+    $user = auth()->user();
+
+    return match ($user->role) {
+
+        'admin' => redirect()->route(
+            'admin.dashboard'
+        ),
+
+        'operator' => redirect()->route(
+            'operator.dashboard'
+        ),
+
+        'user' => redirect()->route(
+            'user.dashboard'
+        ),
+
+        default => abort(
+            403,
+            'Role pengguna tidak dikenali.'
+        ),
+    };
+
+})
+    ->middleware([
+        'auth',
+        'verified',
+    ])
+    ->name('dashboard');
 
 
 /*
 |--------------------------------------------------------------------------
-| Profile
+| PROFILE ROUTES
 |--------------------------------------------------------------------------
+|
+| Semua pengguna yang telah login dapat:
+|
+| - melihat halaman edit profil;
+| - memperbarui data profil;
+| - menghapus akun.
+|
 */
 
-Route::middleware('auth')->group(function () {
-
-    Route::get('/profile', [
-        ProfileController::class,
-        'edit'
-    ])->name('profile.edit');
+Route::middleware([
+    'auth',
+])->group(function () {
 
 
-    Route::patch('/profile', [
-        ProfileController::class,
-        'update'
-    ])->name('profile.update');
+    /*
+    |--------------------------------------------------------------------------
+    | Edit Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/profile',
+        [
+            ProfileController::class,
+            'edit',
+        ]
+    )->name('profile.edit');
 
 
-    Route::delete('/profile', [
-        ProfileController::class,
-        'destroy'
-    ])->name('profile.destroy');
+    /*
+    |--------------------------------------------------------------------------
+    | Update Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::patch(
+        '/profile',
+        [
+            ProfileController::class,
+            'update',
+        ]
+    )->name('profile.update');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::delete(
+        '/profile',
+        [
+            ProfileController::class,
+            'destroy',
+        ]
+    )->name('profile.destroy');
 
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| Authentication
+| AUTHENTICATION ROUTES
 |--------------------------------------------------------------------------
+|
+| Route autentikasi dari Laravel Breeze:
+|
+| - Login
+| - Register
+| - Forgot Password
+| - Reset Password
+| - Email Verification
+| - Logout
+|
 */
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role admin.
+|
+*/
+
+require __DIR__ . '/admin.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| OPERATOR ROUTES
+|--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role operator.
+|
+*/
+
+require __DIR__ . '/operator.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| USER ROUTES
+|--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role user.
+|
+*/
+
+require __DIR__ . '/user.php';
