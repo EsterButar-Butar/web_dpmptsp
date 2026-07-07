@@ -15,7 +15,7 @@
     </title>
 
 
-    {{-- Google Fonts --}}
+    {{-- Google Fonts --}
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
     <link

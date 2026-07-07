@@ -1,13 +1,3 @@
-@extends('layouts.landing')
-
-@section('title', 'Tentang | DPMPTSP Provinsi Sumatera Utara')
-
-@section('content')
-
-<section class="about-section">
-
-
-@endsection
 <!DOCTYPE html>
 <html lang="id">
 
@@ -18,9 +8,10 @@
 
     <title>Tentang | DPMPTSP Provinsi Sumatera Utara</title>
 
-    {{-- CSS --}}
-    <link rel="stylesheet" href="{{ asset('css/about.css') }}">
-
+    @vite([
+'resources/css/about.css',
+'resources/js/about.js'
+])
     {{-- Google Font --}}
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -1024,10 +1015,8 @@
             JAVASCRIPT
     ========================== -->
 
-    <script src="{{ asset('js/about.js') }}"></script>
+  
 
 </body>
 
 </html>
-
-</section>
