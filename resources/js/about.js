@@ -346,24 +346,24 @@ window.addEventListener("load", () => {
         BACK TO HOME
 ========================================== */
 
-let redirectedHome = false;
+// let redirectedHome = false;
 
-window.addEventListener("scroll", () => {
+// window.addEventListener("scroll", () => {
 
-    if (window.scrollY <= 10 && !redirectedHome) {
+//     if (window.scrollY <= 10 && !redirectedHome) {
 
-        redirectedHome = true;
+//         redirectedHome = true;
 
-    }
+//     }
 
-});
+// });
 
-window.addEventListener("wheel", function(e){
+// window.addEventListener("wheel", function(e){
 
-    if(window.scrollY <= 5 && e.deltaY < 0){
+//     if(window.scrollY <= 5 && e.deltaY < 0){
 
-        window.location.href = "/";
+//         window.location.href = "/";
 
-    }
+//     }
 
-});
+// });
