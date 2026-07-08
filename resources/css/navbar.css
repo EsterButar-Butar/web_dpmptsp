@@ -24,19 +24,21 @@
 
 .navbar-container{
 
-    max-width:1400px;
+    max-width: 1450px;
 
-    margin:auto;
+    margin: auto;
 
-    height:90px;
+    height: 90px;
 
-    display:grid;
+    display: grid;
 
-    grid-template-columns:300px 1fr 170px;
+    grid-template-columns: auto 1fr auto;
 
-    align-items:center;
+    align-items: center;
 
-    padding:0 30px;
+    gap: 30px;
+
+    padding: 0 35px;
 }
 
 /* =========================
@@ -93,23 +95,34 @@
 ========================= */
 
 .main-navigation{
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    display:flex;
+    gap: 55px;
 
-    justify-content:center;
+    background: rgba(255,255,255,.10);
 
-    align-items:center;
+    padding: 18px 45px;
 
-    gap:38px;
+    border-radius: 999px;
+
+    backdrop-filter: blur(10px);
+
+    width: fit-content;
+
+    margin: 0 auto;
+
+    flex: none;
 }
 
 .nav-link{
 
     color:#fff;
 
-    font-size:17px;
+    font-size:21px;
 
-    font-weight:500;
+    font-weight:600;
 
     position:relative;
 

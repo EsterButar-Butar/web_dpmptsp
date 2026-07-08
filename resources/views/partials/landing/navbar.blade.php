@@ -29,33 +29,21 @@
         </button>
 
         {{-- NAVIGATION --}}
-        <nav class="main-navigation" id="mainNavigation">
+     <nav class="main-navigation" id="mainNavigation">
 
-            <a href="#hero" class="nav-link active">
-                Beranda
-            </a>
+    <a href="#hero" class="nav-link active">
+        Beranda
+    </a>
 
-            <a href="#tentang" class="nav-link">
-                Tentang
-            </a>
+    <a href="#tentang" class="nav-link">
+        Tentang
+    </a>
 
-            <a href="{{ route('dashboard') }}" class="nav-link">
-                Dashboard
-            </a>
+    <a href="{{ route('investment.map') }}" class="nav-link">
+        Peta Investasi
+    </a>
 
-            <a href="{{ route('investment.map') }}" class="nav-link">
-                Peta Investasi
-            </a>
-
-            <a href="#contact" class="nav-link">
-                Kontak
-            </a>
-
-            <a href="#faq" class="nav-link">
-                FAQ
-            </a>
-
-        </nav>
+</nav>
 
         {{-- LOGIN --}}
         <div class="navbar-action">

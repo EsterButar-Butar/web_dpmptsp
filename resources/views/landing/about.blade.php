@@ -403,13 +403,12 @@
 
                 <i class="fa-solid fa-database"></i>
 
-                <h3>Data PDRB</h3>
+                <h3>Tipology Sektor</h3>
 
                 <p>
 
-                    Pengelolaan data PDRB Kabupaten,
-                    Provinsi dan Nasional
-                    secara terintegrasi.
+                    Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya untuk mengidentifikasi 
+                    sektor unggulan
 
                 </p>
 
@@ -742,6 +741,29 @@
 
             </div>
 
+             <div class="faq-item">
+
+                <button class="faq-question">
+
+                    Apa itu Tipology Sektor?
+
+                    <i class="fa-solid fa-plus"></i>
+
+                </button>
+
+                <div class="faq-answer">
+
+                    <p>
+
+                        Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya 
+                        untuk mengidentifikasi sektor unggulan serta sektor yang perlu dikembangkan
+
+                    </p>
+
+                </div>
+
+            </div>
+
             <div class="faq-item">
 
                 <button class="faq-question">
@@ -797,9 +819,8 @@
 
                 <p>
 
-                    Jl. Pangeran Diponegoro No.21-A,
-                    Medan,
-                    Sumatera Utara.
+                    Jl. K.H. Wahid Hasyim No.8A, Merdeka, 
+                    Kec. Medan Baru, Kota Medan, Sumatera Utara 20154, Indonesia.
 
                 </p>
 
@@ -813,7 +834,7 @@
 
                 <p>
 
-                    (061) 453-9000
+                    (061) 4514614
 
                 </p>
 
@@ -847,13 +868,18 @@
 
         <iframe
 
-            src="https://www.google.com/maps?q=DPMPTSP%20Provinsi%20Sumatera%20Utara&output=embed"
+           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.058729154579!2d98.65581707497314!3d3.5739699964002023!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312fd63f5fe24d%3A0x84645c5d9a30054a!2sDinas%20Penanaman%20Modal%20dan%20PTSP%20Prov.%20Sumut!5e0!3m2!1sid!2sid!4v1783478328320!5m2!1sid!2sid" 
+           width="600" height="450" style="border:0;" 
+           allowfullscreen="" loading="lazy" 
+           referrerpolicy="strict-origin-when-cross-origin">
+           
+        </iframe>
 
-            loading="lazy"
+            {{-- loading="lazy"
 
             allowfullscreen>
 
-        </iframe>
+        </iframe> --}}
 
     </section>
 
