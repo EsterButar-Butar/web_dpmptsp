@@ -1,0 +1,271 @@
+/* =========================
+        NAVBAR
+========================= */
+
+.main-header{
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:999;
+
+    background:#1E5D41;
+    transition:.35s;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.12);
+}
+
+.main-header.scrolled{
+
+    background:#ffffff;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+.navbar-container{
+
+    max-width:1400px;
+
+    margin:auto;
+
+    height:90px;
+
+    display:grid;
+
+    grid-template-columns:300px 1fr 170px;
+
+    align-items:center;
+
+    padding:0 30px;
+}
+
+/* =========================
+        BRAND
+========================= */
+
+.brand{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    text-decoration:none;
+}
+
+.brand-logo{
+
+    width:70px;
+
+    height:auto;
+
+    transition:.3s;
+}
+
+.brand-text{
+
+    display:flex;
+
+    flex-direction:column;
+
+    line-height:1.2;
+}
+
+.brand-text strong{
+
+    color:#fff;
+
+    font-size:28px;
+
+    font-weight:700;
+}
+
+.brand-text span{
+
+    color:#f5f5f5;
+
+    font-size:14px;
+}
+
+/* =========================
+        MENU
+========================= */
+
+.main-navigation{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:38px;
+}
+
+.nav-link{
+
+    color:#fff;
+
+    font-size:17px;
+
+    font-weight:500;
+
+    position:relative;
+
+    transition:.3s;
+}
+
+.nav-link::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:50%;
+
+    bottom:-8px;
+
+    transform:translateX(-50%);
+
+    width:0;
+
+    height:3px;
+
+    border-radius:20px;
+
+    background:#FFD54F;
+
+    transition:.3s;
+}
+
+.nav-link:hover{
+
+    color:#FFD54F;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after{
+
+    width:100%;
+}
+
+.nav-link.active{
+
+    color:#FFD54F;
+}
+
+/* =========================
+        LOGIN
+========================= */
+
+.navbar-action{
+
+    display:flex;
+
+    justify-content:flex-end;
+}
+
+.login-button{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px 25px;
+
+    border-radius:40px;
+
+    background:#FFD54F;
+
+    color:#1E5D41;
+
+    font-weight:600;
+
+    transition:.3s;
+}
+
+.login-button:hover{
+
+    transform:translateY(-3px);
+
+    background:#fff;
+}
+
+/* =========================
+        SCROLL
+========================= */
+
+.main-header.scrolled .brand-text strong,
+.main-header.scrolled .brand-text span{
+
+    color:#1E5D41;
+}
+
+.main-header.scrolled .nav-link{
+
+    color:#1E5D41;
+}
+
+.main-header.scrolled .nav-link.active{
+
+    color:#FFD54F;
+}
+
+/* =========================
+        MOBILE
+========================= */
+
+.mobile-menu-button{
+
+    display:none;
+
+    background:none;
+
+    border:none;
+
+    color:white;
+
+    font-size:28px;
+
+    cursor:pointer;
+}
+
+@media(max-width:992px){
+
+.navbar-container{
+
+grid-template-columns:auto auto;
+
+}
+
+.mobile-menu-button{
+
+display:block;
+
+justify-self:end;
+
+}
+
+.main-navigation,
+.navbar-action{
+
+display:none;
+
+}
+
+.brand-logo{
+
+width:60px;
+
+}
+
+.brand-text strong{
+
+font-size:22px;
+
+}
+
+}

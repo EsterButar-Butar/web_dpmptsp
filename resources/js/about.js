@@ -2,21 +2,19 @@
         NAVBAR SCROLL
 ========================================== */
 
-const navbar = document.getElementById("navbar");
+const navbar = document.getElementById("mainHeader");
 
-window.addEventListener("scroll", () => {
+if (navbar) {
+    window.addEventListener("scroll", () => {
 
-    if (window.scrollY > 80) {
+        if (window.scrollY > 80) {
+            navbar.classList.add("scrolled");
+        } else {
+            navbar.classList.remove("scrolled");
+        }
 
-        navbar.classList.add("scrolled");
-
-    } else {
-
-        navbar.classList.remove("scrolled");
-
-    }
-
-});
+    });
+}
 
 
 /* ==========================================
@@ -27,14 +25,13 @@ const counters = document.querySelectorAll(".counter");
 
 const speed = 80;
 
-const startCounter = () => {
+function startCounter() {
 
     counters.forEach(counter => {
 
         const update = () => {
 
-            const target = +counter.getAttribute("data-target");
-
+            const target = +counter.dataset.target;
             const count = +counter.innerText;
 
             const increment = Math.ceil(target / speed);
@@ -57,25 +54,29 @@ const startCounter = () => {
 
     });
 
-};
+}
 
 const statSection = document.querySelector(".stats");
 
 let counterStarted = false;
 
-window.addEventListener("scroll", () => {
+if (statSection) {
 
-    const top = statSection.getBoundingClientRect().top;
+    window.addEventListener("scroll", () => {
 
-    if (top < window.innerHeight - 120 && !counterStarted) {
+        const top = statSection.getBoundingClientRect().top;
 
-        counterStarted = true;
+        if (top < window.innerHeight - 120 && !counterStarted) {
 
-        startCounter();
+            counterStarted = true;
 
-    }
+            startCounter();
 
-});
+        }
+
+    });
+
+}
 
 
 /* ==========================================
@@ -88,21 +89,25 @@ faqs.forEach(item => {
 
     const btn = item.querySelector(".faq-question");
 
-    btn.addEventListener("click", () => {
+    if (btn) {
 
-        faqs.forEach(f => {
+        btn.addEventListener("click", () => {
 
-            if (f !== item) {
+            faqs.forEach(f => {
 
-                f.classList.remove("active");
+                if (f !== item) {
 
-            }
+                    f.classList.remove("active");
+
+                }
+
+            });
+
+            item.classList.toggle("active");
 
         });
 
-        item.classList.toggle("active");
-
-    });
+    }
 
 });
 
@@ -113,52 +118,103 @@ faqs.forEach(item => {
 
 const topBtn = document.getElementById("topBtn");
 
-window.addEventListener("scroll", () => {
+if (topBtn) {
 
-    if (window.scrollY > 500) {
+    window.addEventListener("scroll", () => {
 
-        topBtn.style.display = "block";
+        if (window.scrollY > 500) {
 
-    } else {
+            topBtn.style.display = "flex";
 
-        topBtn.style.display = "none";
+        } else {
 
-    }
+            topBtn.style.display = "none";
 
-});
-
-topBtn.onclick = () => {
-
-    window.scrollTo({
-
-        top:0,
-
-        behavior:"smooth"
+        }
 
     });
 
-};
+    topBtn.addEventListener("click", () => {
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth"
+
+        });
+
+    });
+
+}
 
 
 /* ==========================================
-        SMOOTH LINK
+        SMOOTH SCROLL
 ========================================== */
 
-document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
-    anchor.addEventListener("click",function(e){
+    anchor.addEventListener("click", function (e) {
 
-        e.preventDefault();
+        const target = document.querySelector(this.getAttribute("href"));
 
-        const target=document.querySelector(this.getAttribute("href"));
+        if (target) {
 
-        if(target){
+            e.preventDefault();
 
-            target.scrollIntoView({
+            const navbarHeight = document.querySelector(".main-header")?.offsetHeight || 90;
 
-                behavior:"smooth"
+            const position = target.offsetTop - navbarHeight;
+
+            window.scrollTo({
+
+                top: position,
+
+                behavior: "smooth"
 
             });
+
+        }
+
+    });
+
+});
+
+
+/* ==========================================
+        ACTIVE NAVBAR
+========================================== */
+
+const sections = document.querySelectorAll("section[id]");
+
+const navLinks = document.querySelectorAll(".main-navigation .nav-link");
+
+window.addEventListener("scroll", () => {
+
+    let current = "";
+
+    sections.forEach(section => {
+
+        const sectionTop = section.offsetTop - 120;
+
+        if (window.scrollY >= sectionTop) {
+
+            current = section.getAttribute("id");
+
+        }
+
+    });
+
+    navLinks.forEach(link => {
+
+        link.classList.remove("active");
+
+        const href = link.getAttribute("href");
+
+        if (href === "#" + current) {
+
+            link.classList.add("active");
 
         }
 
@@ -171,11 +227,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
         SCROLL ANIMATION
 ========================================== */
 
-const observer = new IntersectionObserver((entries)=>{
+const observer = new IntersectionObserver((entries) => {
 
-    entries.forEach(entry=>{
+    entries.forEach(entry => {
 
-        if(entry.isIntersecting){
+        if (entry.isIntersecting) {
 
             entry.target.classList.add("show");
 
@@ -183,15 +239,15 @@ const observer = new IntersectionObserver((entries)=>{
 
     });
 
-},{
-    threshold:.2
+}, {
+
+    threshold: 0.2
+
 });
 
 document.querySelectorAll(
-
-".about,.stats,.visi,.layanan,.flow,.unggulan,.faq,.contact,.maps,.cta"
-
-).forEach(el=>{
+    ".about,.stats,.visi,.layanan,.flow,.unggulan,.faq,.contact,.maps,.cta"
+).forEach(el => {
 
     el.classList.add("hidden");
 
@@ -201,22 +257,20 @@ document.querySelectorAll(
 
 
 /* ==========================================
-        BUTTON RIPPLE
+        BUTTON EFFECT
 ========================================== */
 
-const buttons = document.querySelectorAll(".btn1,.btn2,.cta a");
+document.querySelectorAll(".btn1,.btn2,.cta a").forEach(button => {
 
-buttons.forEach(button=>{
+    button.addEventListener("mouseenter", () => {
 
-    button.addEventListener("mouseenter",()=>{
-
-        button.style.transform="translateY(-5px) scale(1.03)";
+        button.style.transform = "translateY(-5px) scale(1.03)";
 
     });
 
-    button.addEventListener("mouseleave",()=>{
+    button.addEventListener("mouseleave", () => {
 
-        button.style.transform="translateY(0) scale(1)";
+        button.style.transform = "translateY(0) scale(1)";
 
     });
 
@@ -224,34 +278,29 @@ buttons.forEach(button=>{
 
 
 /* ==========================================
-        CARD HOVER
+        CARD EFFECT
 ========================================== */
 
-const cards = document.querySelectorAll(
+document.querySelectorAll(
+    ".layanan-card,.stats .card,.unggulan-item,.visi-card,.contact-card"
+).forEach(card => {
 
-".layanan-card,.stats .card,.unggulan-item,.visi-card,.contact-card"
+    card.addEventListener("mousemove", (e) => {
 
-);
+        const x = e.offsetX / card.offsetWidth - 0.5;
+        const y = e.offsetY / card.offsetHeight - 0.5;
 
-cards.forEach(card=>{
-
-    card.addEventListener("mousemove",(e)=>{
-
-        const x=e.offsetX/card.offsetWidth-.5;
-
-        const y=e.offsetY/card.offsetHeight-.5;
-
-        card.style.transform=`
-        rotateY(${x*8}deg)
-        rotateX(${y*-8}deg)
-        translateY(-8px)
-        `;
+        card.style.transform =
+            `rotateY(${x * 8}deg)
+             rotateX(${y * -8}deg)
+             translateY(-8px)`;
 
     });
 
-    card.addEventListener("mouseleave",()=>{
+    card.addEventListener("mouseleave", () => {
 
-        card.style.transform="rotateY(0deg) rotateX(0deg) translateY(0px)";
+        card.style.transform =
+            "rotateY(0deg) rotateX(0deg) translateY(0px)";
 
     });
 
@@ -262,29 +311,34 @@ cards.forEach(card=>{
         HERO PARALLAX
 ========================================== */
 
-window.addEventListener("scroll",()=>{
+const hero = document.querySelector(".hero");
 
-    const hero=document.querySelector(".hero");
+if (hero) {
 
-    hero.style.backgroundPositionY=window.scrollY*0.4+"px";
+    window.addEventListener("scroll", () => {
 
-});
+        hero.style.backgroundPositionY =
+            window.scrollY * 0.35 + "px";
+
+    });
+
+}
 
 
 /* ==========================================
-        LOADING EFFECT
+        PAGE FADE IN
 ========================================== */
 
-window.onload=()=>{
+window.addEventListener("load", () => {
 
-    document.body.style.opacity="0";
+    document.body.style.opacity = "0";
 
-    setTimeout(()=>{
+    setTimeout(() => {
 
-        document.body.style.transition="1s";
+        document.body.style.transition = "opacity .8s";
 
-        document.body.style.opacity="1";
+        document.body.style.opacity = "1";
 
-    },100);
+    }, 100);
 
-};
+});
