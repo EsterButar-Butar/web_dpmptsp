@@ -30,14 +30,6 @@ Route::get('/peta-investasi', function () {
 })->name('investment.map');
 
 Route::get(
-    '/comparison',
-    [
-        ComparisonController::class,
-        'index'
-    ]
-)->name('comparison.index');
-
-Route::get(
     '/analisis',
     [
         AnalysisController::class,
