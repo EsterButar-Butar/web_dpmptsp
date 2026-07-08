@@ -1,134 +1,19 @@
-<!DOCTYPE html>
-<html lang="id">
-
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Tentang | DPMPTSP Provinsi Sumatera Utara</title>
-
-    @vite([
-'resources/css/about.css',
-'resources/js/about.js'
-])
-    {{-- Google Font --}}
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-
-    {{-- Font Awesome --}}
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-</head>
-
-<body>
-
-    <!-- =========================
-            NAVBAR
-    ========================== -->
-
-    <header id="navbar">
-
-        <div class="logo">
-
-            <img src="{{ asset('images/logo.png') }}" alt="Logo DPMPTSP">
-
-            <h2>DPMPTSP</h2>
-
-        </div>
-
-        <nav>
-
-            <a href="{{ route('home') }}">Beranda</a>
-
-            <a class="active" href="{{ route('about') }}">
-                Tentang
-            </a>
-
-            <a href="#">
-                Perbandingan Sektor
-            </a>
-
-            <a href="#">
-                Peta
-            </a>
-
-            <a href="#">
-                Kontak
-            </a>
-
-        </nav>
-
-    </header>
+@extends('layouts.landing')
 
 
+@section('title', 'Tentang | DPMPTSP Provinsi Sumatera Utara')
 
 
-
-    <!-- =========================
-            HERO
-    ========================== -->
-
-    <section class="hero">
-
-        <div class="overlay">
-
-            <h4>Selamat Datang</h4>
-
-            <h1>
-
-                DPMPTSP <br>
-
-                Provinsi Sumatera Utara
-
-            </h1>
-
-            <p>
-
-                Dashboard Analisis Potensi Investasi
-                berbasis GIS, PDRB, Location Quotient,
-                Shift Share, Tipologi Klassen,
-                dan Tipologi Sektor.
-
-            </p>
-
-            <div class="hero-button">
-
-                <a href="{{ route('home') }}"
-                    class="btn1">
-
-                    Mulai Analisis
-
-                </a>
-
-                <a href="#tentang"
-                    class="btn2">
-
-                    Pelajari Lebih Lanjut
-
-                </a>
-
-            </div>
-
-        </div>
-
-    </section>
+@section('content')
 
 
+@include('partials.landing.navbar')
 
-
-
-    <!-- =========================
-            TENTANG
-    ========================== -->
-
-    <section id="tentang"
-        class="about">
-
+<section id="tentang" class="about">
+    
         <div class="about-image">
 
-            <img src="{{ asset('images/gedung.jpg') }}"
+            <img src="{{ asset('images/gedung-dpmptsp.jpg') }}"
                 alt="Gedung DPMPTSP">
 
         </div>
@@ -197,10 +82,6 @@
         </div>
 
     </section>
-
-
-
-
 
     <!-- =========================
             STATISTIK
@@ -423,13 +304,12 @@
 
                 <i class="fa-solid fa-database"></i>
 
-                <h3>Data PDRB</h3>
+                <h3>Tipology Sektor</h3>
 
                 <p>
 
-                    Pengelolaan data PDRB Kabupaten,
-                    Provinsi dan Nasional
-                    secara terintegrasi.
+                    Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya untuk mengidentifikasi 
+                    sektor unggulan
 
                 </p>
 
@@ -676,7 +556,7 @@
             FAQ
     ========================== -->
 
-    <section class="faq">
+   <section class="faq">
 
         <div class="section-title">
 
@@ -762,6 +642,29 @@
 
             </div>
 
+             <div class="faq-item">
+
+                <button class="faq-question">
+
+                    Apa itu Tipology Sektor?
+
+                    <i class="fa-solid fa-plus"></i>
+
+                </button>
+
+                <div class="faq-answer">
+
+                    <p>
+
+                        Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya 
+                        untuk mengidentifikasi sektor unggulan serta sektor yang perlu dikembangkan
+
+                    </p>
+
+                </div>
+
+            </div>
+
             <div class="faq-item">
 
                 <button class="faq-question">
@@ -817,9 +720,8 @@
 
                 <p>
 
-                    Jl. Pangeran Diponegoro No.21-A,
-                    Medan,
-                    Sumatera Utara.
+                    Jl. K.H. Wahid Hasyim No.8A, Merdeka, 
+                    Kec. Medan Baru, Kota Medan, Sumatera Utara 20154, Indonesia.
 
                 </p>
 
@@ -833,7 +735,7 @@
 
                 <p>
 
-                    (061) 453-9000
+                    (061) 4514614
 
                 </p>
 
@@ -867,13 +769,18 @@
 
         <iframe
 
-            src="https://www.google.com/maps?q=DPMPTSP%20Provinsi%20Sumatera%20Utara&output=embed"
+           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.058729154579!2d98.65581707497314!3d3.5739699964002023!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312fd63f5fe24d%3A0x84645c5d9a30054a!2sDinas%20Penanaman%20Modal%20dan%20PTSP%20Prov.%20Sumut!5e0!3m2!1sid!2sid!4v1783478328320!5m2!1sid!2sid" 
+           width="600" height="450" style="border:0;" 
+           allowfullscreen="" loading="lazy" 
+           referrerpolicy="strict-origin-when-cross-origin">
 
-            loading="lazy"
+        </iframe>
+
+            {{-- loading="lazy"
 
             allowfullscreen>
 
-        </iframe>
+        </iframe> --}}
 
     </section>
 
@@ -924,11 +831,10 @@
 
                 </a>
 
-                <a href="{{ route('about') }}">
-
-                    Tentang
-
-                </a>
+                <a href="#tentang"
+        class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">
+            Tentang
+            </a>
 
                 <a href="#">
 
@@ -1017,6 +923,4 @@
 
   
 
-</body>
-
-</html>
+@endsection

@@ -1,8 +1,7 @@
 <?php
 
-use App\Http\Auth\LoginController;
-use App\Http\Auth\RegisterController;
-
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -48,7 +47,7 @@ Route::middleware('guest')->group(function () {
     Route::get(
         '/register',
         [
-            RegisterController::class,
+            RegisteredUserController::class,
             'create',
         ]
     )->name('register');
@@ -57,7 +56,7 @@ Route::middleware('guest')->group(function () {
     Route::post(
         '/register',
         [
-            RegisterController::class,
+            RegisteredUserController::class,
             'store',
         ]
     );
@@ -79,7 +78,7 @@ Route::middleware('guest')->group(function () {
     Route::get(
         '/login',
         [
-            LoginController::class,
+            AuthenticatedSessionController::class,
             'create',
         ]
     )->name('login');
@@ -88,7 +87,7 @@ Route::middleware('guest')->group(function () {
     Route::post(
         '/login',
         [
-            LoginController::class,
+            AuthenticatedSessionController::class,
             'store',
         ]
     );
@@ -279,14 +278,14 @@ Route::middleware('auth')->group(function () {
     | LOGOUT CUSTOM
     |--------------------------------------------------------------------------
     |
-    | Logout ditangani oleh LoginController custom.
+    | Logout ditangani oleh AuthenticatedSessionController custom.
     |
     */
 
     Route::post(
         '/logout',
         [
-            LoginController::class,
+            AuthenticatedSessionController::class,
             'destroy',
         ]
     )->name('logout');

@@ -16,15 +16,21 @@ use App\Http\Controllers\Landing\ComparisonController;
 |
 */
 
+// Route::get('/', function () {
+//     return view('landing.home');
+// })->name('home');
+
+
+// Route::get('/tentang', function () {
+//     return view('landing.about');
+// })->name('about');
 Route::get('/', function () {
     return view('landing.home');
 })->name('home');
 
-
 Route::get('/tentang', function () {
-    return view('landing.about');
+    return view('landing.home');
 })->name('about');
-
 
 Route::get('/peta-investasi', function () {
     return view('landing.map');
