@@ -45,7 +45,7 @@ Route::get(
         'index'
     ]
 
-)->name('comparison');
+)->name('comparison.index');
 
 
 /*
