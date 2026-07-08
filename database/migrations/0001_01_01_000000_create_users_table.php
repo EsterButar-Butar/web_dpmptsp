@@ -4,11 +4,10 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Jalankan migration.
      */
     public function up(): void
     {
@@ -19,23 +18,38 @@ return new class extends Migration
         */
 
         Schema::create('users', function (Blueprint $table) {
-
             $table->id();
 
+            // Data dasar pengguna
             $table->string('name');
 
             $table->string('email')
                 ->unique();
 
+            /*
+            |--------------------------------------------------------------------------
+            | EMAIL VERIFICATION
+            |--------------------------------------------------------------------------
+            |
+            | User register manual:
+            | NULL -> sebelum verifikasi
+            | timestamp -> setelah klik link verifikasi
+            |
+            | User Google OAuth:
+            | dapat langsung diisi saat akun dibuat melalui Google.
+            |
+            */
+
             $table->timestamp('email_verified_at')
                 ->nullable();
+
 
             /*
             |--------------------------------------------------------------------------
             | PASSWORD
             |--------------------------------------------------------------------------
             |
-            | Nullable agar mendukung akun yang dibuat melalui Google Login.
+            | Nullable karena akun Google OAuth tidak wajib memiliki password lokal.
             |
             */
 
@@ -48,24 +62,23 @@ return new class extends Migration
             | ROLE
             |--------------------------------------------------------------------------
             |
-            | Role aplikasi:
-            |
-            | - admin
-            | - operator
+            | Role:
             | - user
+            | - operator
+            | - admin
             |
-            | Registrasi publik otomatis menggunakan role user.
+            | Semua registrasi publik mendapatkan role user.
             |
             */
 
-            $table->string('role')
+            $table->string('role', 20)
                 ->default('user')
                 ->index();
 
 
             /*
             |--------------------------------------------------------------------------
-            | GOOGLE AUTHENTICATION
+            | GOOGLE OAUTH
             |--------------------------------------------------------------------------
             */
 
@@ -73,13 +86,13 @@ return new class extends Migration
                 ->nullable()
                 ->unique();
 
-            $table->string('avatar')
+            $table->text('avatar')
                 ->nullable();
 
 
             /*
             |--------------------------------------------------------------------------
-            | REMEMBER TOKEN
+            | REMEMBER LOGIN
             |--------------------------------------------------------------------------
             */
 
@@ -88,7 +101,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | TIMESTAMPS
+            | CREATED_AT & UPDATED_AT
             |--------------------------------------------------------------------------
             */
 
@@ -98,12 +111,11 @@ return new class extends Migration
 
         /*
         |--------------------------------------------------------------------------
-        | PASSWORD RESET TOKENS TABLE
+        | PASSWORD RESET TOKENS
         |--------------------------------------------------------------------------
         */
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-
             $table->string('email')
                 ->primary();
 
@@ -111,18 +123,21 @@ return new class extends Migration
 
             $table->timestamp('created_at')
                 ->nullable();
-
         });
 
 
         /*
         |--------------------------------------------------------------------------
-        | SESSIONS TABLE
+        | SESSIONS
         |--------------------------------------------------------------------------
+        |
+        | Digunakan jika:
+        |
+        | SESSION_DRIVER=database
+        |
         */
 
         Schema::create('sessions', function (Blueprint $table) {
-
             $table->string('id')
                 ->primary();
 
@@ -140,20 +155,15 @@ return new class extends Migration
 
             $table->integer('last_activity')
                 ->index();
-
         });
     }
 
 
     /**
-     * Reverse the migrations.
+     * Batalkan migration.
      */
     public function down(): void
     {
-        /*
-        | Hapus tabel pendukung terlebih dahulu.
-        */
-
         Schema::dropIfExists('sessions');
 
         Schema::dropIfExists('password_reset_tokens');

@@ -48,29 +48,36 @@
         {{-- LOGIN --}}
         <div class="navbar-action">
 
-            @auth
+    @guest
 
-                <a
-                    href="{{ route('dashboard') }}"
-                    class="login-button"
-                >
-                    <i class="fa-solid fa-grip"></i>
-                    Dashboard
-                </a>
+        <a
+            href="{{ route('login') }}"
+            class="login-button"
+        >
+            <i class="fa-regular fa-user"></i>
 
-            @else
+            <span>
+                Masuk
+            </span>
+        </a>
 
-                <a
-                    href="{{ route('login') }}"
-                    class="login-button"
-                >
-                    <i class="fa-regular fa-user"></i>
-                    Login
-                </a>
+    @else
 
-            @endauth
+        <a
+            href="{{ route('dashboard') }}"
+            class="login-button"
+            title="Buka Dashboard"
+        >
+            <i class="fa-regular fa-user"></i>
 
-        </div>
+            <span>
+                {{ Str::before(auth()->user()->name, ' ') }}
+            </span>
+        </a>
+
+    @endguest
+
+</div>
 
     </div>
 

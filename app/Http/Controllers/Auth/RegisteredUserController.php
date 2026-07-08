@@ -44,10 +44,15 @@ class RegisteredUserController extends Controller
         ]);
 
         
-        (new Registered($user));
+        // Dispatch event agar Laravel mengirim email verifikasi.
+        event(new Registered($user));
 
+        // Login otomatis setelah registrasi.
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        $request->session()->regenerate();
+
+         // Arahkan user ke halaman tunggu verifikasi.
+        return redirect()->route('verification.notice');
     }
 }
