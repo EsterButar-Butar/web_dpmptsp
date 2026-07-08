@@ -38,9 +38,8 @@ Route::middleware([
         |
         */
 
-        Route::view(
-            '/dashboard',
-            'operator.dashboard'
-        )->name('dashboard');
+        Route::get('/dashboard', function () {
+        return view('operator.dashboard');
+    })->name('dashboard');
 
     });
