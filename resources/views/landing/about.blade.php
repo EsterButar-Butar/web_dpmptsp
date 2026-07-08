@@ -655,7 +655,7 @@
             FAQ
     ========================== -->
 
-   <section id="faq" class="faq">
+   <section class="faq">
 
         <div class="section-title">
 
@@ -872,7 +872,7 @@
            width="600" height="450" style="border:0;" 
            allowfullscreen="" loading="lazy" 
            referrerpolicy="strict-origin-when-cross-origin">
-           
+
         </iframe>
 
             {{-- loading="lazy"
