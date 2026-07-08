@@ -1,0 +1,61 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+
+    public function up(): void
+    {
+        Schema::create('pdrb', function (Blueprint $table) {
+
+            $table->id();
+
+
+            $table->foreignId('kabupaten_id')
+                ->constrained('kabupaten')
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('sektor_id')
+                ->constrained('sektor')
+                ->cascadeOnDelete();
+
+            $table->integer('tahun');
+
+
+
+            $table->decimal(
+                'pdrb_kabupaten',
+                20,
+                2
+            );
+
+
+            $table->decimal(
+                'pdrb_provinsi',
+                20,
+                2
+            );
+
+            $table->unique([
+                'kabupaten_id',
+                'sektor_id',
+                'tahun'
+            ]);
+
+
+
+            $table->timestamps();
+
+        });
+    }
+
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pdrb');
+    }
+};

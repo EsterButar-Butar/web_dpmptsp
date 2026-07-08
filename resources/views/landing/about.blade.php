@@ -47,7 +47,7 @@
             </a>
 
             <a href="#">
-                Dashboard
+                Perbandingan Sektor
             </a>
 
             <a href="#">

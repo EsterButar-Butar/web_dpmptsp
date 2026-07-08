@@ -1786,3 +1786,56 @@
             auto !important;
     }
 }
+
+.analysis-page{
+    padding:60px;
+}
+
+
+.analysis-page h1{
+    text-align:center;
+    color:#0066dd;
+}
+
+
+.analysis-page form{
+    display:flex;
+    gap:20px;
+    padding:30px;
+    border:1px solid #ddd;
+    border-radius:12px;
+}
+
+
+.analysis-page select{
+    flex:1;
+    padding:15px;
+}
+
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin:40px 0;
+}
+
+
+.summary-card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    border:1px solid #ddd;
+}
+
+
+.summary-card h3{
+    font-size:40px;
+}
+
+
+.chart-box{
+    padding:30px;
+    border-radius:15px;
+    border:1px solid #ddd;
+}

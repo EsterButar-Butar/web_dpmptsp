@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Landing\AnalysisController;
+use App\Http\Controllers\Landing\ComparisonController;
 
 
 /*
@@ -37,6 +39,25 @@ Route::get('/kontak', function () {
 Route::get('/faq', function () {
     return view('landing.faq');
 })->name('faq');
+
+Route::get(
+    '/analisis',
+    [
+        AnalysisController::class,
+        'index'
+    ]
+
+)->name('analysis');
+
+
+Route::get(
+    '/perbandingan-sektor',
+    [
+        ComparisonController::class,
+        'index'
+    ]
+
+)->name('comparison');
 
 
 /*

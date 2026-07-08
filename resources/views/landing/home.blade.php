@@ -50,12 +50,12 @@
 
 
                 <a
-                    href="{{ url('/dashboard') }}"
+                    href="{{ route('analysis') }}"
                     class="btn btn-outline"
                 >
                     <i class="fa-solid fa-chart-column"></i>
 
-                    Lihat Dashboard
+                    Analisis Sekarang
                 </a>
 
             </div>
