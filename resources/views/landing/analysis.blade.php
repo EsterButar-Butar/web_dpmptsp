@@ -16,9 +16,8 @@ Dashboard Executive Summary Investment
 
 
 <form method="GET"
-      action="{{ route('analysis') }}"
+      action="{{ route('analysis.index') }}"
       class="filter-box">
-
 
 <select name="provinsi">
 

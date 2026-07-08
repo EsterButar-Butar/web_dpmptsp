@@ -51,14 +51,7 @@
 
 <body>
 
-
-    {{-- NAVBAR --}}
-
     @include('partials.landing.navbar')
-
-
-
-    {{-- PAGE CONTENT --}}
 
     <main>
 
@@ -66,15 +59,7 @@
 
     </main>
 
-
-
-    {{-- FOOTER --}}
-
     @include('partials.landing.footer')
-
-
-
-    {{-- BACK TO TOP --}}
 
     <button
         type="button"
