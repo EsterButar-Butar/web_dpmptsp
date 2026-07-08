@@ -16,14 +16,6 @@ use App\Http\Controllers\Landing\ComparisonController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('landing.home');
-// })->name('home');
-
-
-// Route::get('/tentang', function () {
-//     return view('landing.about');
-// })->name('about');
 Route::get('/', function () {
     return view('landing.home');
 })->name('home');
@@ -35,16 +27,6 @@ Route::get('/tentang', function () {
 Route::get('/peta-investasi', function () {
     return view('landing.map');
 })->name('investment.map');
-
-
-Route::get('/kontak', function () {
-    return view('landing.contact');
-})->name('contact');
-
-
-Route::get('/faq', function () {
-    return view('landing.faq');
-})->name('faq');
 
 Route::get(
     '/analisis',
@@ -94,7 +76,7 @@ Route::get('/dashboard', function () {
         ),
 
         'user' => redirect()->route(
-            'user.dashboard'
+        'profile.edit'
         ),
 
         default => abort(

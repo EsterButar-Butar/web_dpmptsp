@@ -1,12 +1,3 @@
-@extends('layouts.landing')
-
-
-@section('title', 'Tentang | DPMPTSP Provinsi Sumatera Utara')
-
-
-@section('content')
-
-
 @include('partials.landing.navbar')
 
 <section id="tentang" class="about">
@@ -923,4 +914,6 @@
 
   
 
-@endsection
+</body>
+
+</html>

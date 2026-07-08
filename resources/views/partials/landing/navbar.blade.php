@@ -46,39 +46,33 @@
 </nav>
 
         {{-- LOGIN --}}
-        <div class="navbar-action">
+       <div class="navbar-action">
 
-    @guest
+    @auth
+
+        <a
+            href="{{ route('dashboard') }}"
+            class="login-button"
+        >
+            <i class="fa-solid fa-user"></i>
+
+            {{ ucfirst(strtolower(explode(' ', Auth::user()->name)[0])) }}
+
+        </a>
+
+    @else
 
         <a
             href="{{ route('login') }}"
             class="login-button"
         >
             <i class="fa-regular fa-user"></i>
-
-            <span>
-                Masuk
-            </span>
+            Login
         </a>
 
-    @else
-
-        <a
-            href="{{ route('dashboard') }}"
-            class="login-button"
-            title="Buka Dashboard"
-        >
-            <i class="fa-regular fa-user"></i>
-
-            <span>
-                {{ Str::before(auth()->user()->name, ' ') }}
-            </span>
-        </a>
-
-    @endguest
+    @endauth
 
 </div>
-
     </div>
 
 </header>
