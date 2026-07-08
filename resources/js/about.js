@@ -342,3 +342,28 @@ window.addEventListener("load", () => {
     }, 100);
 
 });
+/* ==========================================
+        BACK TO HOME
+========================================== */
+
+let redirectedHome = false;
+
+window.addEventListener("scroll", () => {
+
+    if (window.scrollY <= 10 && !redirectedHome) {
+
+        redirectedHome = true;
+
+    }
+
+});
+
+window.addEventListener("wheel", function(e){
+
+    if(window.scrollY <= 5 && e.deltaY < 0){
+
+        window.location.href = "/";
+
+    }
+
+});
