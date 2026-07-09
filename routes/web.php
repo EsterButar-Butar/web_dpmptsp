@@ -6,6 +6,16 @@ use App\Http\Controllers\Landing\AnalysisController;
 use App\Http\Controllers\Landing\ComparisonController;
 
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC LANDING PAGES
+|--------------------------------------------------------------------------
+|
+| Halaman publik yang dapat diakses oleh semua pengunjung
+| tanpa harus melakukan autentikasi.
+|
+*/
+
 Route::get('/', function () {
     return view('landing.home');
 })->name('home');
@@ -19,17 +29,6 @@ Route::get('/tentang', function () {
 Route::get('/peta-investasi', function () {
     return view('landing.map');
 })->name('investment.map');
-
-
-Route::get('/kontak', function () {
-    return view('landing.contact');
-})->name('contact');
-
-
-Route::get('/faq', function () {
-    return view('landing.faq');
-})->name('faq');
-
 
 Route::get(
     '/analisis',
@@ -46,7 +45,135 @@ Route::get(
         ComparisonController::class,
         'index'
     ]
-)->name('comparison.index');
+
+)->name('comparison');
+
+
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD REDIRECT
+|--------------------------------------------------------------------------
+|
+| Route /dashboard menjadi pintu masuk utama setelah pengguna login.
+|
+| admin    → admin.dashboard
+| operator → operator.dashboard
+| user     → user.dashboard
+|
+*/
+
+Route::get('/dashboard', function () {
+
+    $user = auth()->user();
+
+    return match ($user->role) {
+
+        'admin' => redirect()->route(
+            'admin.dashboard'
+        ),
+
+        'operator' => redirect()->route(
+            'operator.dashboard'
+        ),
+
+        'user' => redirect()->route(
+        'profile.edit'
+        ),
+
+        default => abort(
+            403,
+            'Role pengguna tidak dikenali.'
+        ),
+    };
+
+})
+    ->middleware([
+        'auth',
+        'verified',
+    ])
+    ->name('dashboard');
+
+
+/*
+|--------------------------------------------------------------------------
+| PROFILE ROUTES
+|--------------------------------------------------------------------------
+|
+| Semua pengguna yang telah login dapat:
+|
+| - melihat halaman edit profil;
+| - memperbarui data profil;
+| - menghapus akun.
+|
+*/
+
+Route::middleware([
+    'auth',
+])->group(function () {
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Edit Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/profile',
+        [
+            ProfileController::class,
+            'edit',
+        ]
+    )->name('profile.edit');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::patch(
+        '/profile',
+        [
+            ProfileController::class,
+            'update',
+        ]
+    )->name('profile.update');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::delete(
+        '/profile',
+        [
+            ProfileController::class,
+            'destroy',
+        ]
+    )->name('profile.destroy');
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATION ROUTES
+|--------------------------------------------------------------------------
+|
+| Route autentikasi dari Laravel Breeze:
+|
+| - Login
+| - Register
+| - Forgot Password
+| - Reset Password
+| - Email Verification
+| - Logout
+|
+*/
 
 require __DIR__ . '/auth.php';
 
