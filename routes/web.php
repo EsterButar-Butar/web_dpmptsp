@@ -25,10 +25,17 @@ Route::get('/tentang', function () {
     return view('landing.about');
 })->name('about');
 
-
 Route::get('/peta-investasi', function () {
     return view('landing.map');
 })->name('investment.map');
+
+Route::get(
+    '/comparison',
+    [
+        ComparisonController::class,
+        'index'
+    ]
+)->name('comparison.index');
 
 Route::get(
     '/analisis',

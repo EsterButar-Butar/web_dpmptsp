@@ -40,6 +40,7 @@
     {{-- VITE --}}
     @vite([
         'resources/css/app.css',
+        'resources/css/comparison.css',
         'resources/js/app.js'
     ])
 

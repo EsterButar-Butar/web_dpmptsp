@@ -1,0 +1,315 @@
+.comparison-page {
+    background: #fbfcf7;
+    min-height: 100vh;
+    padding: 70px 7%;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+.comparison-page h1 {
+    text-align: center;
+    color: #0069d9;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 55px;
+}
+
+
+.comparison-filter {
+    background: white;
+    border: 1px solid #d9dee7;
+    border-radius: 14px;
+    padding: 28px;
+
+    display: grid;
+    grid-template-columns: 
+        1.2fr 
+        1.2fr 
+        1.2fr 
+        .8fr 
+        .8fr 
+        auto;
+
+    gap: 22px;
+
+    align-items: end;
+
+    margin-bottom: 45px;
+}
+
+
+.comparison-filter select {
+    height: 55px;
+
+    padding: 0 18px;
+
+    border-radius: 9px;
+
+    border: 1px solid #9aa4b5;
+
+    background: white;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+
+.comparison-filter button {
+    height: 55px;
+
+    padding: 0 28px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #006be6;
+
+    color: white;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.summary-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(4,1fr);
+
+    gap: 25px;
+
+    margin-bottom: 45px;
+
+}
+
+
+.summary-grid div {
+
+    background: white;
+
+    min-height: 150px;
+
+    border-radius: 15px;
+
+    padding: 30px;
+
+    border: 1px solid #dce0e6;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+}
+
+
+.summary-grid h2 {
+
+    font-size: 38px;
+
+    font-weight: 700;
+
+    margin-bottom: 15px;
+
+    color: #00543d;
+
+}
+
+
+.summary-grid p {
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+}
+
+
+
+.chart-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2,1fr);
+
+    gap: 30px;
+
+    margin-bottom: 50px;
+
+}
+
+
+
+.chart-card {
+
+    background: white;
+
+    border-radius: 15px;
+
+    border: 1px solid #dce0e6;
+
+    padding: 30px;
+
+    min-height: 430px;
+
+}
+
+
+
+.chart-card h3 {
+
+    margin-bottom: 30px;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+}
+
+
+
+.chart-card canvas {
+
+    width: 100% !important;
+
+    height: 320px !important;
+
+}
+
+
+
+
+.table-card {
+
+    background: white;
+
+    border-radius: 15px;
+
+    border: 1px solid #dce0e6;
+
+    padding: 30px;
+
+}
+
+
+
+.table-card h3 {
+
+    margin-bottom: 25px;
+
+}
+
+
+
+.table-card table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+}
+
+
+
+.table-card thead {
+
+    background: #eef6ff;
+
+}
+
+
+
+.table-card th {
+
+    padding: 16px;
+
+    text-align: center;
+
+    font-weight: 700;
+
+}
+
+
+
+.table-card td {
+
+    padding: 16px;
+
+    text-align: center;
+
+    border-bottom: 1px solid #ddd;
+
+}
+
+
+
+.table-card tbody tr:hover {
+
+    background: #f7fbff;
+
+}
+
+
+
+
+@media(max-width:1200px){
+
+
+    .comparison-filter {
+
+        grid-template-columns: repeat(3,1fr);
+
+    }
+
+
+    .summary-grid {
+
+        grid-template-columns: repeat(2,1fr);
+
+    }
+
+
+
+}
+
+
+
+@media(max-width:768px){
+
+
+    .comparison-page {
+
+        padding: 40px 20px;
+
+    }
+
+
+    .comparison-filter {
+
+        grid-template-columns:1fr;
+
+    }
+
+
+
+    .summary-grid {
+
+        grid-template-columns:1fr;
+
+    }
+
+
+
+    .chart-grid {
+
+        grid-template-columns:1fr;
+
+    }
+
+
+}
