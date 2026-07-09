@@ -4,7 +4,7 @@
 
 
 /* =========================================================
-   1. DESIGN TOKENS
+1. DESIGN TOKENS
 ========================================================= */
 
 :root {
@@ -50,7 +50,7 @@
 
 
 /* =========================================================
-   2. BASE
+2. BASE
 ========================================================= */
 
 @layer base {
@@ -124,7 +124,7 @@
 
 
 /* =========================================================
-   3. LAYOUT
+3. LAYOUT
 ========================================================= */
 
 @layer components {
@@ -140,7 +140,7 @@
 
 
     /* =====================================================
-       NAVBAR
+    NAVBAR
     ===================================================== */
 
     .main-header {
@@ -183,7 +183,7 @@
     /* BRAND */
 
     /* =====================================================
-   NAVBAR BRAND
+NAVBAR BRAND
 ===================================================== */
 
 .brand {
@@ -720,7 +720,7 @@
 
 
     /* =====================================================
-       GENERAL SECTION
+    GENERAL SECTION
     ===================================================== */
 
     .section {
@@ -804,7 +804,7 @@
 
 
     /* =====================================================
-       MAP
+    MAP
     ===================================================== */
 
     .map-section {
@@ -940,7 +940,7 @@
 
 
     /* =====================================================
-       SECTORS
+    SECTORS
     ===================================================== */
 
     .sector-section {
@@ -1862,5 +1862,464 @@
     font-weight:700;
 
     text-decoration:none;
+
+}
+/* =========================================================
+   PROFILE PAGE
+========================================================= */
+
+.profile-body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+
+    background: #ffffff;
+
+    font-family: "Poppins", sans-serif;
+}
+
+.profile-page {
+    width: 100%;
+    min-height: 100vh;
+
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   HEADER PROFIL
+========================================================= */
+
+.profile-header {
+    width: 100%;
+
+    background: #1d704f;
+
+    border-bottom: 4px solid #1aa7e8;
+}
+
+.profile-header-container {
+    width: 100%;
+    max-width: 1200px;
+
+    min-height: 175px;
+
+    margin: 0 auto;
+    padding: 0 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   TOMBOL KEMBALI
+========================================================= */
+
+.profile-back-button {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 22px;
+
+    background: #dce8e3;
+    color: #17251f;
+
+    border-radius: 30px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+.profile-back-button i {
+    font-size: 14px;
+}
+
+.profile-back-button:hover {
+    background: #ffffff;
+
+    transform: translateX(-3px);
+}
+
+
+/* =========================================================
+   USER HEADER
+========================================================= */
+
+.profile-user {
+    display: flex;
+    align-items: center;
+
+    gap: 30px;
+}
+
+.profile-user-text {
+    text-align: right;
+}
+
+.profile-user-text h1 {
+    margin: 0 0 3px;
+
+    color: #ffffff;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+.profile-user-text span {
+    display: block;
+
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+.profile-avatar {
+    flex-shrink: 0;
+}
+
+.profile-avatar img,
+.profile-avatar-default {
+    width: 80px;
+    height: 80px;
+
+    border-radius: 50%;
+}
+
+.profile-avatar img {
+    display: block;
+
+    object-fit: cover;
+}
+
+.profile-avatar-default {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffd451;
+    color: #07533a;
+
+    font-size: 27px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.profile-content {
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 55px 70px 100px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   JUDUL INFORMASI
+========================================================= */
+
+.profile-section-title {
+    margin: 0 0 42px;
+
+    padding-bottom: 8px;
+
+    border-bottom: 1px solid #e3e8e5;
+
+    color: #111111;
+
+    font-size: 26px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   GRID INFORMASI
+========================================================= */
+
+.profile-information-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 35px;
+
+    width: 100%;
+}
+
+
+/* =========================================================
+   CARD INFORMASI
+========================================================= */
+
+.profile-info-item {
+    min-height: 140px;
+
+    padding: 28px 30px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    background: #fbfdfc;
+
+    border: 1px solid #dfe6e2;
+    border-radius: 15px;
+
+    box-sizing: border-box;
+}
+
+.profile-info-label {
+    display: block;
+
+    margin-bottom: 15px;
+
+    color: #84909c;
+
+    font-size: 15px;
+    font-weight: 400;
+}
+
+.profile-info-item strong {
+    color: #172c38;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   STATUS EMAIL
+========================================================= */
+
+.status-verified,
+.status-unverified {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+.status-verified {
+    color: #172c38 !important;
+}
+
+.status-verified i {
+    font-size: 16px;
+
+    color: #253e47;
+}
+
+.status-unverified {
+    color: #d68b00 !important;
+}
+
+
+/* =========================================================
+   PENGATURAN
+========================================================= */
+
+.profile-settings {
+    margin-top: 85px;
+}
+
+.profile-settings-title {
+    margin: 0 0 30px;
+
+    color: #111111;
+
+    font-size: 26px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   GANTI PASSWORD
+========================================================= */
+
+.profile-setting-link {
+    width: fit-content;
+
+    display: flex;
+    align-items: center;
+
+    gap: 25px;
+
+    margin-bottom: 25px;
+
+    color: #111111;
+
+    font-size: 16px;
+    font-weight: 400;
+
+    text-decoration: none;
+}
+
+.profile-setting-link i {
+    font-size: 18px;
+
+    transition: transform 0.2s ease;
+}
+
+.profile-setting-link:hover i {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.profile-logout-form {
+    margin: 0;
+}
+
+.profile-logout-button {
+    padding: 0;
+
+    background: transparent;
+
+    border: none;
+
+    color: #ff2020;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.profile-logout-button:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .profile-header-container {
+        min-height: 150px;
+
+        padding: 25px 35px;
+    }
+
+    .profile-content {
+        padding: 45px 35px 80px;
+    }
+
+    .profile-information-grid {
+        gap: 25px;
+    }
+
+    .profile-user-text h1 {
+        font-size: 23px;
+    }
+
+    .profile-user-text span {
+        font-size: 16px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .profile-header-container {
+        min-height: auto;
+
+        padding: 25px 20px;
+
+        flex-direction: column-reverse;
+        align-items: stretch;
+
+        gap: 25px;
+    }
+
+    .profile-user {
+        justify-content: space-between;
+    }
+
+    .profile-user-text {
+        text-align: left;
+    }
+
+    .profile-back-button {
+        justify-content: center;
+
+        width: 100%;
+
+        box-sizing: border-box;
+    }
+
+    .profile-avatar img,
+    .profile-avatar-default {
+        width: 65px;
+        height: 65px;
+    }
+
+    .profile-content {
+        padding: 35px 20px 60px;
+    }
+
+    .profile-section-title {
+        margin-bottom: 30px;
+
+        font-size: 22px;
+    }
+
+    .profile-information-grid {
+        grid-template-columns: 1fr;
+
+        gap: 20px;
+    }
+
+    .profile-info-item {
+        min-height: 120px;
+
+        padding: 23px;
+    }
+
+    .profile-settings {
+        margin-top: 60px;
+    }
+
+    .profile-settings-title {
+        font-size: 22px;
+    }
 
 }
