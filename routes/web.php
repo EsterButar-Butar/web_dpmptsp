@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Landing\AnalysisController;
 use App\Http\Controllers\Landing\ComparisonController;
+use Illuminate\Support\Facades\Route;
 
 
 /*
@@ -30,22 +30,23 @@ Route::get('/peta-investasi', function () {
     return view('landing.map');
 })->name('investment.map');
 
+
 Route::get(
     '/analisis',
     [
         AnalysisController::class,
-        'index'
+        'index',
     ]
-)->name('analysis.index');
+
+)->name('analysis');
 
 
 Route::get(
     '/perbandingan-sektor',
     [
         ComparisonController::class,
-        'index'
+        'index',
     ]
-
 )->name('comparison');
 
 
@@ -54,11 +55,11 @@ Route::get(
 | DASHBOARD REDIRECT
 |--------------------------------------------------------------------------
 |
-| Route /dashboard menjadi pintu masuk utama setelah pengguna login.
+| Route /dashboard menjadi pusat redirect setelah login.
 |
 | admin    → admin.dashboard
 | operator → operator.dashboard
-| user     → user.dashboard
+| user     → profile.show
 |
 */
 
@@ -77,7 +78,7 @@ Route::get('/dashboard', function () {
         ),
 
         'user' => redirect()->route(
-        'profile.edit'
+            'profile.show'
         ),
 
         default => abort(
@@ -99,11 +100,11 @@ Route::get('/dashboard', function () {
 | PROFILE ROUTES
 |--------------------------------------------------------------------------
 |
-| Semua pengguna yang telah login dapat:
+| Route profil dapat digunakan oleh:
 |
-| - melihat halaman edit profil;
-| - memperbarui data profil;
-| - menghapus akun.
+| - admin
+| - operator
+| - user
 |
 */
 
@@ -114,12 +115,27 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Edit Profile
+    | Tampilkan Profil
     |--------------------------------------------------------------------------
     */
 
     Route::get(
         '/profile',
+        [
+            ProfileController::class,
+            'show',
+        ]
+    )->name('profile.show');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Edit Profil
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/profile/edit',
         [
             ProfileController::class,
             'edit',
@@ -129,7 +145,7 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Update Profile
+    | Update Profil
     |--------------------------------------------------------------------------
     */
 
@@ -144,7 +160,7 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Delete Profile
+    | Hapus Akun
     |--------------------------------------------------------------------------
     */
 
@@ -164,7 +180,7 @@ Route::middleware([
 | AUTHENTICATION ROUTES
 |--------------------------------------------------------------------------
 |
-| Route autentikasi dari Laravel Breeze:
+| Route Laravel Breeze:
 |
 | - Login
 | - Register
@@ -177,8 +193,38 @@ Route::middleware([
 
 require __DIR__ . '/auth.php';
 
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role admin.
+|
+*/
+
 require __DIR__ . '/admin.php';
 
+
+/*
+|--------------------------------------------------------------------------
+| OPERATOR ROUTES
+|--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role operator.
+|
+*/
+
 require __DIR__ . '/operator.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| USER ROUTES
+|--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role user.
+|
+*/
 
 require __DIR__ . '/user.php';
