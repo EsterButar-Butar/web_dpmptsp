@@ -8,6 +8,7 @@
 
 <head>
 
+<<<<<<< HEAD
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,23 +19,44 @@
         'resources/css/home.css',
         'resources/css/about.css',
 
+=======
+<<<<<<< HEAD
+    <div class="container hero-container">
+=======
+>>>>>>> 555be315f2d687f7b27dfdec776c85b5e4dfb8c8
         'resources/js/navbar.js',
         'resources/js/home.js',
         'resources/js/about.js',
     ])
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+<<<<<<< HEAD
           rel="stylesheet">
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+=======
+        rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+>>>>>>> 555be315f2d687f7b27dfdec776c85b5e4dfb8c8
 
 </head>
 
 <body>
 
+<<<<<<< HEAD
     {{-- HERO --}}
     <section id="hero" class="hero">
+=======
+    {{-- NAVBAR --}}
+    @include('partials.landing.navbar')
+
+    {{-- HERO --}}
+    <section id="hero" class="hero">
+>>>>>>> 55f46de (Update tabel database)
+>>>>>>> 555be315f2d687f7b27dfdec776c85b5e4dfb8c8
 
         <div class="hero-content">
 
