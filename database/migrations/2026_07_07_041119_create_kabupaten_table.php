@@ -8,27 +8,26 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('kabupaten', function (Blueprint $table) {
+        Schema::table('kabupaten', function (Blueprint $table) {
+            $table->string('kode_kabupaten', 20)
+                ->nullable()
+                ->unique()
+                ->after('provinsi_id');
 
-            $table->id();
-
-
-            $table->foreignId('provinsi_id')
-                ->constrained('provinsi')
-                ->cascadeOnDelete();
-
-
-            $table->string('nama_kabupaten');
-
-
-            $table->timestamps();
-
+            $table->string('status', 20)
+                ->default('Aktif')
+                ->after('nama_kabupaten');
         });
     }
 
-
     public function down(): void
     {
-        Schema::dropIfExists('kabupaten');
+        Schema::table('kabupaten', function (Blueprint $table) {
+            $table->dropUnique(['kode_kabupaten']);
+            $table->dropColumn([
+                'kode_kabupaten',
+                'status'
+            ]);
+        });
     }
 };

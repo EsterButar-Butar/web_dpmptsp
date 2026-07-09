@@ -7,7 +7,30 @@
 
 <section class="hero-section">
 
+<<<<<<< HEAD
     <div class="container hero-container">
+=======
+        'resources/js/navbar.js',
+        'resources/js/home.js',
+        'resources/js/about.js',
+    ])
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+    {{-- NAVBAR --}}
+    @include('partials.landing.navbar')
+
+    {{-- HERO --}}
+    <section id="hero" class="hero">
+>>>>>>> 55f46de (Update tabel database)
 
         <div class="hero-content">
 
