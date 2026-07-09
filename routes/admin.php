@@ -1,45 +1,26 @@
 <?php
 
+use App\Http\Controllers\Admin\PenggunaController;
 use Illuminate\Support\Facades\Route;
 
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN ROUTES
-|--------------------------------------------------------------------------
-|
-| Semua route khusus Admin.
-|
-| Alur akses:
-| 1. Pengguna harus sudah login.
-| 2. Email pengguna harus sudah diverifikasi.
-| 3. Pengguna harus memiliki role "admin".
-| 4. Admin dapat mengakses dashboard admin.
-|
-*/
-
-Route::middleware([
-    'auth',
-    'verified',
-    'role:admin',
-])
-    ->prefix('admin')
+Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | ADMIN DASHBOARD
-        |--------------------------------------------------------------------------
-        |
-        | URL        : /admin/dashboard
-        | View       : admin.dashboard
-        | Route Name : admin.dashboard
-        |
-        */
-
         Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+            return view('admin.dashboard');
+        })->name('dashboard');
+
+        Route::get('/pengguna', [PenggunaController::class, 'index'])
+            ->name('pengguna.index');
+
+        Route::post('/pengguna', [PenggunaController::class, 'store'])
+            ->name('pengguna.store');
+
+        Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])
+            ->name('pengguna.update');
+
+        Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])
+            ->name('pengguna.destroy');
 
     });
