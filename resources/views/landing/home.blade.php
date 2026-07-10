@@ -1,25 +1,28 @@
-@extends('layouts.landing')
+<!DOCTYPE html>
+<html lang="id">
 
-@section('title', 'Beranda | DPMPTSP Provinsi Sumatera Utara')
+<head>
 
-@section('content')
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Beranda | DPMPTSP Provinsi Sumatera Utara</title>
 
-<section class="hero-section">
+    @vite([
+        'resources/css/navbar.css',
+        'resources/css/home.css',
+        'resources/css/about.css',
 
-<<<<<<< HEAD
-    <div class="container hero-container">
-=======
         'resources/js/navbar.js',
         'resources/js/home.js',
         'resources/js/about.js',
     ])
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+          rel="stylesheet">
 
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 </head>
 
@@ -30,167 +33,72 @@
 
     {{-- HERO --}}
     <section id="hero" class="hero">
->>>>>>> 55f46de (Update tabel database)
 
         <div class="hero-content">
 
-            <div class="hero-badge">
-                Potensi Investasi Sumatera Utara
-            </div>
-
+            <h5>Selamat Datang</h5>
 
             <h1>
-                Temukan Peluang
-                <br>
-                Investasi
-                <span>
-                    Terbaik di Sumatera Utara
-                </span>
+                Dashboard Analisis <br>
+                Potensi Investasi
             </h1>
 
-
             <p>
-                Jelajahi data, potensi daerah,
-                sektor unggulan, dan peluang investasi
-                strategis di seluruh kabupaten dan kota
-                Provinsi Sumatera Utara.
+                Dashboard Analisis Potensi Investasi berbasis GIS,
+                PDRB, Location Quotient, Shift Share,
+                Tipologi Klassen, dan Tipologi Sektor
+                untuk Provinsi Sumatera Utara.
             </p>
 
+            <div class="hero-button">
 
-            <div class="hero-actions">
-
-                <a 
-                    href="{{ route('analysis.index') }}"
-                    class="btn btn-primary"
-                >
-
-                    <i class="fa-solid fa-chart-column"></i>
-
-                    Analisis Sekarang
-
+                <a href="{{ route('analysis.index') }}" class="btn1">
+                    Mulai Analisis
                 </a>
 
-
-                <a
-                    href="{{ route('investment.map') }}"
-                    class="btn btn-outline"
-                >
-
-                    <i class="fa-solid fa-map-location-dot"></i>
-
-                    Jelajahi Peta
-
+                <a href="{{ route('comparison.index') }}" class="btn1">
+                    Analisis Perbandingan
                 </a>
 
             </div>
 
+            <div class="hero-stats">
 
-        </div>
-
-    </div>
-
-
-</section>
-
-
-
-
-<section class="statistics-section">
-
-    <div class="container">
-
-        <div class="statistics-grid">
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i class="fa-solid fa-city"></i>
-
-                </div>
-
-
-                <div class="stat-content">
-
-                    <strong>33</strong>
-
+                <div>
+                    <h3>33</h3>
                     <span>Kabupaten/Kota</span>
-
                 </div>
 
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i class="fa-solid fa-chart-line"></i>
-
-                </div>
-
-
-                <div class="stat-content">
-
-                    <strong>4</strong>
-
+                <div>
+                    <h3>4</h3>
                     <span>Metode Analisis</span>
-
                 </div>
 
-            </div>
-
-
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i class="fa-solid fa-map"></i>
-
-                </div>
-
-
-                <div class="stat-content">
-
-                    <strong>GIS</strong>
-
+                <div>
+                    <h3>GIS</h3>
                     <span>Pemetaan Investasi</span>
-
                 </div>
 
             </div>
-
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i class="fa-solid fa-database"></i>
-
-                </div>
-
-
-                <div class="stat-content">
-
-                    <strong>PDRB</strong>
-
-                    <span>Data Ekonomi</span>
-
-                </div>
-
-            </div>
-
 
         </div>
 
-    </div>
+        <div class="hero-image">
 
+            <img
+                src="{{ asset('images/gedung-dpmptsp.jpg') }}"
+                alt="Gedung DPMPTSP">
 
-</section>
+        </div>
 
-@endsection
+    </section>
+
+    {{-- ABOUT --}}
+    @include('landing.about')
+
+    {{-- FOOTER --}}
+    {{-- @include('partials.landing.footer') --}}
+
+</body>
+
+</html>
