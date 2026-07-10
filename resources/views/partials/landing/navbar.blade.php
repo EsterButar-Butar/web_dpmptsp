@@ -11,10 +11,10 @@
                 class="brand-logo"
             >
 
-            <div class="brand-text">
+            {{-- <div class="brand-text">
                 <strong>DPMPTSP</strong>
                 <span>Provinsi Sumatera Utara</span>
-            </div>
+            </div> --}}
 
         </a>
 
