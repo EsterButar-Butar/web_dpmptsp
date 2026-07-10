@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\Admin\PenggunaController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\Admin\DataWilayahController;
 
 Route::prefix('admin')
     ->name('admin.')
@@ -22,5 +23,17 @@ Route::prefix('admin')
 
         Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])
             ->name('pengguna.destroy');
+
+        Route::get('/data-wilayah', [DataWilayahController::class, 'index'])
+            ->name('data-wilayah.index');
+
+        Route::post('/data-wilayah', [DataWilayahController::class, 'store'])
+            ->name('data-wilayah.store');
+
+        Route::put('/data-wilayah/{dataWilayah}', [DataWilayahController::class, 'update'])
+            ->name('data-wilayah.update');
+
+        Route::delete('/data-wilayah/{dataWilayah}', [DataWilayahController::class, 'destroy'])
+            ->name('data-wilayah.destroy');
 
     });

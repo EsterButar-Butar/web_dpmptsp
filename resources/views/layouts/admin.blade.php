@@ -277,8 +277,8 @@
 
                 <li>
                     <a
-                        href="#"
-                        class="sidebar-link"
+                        href="{{ route('admin.data-wilayah.index') }}"
+                        class="sidebar-link {{ request()->is('admin/data-wilayah*') ? 'active' : '' }}"
                     >
                         <i class="fa-solid fa-map"></i>
                         <span>Data Wilayah</span>
