@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\DataWilayahController;
 
@@ -8,9 +9,8 @@ Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
 
         Route::get('/pengguna', [PenggunaController::class, 'index'])
             ->name('pengguna.index');

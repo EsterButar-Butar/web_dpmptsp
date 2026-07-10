@@ -11,17 +11,17 @@ class DataWilayah extends Model
     protected $fillable = [
         'no_urut',
 
-        'province_code',
-        'province_name',
+        'nama_provinsi',
+        'kode_provinsi',
 
-        'regency_code',
-        'regency_name',
+        'nama_kabupaten',
+        'kode_kabupaten',
 
-        'district_code',
-        'district_name',
+        'nama_kecamatan',
+        'kode_kecamatan',
 
-        'village_code',
-        'village_name',
+        'nama_desa',
+        'kode_desa',
 
         'status',
         'keterangan',

@@ -440,6 +440,19 @@
         font-weight: 500;
     }
 
+    .page-dots {
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 12px;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
     .page-link.active {
         background: var(--green-dark);
         color: #ffffff;
@@ -672,82 +685,84 @@
     </div>
 
     <form
-        action="{{ route('admin.data-wilayah.index') }}"
-        method="GET"
-        class="toolbar"
-    >
-        <div class="filter-control">
-            <select
-                name="regency_code"
-                onchange="this.form.submit()"
-            >
-                <option value="">Pilih Kab/Kota</option>
-                @foreach ($regencyOptions as $option)
-                    <option
-                        value="{{ $option->regency_code }}"
-                        {{ request('regency_code') === $option->regency_code ? 'selected' : '' }}
-                    >
-                        {{ $option->regency_name }}
-                    </option>
-                @endforeach
-            </select>
-            <i class="fa-solid fa-chevron-down"></i>
-        </div>
-
-        <div class="filter-control">
-            <select
-                name="district_code"
-                onchange="this.form.submit()"
-            >
-                <option value="">Pilih Kecamatan</option>
-                @foreach ($districtOptions as $option)
-                    <option
-                        value="{{ $option->district_code }}"
-                        {{ request('district_code') === $option->district_code ? 'selected' : '' }}
-                    >
-                        {{ $option->district_name }}
-                    </option>
-                @endforeach
-            </select>
-            <i class="fa-solid fa-chevron-down"></i>
-        </div>
-
-        <div class="filter-control">
-            <select
-                name="status"
-                onchange="this.form.submit()"
-            >
-                <option value="">Pilih Status</option>
-                <option value="Aktif" {{ request('status') === 'Aktif' ? 'selected' : '' }}>
-                    Aktif
-                </option>
-                <option value="Nonaktif" {{ request('status') === 'Nonaktif' ? 'selected' : '' }}>
-                    Nonaktif
-                </option>
-            </select>
-            <i class="fa-solid fa-chevron-down"></i>
-        </div>
-
-        <div class="search-control">
-            <input
-                type="text"
-                name="search"
-                value="{{ request('search') }}"
-                placeholder="Cari provinsi, kab/kota, kecamatan, desa..."
-            >
-
-            <button type="submit">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-        </div>
-
-        <a
-            href="{{ route('admin.data-wilayah.index') }}"
-            class="btn-reset"
+    action="{{ route('admin.data-wilayah.index') }}"
+    method="GET"
+    class="toolbar"
+>
+    <div class="filter-control">
+        <select
+            name="kode_kabupaten"
+            onchange="this.form.submit()"
         >
-            Reset
-        </a>
-    </form>
+            <option value="">Pilih Kab/Kota</option>
+
+            @foreach ($kabupatenOptions as $option)
+                <option
+                    value="{{ $option->kode_kabupaten }}"
+                    {{ request('kode_kabupaten') === $option->kode_kabupaten ? 'selected' : '' }}
+                >
+                    {{ $option->nama_kabupaten }}
+                </option>
+            @endforeach
+        </select>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+
+    <div class="filter-control">
+        <select
+            name="kode_kecamatan"
+            onchange="this.form.submit()"
+        >
+            <option value="">Pilih Kecamatan</option>
+
+            @foreach ($kecamatanOptions as $option)
+                <option
+                    value="{{ $option->kode_kecamatan }}"
+                    {{ request('kode_kecamatan') === $option->kode_kecamatan ? 'selected' : '' }}
+                >
+                    {{ $option->nama_kecamatan }}
+                </option>
+            @endforeach
+        </select>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+
+    <div class="filter-control">
+        <select
+            name="status"
+            onchange="this.form.submit()"
+        >
+            <option value="">Pilih Status</option>
+            <option value="Aktif" {{ request('status') === 'Aktif' ? 'selected' : '' }}>
+                Aktif
+            </option>
+            <option value="Nonaktif" {{ request('status') === 'Nonaktif' ? 'selected' : '' }}>
+                Nonaktif
+            </option>
+        </select>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+
+    <div class="search-control">
+        <input
+            type="text"
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Cari provinsi, kab/kota, kecamatan, desa..."
+        >
+
+        <button type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+    </div>
+
+    <a
+        href="{{ route('admin.data-wilayah.index') }}"
+        class="btn-reset"
+    >
+        Reset
+    </a>
+</form>
 
     <div class="table-card">
         <div class="table-responsive">
@@ -778,23 +793,23 @@
                             </td>
 
                             <td>
-                                <div class="region-name">{{ $item->province_name }}</div>
-                                <div class="region-code">{{ $item->province_code }}</div>
+                                <div class="region-name">{{ $item->nama_provinsi }}</div>
+                                <div class="region-code">{{ $item->code_provinsi }}</div>
                             </td>
 
                             <td>
-                                <div class="region-name">{{ $item->regency_name }}</div>
-                                <div class="region-code">{{ $item->regency_code }}</div>
+                                <div class="region-name">{{ $item->nama_kabupaten }}</div>
+                                <div class="region-code">{{ $item->kode_kabupaten }}</div>
                             </td>
 
                             <td>
-                                <div class="region-name">{{ $item->district_name }}</div>
-                                <div class="region-code">{{ $item->district_code }}</div>
+                                <div class="region-name">{{ $item->nama_kecamatan }}</div>
+                                <div class="region-code">{{ $item->kode_kecamatan }}</div>
                             </td>
 
                             <td>
-                                <div class="region-name">{{ $item->village_name }}</div>
-                                <div class="region-code">{{ $item->village_code }}</div>
+                                <div class="region-name">{{ $item->nama_desa }}</div>
+                                <div class="region-code">{{ $item->kode_desa }}</div>
                             </td>
 
                             <td>
@@ -845,38 +860,67 @@
     </div>
 
     @if ($dataWilayah->hasPages())
-        <div class="pagination-wrap">
-            <div class="pagination-info">
-                Menampilkan {{ $dataWilayah->firstItem() }} - {{ $dataWilayah->lastItem() }}
-                dari {{ $dataWilayah->total() }} data wilayah
-            </div>
-
-            <div class="pagination">
-                <a
-                    href="{{ $dataWilayah->previousPageUrl() ?? '#' }}"
-                    class="page-link {{ $dataWilayah->onFirstPage() ? 'disabled' : '' }}"
-                >
-                    <i class="fa-solid fa-chevron-left"></i>&nbsp; PREV
-                </a>
-
-                @foreach ($dataWilayah->getUrlRange(1, $dataWilayah->lastPage()) as $page => $url)
-                    <a
-                        href="{{ $url }}"
-                        class="page-link {{ $page === $dataWilayah->currentPage() ? 'active' : '' }}"
-                    >
-                        {{ $page }}
-                    </a>
-                @endforeach
-
-                <a
-                    href="{{ $dataWilayah->nextPageUrl() ?? '#' }}"
-                    class="page-link {{ $dataWilayah->hasMorePages() ? '' : 'disabled' }}"
-                >
-                    NEXT &nbsp;<i class="fa-solid fa-chevron-right"></i>
-                </a>
-            </div>
+    <div class="pagination-wrap">
+        <div class="pagination-info">
+            Menampilkan {{ $dataWilayah->firstItem() }} - {{ $dataWilayah->lastItem() }}
+            dari {{ $dataWilayah->total() }} data wilayah
         </div>
-    @endif
+
+        <div class="pagination">
+            <a
+                href="{{ $dataWilayah->previousPageUrl() ?? '#' }}"
+                class="page-link {{ $dataWilayah->onFirstPage() ? 'disabled' : '' }}"
+            >
+                <i class="fa-solid fa-chevron-left"></i>&nbsp; PREV
+            </a>
+
+            @php
+                $currentPage = $dataWilayah->currentPage();
+                $lastPage = $dataWilayah->lastPage();
+
+                $pages = collect([
+                    1,
+                    2,
+                    $currentPage - 1,
+                    $currentPage,
+                    $currentPage + 1,
+                    $lastPage - 1,
+                    $lastPage,
+                ])
+                    ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
+                    ->unique()
+                    ->sort()
+                    ->values();
+
+                $previousPageNumber = null;
+            @endphp
+
+            @foreach ($pages as $page)
+                @if ($previousPageNumber && $page - $previousPageNumber > 1)
+                    <span class="page-dots">...</span>
+                @endif
+
+                <a
+                    href="{{ $dataWilayah->url($page) }}"
+                    class="page-link {{ $page === $currentPage ? 'active' : '' }}"
+                >
+                    {{ $page }}
+                </a>
+
+                @php
+                    $previousPageNumber = $page;
+                @endphp
+            @endforeach
+
+            <a
+                href="{{ $dataWilayah->nextPageUrl() ?? '#' }}"
+                class="page-link {{ $dataWilayah->hasMorePages() ? '' : 'disabled' }}"
+            >
+                NEXT &nbsp;<i class="fa-solid fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+@endif
 </div>
 
 @if ($isModalOpen)
@@ -907,136 +951,203 @@
 
                 <input
                     type="hidden"
-                    name="province_name"
-                    id="province_name"
-                    value="{{ old('province_name', $isEdit ? $editData->province_name : 'Sumatera Utara') }}"
+                    name="nama_provinsi"
+                    id="nama_provinsi"
+                    value="{{ old('nama_provinsi', $isEdit ? $editData->nama_provinsi : 'Sumatera Utara') }}"
                 >
 
                 <input
                     type="hidden"
-                    name="regency_name"
-                    id="regency_name"
-                    value="{{ old('regency_name', $isEdit ? $editData->regency_name : '') }}"
+                    name="nama_kabupaten"
+                    id="nama_kabupaten"
+                    value="{{ old('nama_kabupaten', $isEdit ? $editData->nama_kabupaten : '') }}"
                 >
 
                 <input
                     type="hidden"
-                    name="district_name"
-                    id="district_name"
-                    value="{{ old('district_name', $isEdit ? $editData->district_name : '') }}"
+                    name="nama_kecamatan"
+                    id="nama_kecamatan"
+                    value="{{ old('nama_kecamatan', $isEdit ? $editData->nama_kecamatan : '') }}"
                 >
 
                 <input
                     type="hidden"
-                    name="village_name"
-                    id="village_name"
-                    value="{{ old('village_name', $isEdit ? $editData->village_name : '') }}"
+                    name="nama_desa"
+                    id="nama_desa"
+                    value="{{ old('nama_desa', $isEdit ? $editData->nama_desa : '') }}"
                 >
 
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="province_code">Provinsi</label>
-                        <select
-                            id="province_code"
-                            name="province_code"
-                            required
-                        >
-                            <option value="12" selected>Sumatera Utara</option>
-                        </select>
+    <input
+        type="hidden"
+        name="nama_provinsi"
+        id="nama_provinsi"
+        value="{{ old('nama_provinsi', $isEdit ? $editData->nama_provinsi : 'SUMATERA UTARA') }}"
+    >
 
-                        @error('province_code')
-                            <div class="error-text">{{ $message }}</div>
-                        @enderror
-                    </div>
+    <input
+        type="hidden"
+        name="nama_kabupaten"
+        id="nama_kabupaten"
+        value="{{ old('nama_kabupaten', $isEdit ? $editData->nama_kabupaten : '') }}"
+    >
 
-                    <div class="form-group">
-                        <label for="regency_code">Kabupaten/Kota</label>
-                        <select
-                            id="regency_code"
-                            name="regency_code"
-                            required
-                        >
-                            <option value="">Memuat Kabupaten/Kota...</option>
-                        </select>
+    <input
+        type="hidden"
+        name="nama_kecamatan"
+        id="nama_kecamatan"
+        value="{{ old('nama_kecamatan', $isEdit ? $editData->nama_kecamatan : '') }}"
+    >
 
-                        @error('regency_code')
-                            <div class="error-text">{{ $message }}</div>
-                        @enderror
-                    </div>
+    <div class="form-group">
+        <label for="kode_provinsi">Provinsi</label>
 
-                    <div class="form-group">
-                        <label for="district_code">Kecamatan</label>
-                        <select
-                            id="district_code"
-                            name="district_code"
-                            required
-                            disabled
-                        >
-                            <option value="">Pilih Kabupaten/Kota dulu</option>
-                        </select>
+        <input
+            type="text"
+            value="SUMATERA UTARA"
+            readonly
+        >
 
-                        @error('district_code')
-                            <div class="error-text">{{ $message }}</div>
-                        @enderror
-                    </div>
+        <input
+            type="hidden"
+            id="kode_provinsi"
+            name="kode_provinsi"
+            value="{{ old('kode_provinsi', $isEdit ? $editData->kode_provinsi : '12') }}"
+        >
 
-                    <div class="form-group">
-                        <label for="village_code">Desa/Kelurahan</label>
-                        <select
-                            id="village_code"
-                            name="village_code"
-                            required
-                            disabled
-                        >
-                            <option value="">Pilih Kecamatan dulu</option>
-                        </select>
+        <div class="form-helper">
+            Kode Provinsi: <strong>12</strong>
+        </div>
 
-                        @error('village_code')
-                            <div class="error-text">{{ $message }}</div>
-                        @enderror
-                    </div>
+        @error('kode_provinsi')
+            <div class="error-text">{{ $message }}</div>
+        @enderror
+    </div>
 
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        @php
-                            $selectedStatus = old('status', $isEdit ? $editData->status : 'Aktif');
-                        @endphp
+    <div class="form-group">
+        <label for="kode_kabupaten">Kabupaten/Kota</label>
 
-                        <select
-                            id="status"
-                            name="status"
-                            required
-                        >
-                            <option value="Aktif" {{ $selectedStatus === 'Aktif' ? 'selected' : '' }}>
-                                Aktif
-                            </option>
-                            <option value="Nonaktif" {{ $selectedStatus === 'Nonaktif' ? 'selected' : '' }}>
-                                Nonaktif
-                            </option>
-                        </select>
+        <select
+            id="kode_kabupaten"
+            name="kode_kabupaten"
+            required
+        >
+            <option value="">Pilih Kabupaten/Kota</option>
+        </select>
 
-                        @error('status')
-                            <div class="error-text">{{ $message }}</div>
-                        @enderror
-                    </div>
+        <div class="form-helper">
+            Kode Kabupaten/Kota:
+            <strong id="preview_kode_kabupaten">
+                {{ old('kode_kabupaten', $isEdit ? $editData->kode_kabupaten : '-') }}
+            </strong>
+        </div>
 
-                    <div class="form-group full">
-                        <label for="keterangan">Keterangan</label>
-                        <textarea
-                            id="keterangan"
-                            name="keterangan"
-                            placeholder="Opsional"
-                        >{{ old('keterangan', $isEdit ? $editData->keterangan : '') }}</textarea>
+        @error('kode_kabupaten')
+            <div class="error-text">{{ $message }}</div>
+        @enderror
+    </div>
 
-                        @error('keterangan')
-                            <div class="error-text">{{ $message }}</div>
-                        @enderror
+    <div class="form-group">
+        <label for="kode_kecamatan">Kecamatan</label>
 
-                        <div class="form-helper">
-                            Keterangan boleh dikosongkan.
-                        </div>
-                    </div>
-                </div>
+        <select
+            id="kode_kecamatan"
+            name="kode_kecamatan"
+            required
+            disabled
+        >
+            <option value="">Pilih Kabupaten/Kota dulu</option>
+        </select>
+
+        <div class="form-helper">
+            Kode Kecamatan:
+            <strong id="preview_kode_kecamatan">
+                {{ old('kode_kecamatan', $isEdit ? $editData->kode_kecamatan : '-') }}
+            </strong>
+        </div>
+
+        @error('kode_kecamatan')
+            <div class="error-text">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="form-group">
+        <label for="nama_desa">Desa/Kelurahan</label>
+
+        <input
+            id="nama_desa"
+            type="text"
+            name="nama_desa"
+            value="{{ old('nama_desa', $isEdit ? $editData->nama_desa : '') }}"
+            placeholder="Contoh: Aek Loba"
+            required
+        >
+
+        @error('nama_desa')
+            <div class="error-text">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="form-group">
+        <label for="kode_desa">Kode Desa/Kelurahan</label>
+
+        <input
+            id="kode_desa"
+            type="text"
+            name="kode_desa"
+            value="{{ old('kode_desa', $isEdit ? $editData->kode_desa : '') }}"
+            placeholder="Contoh: 12.09.18.2013"
+            required
+        >
+
+        @error('kode_desa')
+            <div class="error-text">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="form-group">
+        <label for="status">Status</label>
+
+        @php
+            $selectedStatus = old('status', $isEdit ? $editData->status : 'Aktif');
+        @endphp
+
+        <select
+            id="status"
+            name="status"
+            required
+        >
+            <option value="Aktif" {{ $selectedStatus === 'Aktif' ? 'selected' : '' }}>
+                Aktif
+            </option>
+            <option value="Nonaktif" {{ $selectedStatus === 'Nonaktif' ? 'selected' : '' }}>
+                Nonaktif
+            </option>
+        </select>
+
+        @error('status')
+            <div class="error-text">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="form-group full">
+        <label for="keterangan">Keterangan</label>
+
+        <textarea
+            id="keterangan"
+            name="keterangan"
+            placeholder="Opsional"
+        >{{ old('keterangan', $isEdit ? $editData->keterangan : '') }}</textarea>
+
+        @error('keterangan')
+            <div class="error-text">{{ $message }}</div>
+        @enderror
+
+        <div class="form-helper">
+            Keterangan boleh dikosongkan.
+        </div>
+    </div>
+</div>
 
                 <div class="form-actions">
                     <a
@@ -1059,24 +1170,34 @@
     </div>
 
     <script>
+    const wilayahOptions = @json($wilayahOptions ?? []);
+
     const selectedWilayah = {
-        provinceCode: @json(old('province_code', $isEdit ? $editData->province_code : '12')),
-        regencyCode: @json(old('regency_code', $isEdit ? $editData->regency_code : '')),
-        districtCode: @json(old('district_code', $isEdit ? $editData->district_code : '')),
-        villageCode: @json(old('village_code', $isEdit ? $editData->village_code : '')),
+        kodeKabupaten: @json(old('kode_kabupaten', $isEdit ? $editData->kode_kabupaten : '')),
+        kodeKecamatan: @json(old('kode_kecamatan', $isEdit ? $editData->kode_kecamatan : '')),
     };
 
-    const apiBase = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+    const kabupatenSelect = document.getElementById('kode_kabupaten');
+    const kecamatanSelect = document.getElementById('kode_kecamatan');
 
-    const provinceSelect = document.getElementById('province_code');
-    const regencySelect = document.getElementById('regency_code');
-    const districtSelect = document.getElementById('district_code');
-    const villageSelect = document.getElementById('village_code');
+    const namaKabupatenInput = document.getElementById('nama_kabupaten');
+    const namaKecamatanInput = document.getElementById('nama_kecamatan');
 
-    const provinceNameInput = document.getElementById('province_name');
-    const regencyNameInput = document.getElementById('regency_name');
-    const districtNameInput = document.getElementById('district_name');
-    const villageNameInput = document.getElementById('village_name');
+    const previewKodeKabupaten = document.getElementById('preview_kode_kabupaten');
+    const previewKodeKecamatan = document.getElementById('preview_kode_kecamatan');
+
+    function uniqueBy(items, key) {
+        const seen = new Set();
+
+        return items.filter((item) => {
+            if (! item[key] || seen.has(item[key])) {
+                return false;
+            }
+
+            seen.add(item[key]);
+            return true;
+        });
+    }
 
     function resetSelect(select, placeholder, disabled = false) {
         select.innerHTML = '';
@@ -1089,186 +1210,103 @@
         select.appendChild(option);
     }
 
-    async function fetchWilayah(url) {
-        const response = await fetch(url);
+    function fillKabupaten(selectedCode = '') {
+        const kabupatenList = uniqueBy(wilayahOptions, 'kode_kabupaten')
+            .sort((a, b) => a.nama_kabupaten.localeCompare(b.nama_kabupaten));
 
-        if (! response.ok) {
-            throw new Error('Gagal mengambil data wilayah.');
-        }
+        resetSelect(kabupatenSelect, 'Pilih Kabupaten/Kota', false);
 
-        const json = await response.json();
-
-        if (Array.isArray(json)) {
-            return json;
-        }
-
-        if (Array.isArray(json.data)) {
-            return json.data;
-        }
-
-        return [];
-    }
-
-    function getCode(item) {
-        return item.id || item.code || '';
-    }
-
-    function getName(item) {
-        return item.name || item.nama || '';
-    }
-
-    function fillSelect(select, items, placeholder, selectedCode = '') {
-        resetSelect(select, placeholder, false);
-
-        items.forEach((item) => {
-            const code = getCode(item);
-            const name = getName(item);
-
+        kabupatenList.forEach((item) => {
             const option = document.createElement('option');
-            option.value = code;
-            option.textContent = name;
-            option.dataset.name = name;
 
-            if (selectedCode && selectedCode === code) {
+            option.value = item.kode_kabupaten;
+            option.textContent = `${item.nama_kabupaten} — ${item.kode_kabupaten}`;
+            option.dataset.nama = item.nama_kabupaten;
+
+            if (selectedCode && selectedCode === item.kode_kabupaten) {
                 option.selected = true;
             }
 
-            select.appendChild(option);
+            kabupatenSelect.appendChild(option);
         });
+
+        setKabupatenName();
     }
 
-    function setNameFromSelect(select, input) {
-        const selected = select.options[select.selectedIndex];
+    function fillKecamatan(kodeKabupaten, selectedCode = '') {
+        if (! kodeKabupaten) {
+            resetSelect(kecamatanSelect, 'Pilih Kabupaten/Kota dulu', true);
+            namaKecamatanInput.value = '';
+            previewKodeKecamatan.textContent = '-';
+            return;
+        }
+
+        const kecamatanList = uniqueBy(
+            wilayahOptions.filter((item) => item.kode_kabupaten === kodeKabupaten),
+            'kode_kecamatan'
+        ).sort((a, b) => a.nama_kecamatan.localeCompare(b.nama_kecamatan));
+
+        resetSelect(kecamatanSelect, 'Pilih Kecamatan', false);
+
+        kecamatanList.forEach((item) => {
+            const option = document.createElement('option');
+
+            option.value = item.kode_kecamatan;
+            option.textContent = `${item.nama_kecamatan} — ${item.kode_kecamatan}`;
+            option.dataset.nama = item.nama_kecamatan;
+
+            if (selectedCode && selectedCode === item.kode_kecamatan) {
+                option.selected = true;
+            }
+
+            kecamatanSelect.appendChild(option);
+        });
+
+        setKecamatanName();
+    }
+
+    function setKabupatenName() {
+        const selected = kabupatenSelect.options[kabupatenSelect.selectedIndex];
 
         if (! selected || ! selected.value) {
-            input.value = '';
+            namaKabupatenInput.value = '';
+            previewKodeKabupaten.textContent = '-';
             return;
         }
 
-        input.value = selected.dataset.name || selected.textContent;
+        namaKabupatenInput.value = selected.dataset.nama;
+        previewKodeKabupaten.textContent = selected.value;
     }
 
-    async function loadRegencies(selectedCode = '') {
-        resetSelect(regencySelect, 'Memuat Kabupaten/Kota...', true);
-        resetSelect(districtSelect, 'Pilih Kabupaten/Kota dulu', true);
-        resetSelect(villageSelect, 'Pilih Kecamatan dulu', true);
+    function setKecamatanName() {
+        const selected = kecamatanSelect.options[kecamatanSelect.selectedIndex];
 
-        regencyNameInput.value = '';
-        districtNameInput.value = '';
-        villageNameInput.value = '';
-
-        try {
-            const items = await fetchWilayah(`${apiBase}/regencies/12.json`);
-
-            fillSelect(
-                regencySelect,
-                items,
-                'Pilih Kabupaten/Kota',
-                selectedCode
-            );
-
-            setNameFromSelect(regencySelect, regencyNameInput);
-        } catch (error) {
-            resetSelect(regencySelect, 'Gagal memuat Kabupaten/Kota', true);
-            console.error(error);
-        }
-    }
-
-    async function loadDistricts(regencyCode, selectedCode = '') {
-        resetSelect(districtSelect, 'Memuat Kecamatan...', true);
-        resetSelect(villageSelect, 'Pilih Kecamatan dulu', true);
-
-        districtNameInput.value = '';
-        villageNameInput.value = '';
-
-        if (! regencyCode) {
-            resetSelect(districtSelect, 'Pilih Kabupaten/Kota dulu', true);
+        if (! selected || ! selected.value) {
+            namaKecamatanInput.value = '';
+            previewKodeKecamatan.textContent = '-';
             return;
         }
 
-        try {
-            const items = await fetchWilayah(`${apiBase}/districts/${regencyCode}.json`);
-
-            fillSelect(
-                districtSelect,
-                items,
-                'Pilih Kecamatan',
-                selectedCode
-            );
-
-            setNameFromSelect(districtSelect, districtNameInput);
-        } catch (error) {
-            resetSelect(districtSelect, 'Gagal memuat Kecamatan', true);
-            console.error(error);
-        }
+        namaKecamatanInput.value = selected.dataset.nama;
+        previewKodeKecamatan.textContent = selected.value;
     }
 
-    async function loadVillages(districtCode, selectedCode = '') {
-        resetSelect(villageSelect, 'Memuat Desa/Kelurahan...', true);
-
-        villageNameInput.value = '';
-
-        if (! districtCode) {
-            resetSelect(villageSelect, 'Pilih Kecamatan dulu', true);
-            return;
-        }
-
-        try {
-            const items = await fetchWilayah(`${apiBase}/villages/${districtCode}.json`);
-
-            fillSelect(
-                villageSelect,
-                items,
-                'Pilih Desa/Kelurahan',
-                selectedCode
-            );
-
-            setNameFromSelect(villageSelect, villageNameInput);
-        } catch (error) {
-            resetSelect(villageSelect, 'Gagal memuat Desa/Kelurahan', true);
-            console.error(error);
-        }
-    }
-
-    provinceSelect.addEventListener('change', async function () {
-        provinceNameInput.value = 'Sumatera Utara';
-
-        await loadRegencies();
+    kabupatenSelect.addEventListener('change', function () {
+        setKabupatenName();
+        fillKecamatan(kabupatenSelect.value);
     });
 
-    regencySelect.addEventListener('change', async function () {
-        setNameFromSelect(regencySelect, regencyNameInput);
-
-        await loadDistricts(regencySelect.value);
+    kecamatanSelect.addEventListener('change', function () {
+        setKecamatanName();
     });
 
-    districtSelect.addEventListener('change', async function () {
-        setNameFromSelect(districtSelect, districtNameInput);
+    document.addEventListener('DOMContentLoaded', function () {
+        fillKabupaten(selectedWilayah.kodeKabupaten);
 
-        await loadVillages(districtSelect.value);
-    });
-
-    villageSelect.addEventListener('change', function () {
-        setNameFromSelect(villageSelect, villageNameInput);
-    });
-
-    document.addEventListener('DOMContentLoaded', async function () {
-        provinceNameInput.value = 'Sumatera Utara';
-        provinceSelect.value = '12';
-
-        await loadRegencies(selectedWilayah.regencyCode);
-
-        if (selectedWilayah.regencyCode) {
-            await loadDistricts(
-                selectedWilayah.regencyCode,
-                selectedWilayah.districtCode
-            );
-        }
-
-        if (selectedWilayah.districtCode) {
-            await loadVillages(
-                selectedWilayah.districtCode,
-                selectedWilayah.villageCode
+        if (selectedWilayah.kodeKabupaten) {
+            fillKecamatan(
+                selectedWilayah.kodeKabupaten,
+                selectedWilayah.kodeKecamatan
             );
         }
     });

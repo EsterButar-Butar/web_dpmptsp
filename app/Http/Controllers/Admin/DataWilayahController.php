@@ -12,55 +12,38 @@ use Illuminate\Validation\Rule;
 class DataWilayahController extends Controller
 {
     public function index(Request $request)
-    {
-        $tableExists = Schema::hasTable('data_wilayah');
+{
+    $tableExists = Schema::hasTable('data_wilayah');
+    $wilayahOptions = collect();
 
         if (! $tableExists) {
-            $dataWilayah = new LengthAwarePaginator(
-                [],
-                0,
-                10,
-                1,
-                [
-                    'path' => $request->url(),
-                    'query' => $request->query(),
-                ]
-            );
+            $dataWilayah = new LengthAwarePaginator([], 0, 10, 1, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
 
-            $stats = [
-                [
-                    'label' => 'Total Wilayah',
-                    'value' => 0,
-                    'color' => 'mint',
-                    'icon' => 'fa-map-location-dot',
-                ],
-                [
-                    'label' => 'Kab/Kota',
-                    'value' => 0,
-                    'color' => 'cream',
-                    'icon' => 'fa-city',
-                ],
-                [
-                    'label' => 'Kecamatan',
-                    'value' => 0,
-                    'color' => 'blue',
-                    'icon' => 'fa-map',
-                ],
-                [
-                    'label' => 'Desa/Kelurahan',
-                    'value' => 0,
-                    'color' => 'red',
-                    'icon' => 'fa-location-dot',
-                ],
-            ];
+            $wilayahOptions = DataWilayah::query()
+                ->select(
+                    'kode_provinsi',
+                    'nama_provinsi',
+                    'kode_kabupaten',
+                    'nama_kabupaten',
+                    'kode_kecamatan',
+                    'nama_kecamatan'
+                )
+                ->distinct()
+                ->orderBy('nama_provinsi')
+                ->orderBy('nama_kabupaten')
+                ->orderBy('nama_kecamatan')
+                ->get();
 
             return view('admin.data-wilayah', [
                 'tableExists' => false,
                 'dataWilayah' => $dataWilayah,
-                'stats' => $stats,
-                'regencyOptions' => collect(),
-                'districtOptions' => collect(),
-                'villageOptions' => collect(),
+                'stats' => $this->emptyStats(),
+                'kabupatenOptions' => collect(),
+                'kecamatanOptions' => collect(),
+                'desaOptions' => collect(),
                 'mode' => $request->query('mode'),
                 'editData' => null,
             ]);
@@ -69,32 +52,34 @@ class DataWilayahController extends Controller
         $query = DataWilayah::query();
 
         if ($request->filled('search')) {
-            $search = strtolower(trim($request->search));
+            $search = '%' . strtolower(trim($request->search)) . '%';
 
             $query->where(function ($q) use ($search) {
-                $q->whereRaw('LOWER(province_name) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(province_code) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(regency_name) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(regency_code) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(district_name) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(district_code) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(village_name) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(village_code) LIKE ?', ["%{$search}%"]);
+                $columns = [
+                    'nama_provinsi',
+                    'kode_provinsi',
+                    'nama_kabupaten',
+                    'kode_kabupaten',
+                    'nama_kecamatan',
+                    'kode_kecamatan',
+                    'nama_desa',
+                    'kode_desa',
+                    'status',
+                    'keterangan',
+                ];
 
-                $q->orWhereRaw('LOWER(COALESCE(keterangan, \'\')) LIKE ?', ["%{$search}%"]);
+                foreach ($columns as $column) {
+                    $q->orWhereRaw("LOWER(CAST({$column} AS TEXT)) LIKE ?", [$search]);
+                }
             });
         }
 
-        if ($request->filled('regency_code')) {
-            $query->where('regency_code', $request->regency_code);
+        if ($request->filled('kode_kabupaten')) {
+            $query->where('kode_kabupaten', $request->kode_kabupaten);
         }
 
-        if ($request->filled('district_code')) {
-            $query->where('district_code', $request->district_code);
-        }
-
-        if ($request->filled('village_code')) {
-            $query->where('village_code', $request->village_code);
+        if ($request->filled('kode_kecamatan')) {
+            $query->where('kode_kecamatan', $request->kode_kecamatan);
         }
 
         if ($request->filled('status')) {
@@ -104,10 +89,10 @@ class DataWilayahController extends Controller
         }
 
         $dataWilayah = $query
-            ->orderBy('province_name')
-            ->orderBy('regency_name')
-            ->orderBy('district_name')
-            ->orderBy('village_name')
+            ->orderBy('nama_provinsi')
+            ->orderBy('nama_kabupaten')
+            ->orderBy('nama_kecamatan')
+            ->orderBy('nama_desa')
             ->paginate(10)
             ->withQueryString();
 
@@ -120,55 +105,70 @@ class DataWilayahController extends Controller
             ],
             [
                 'label' => 'Kab/Kota',
-                'value' => DataWilayah::whereNotNull('regency_code')
+                'value' => DataWilayah::whereNotNull('kode_kabupaten')
                     ->distinct()
-                    ->count('regency_code'),
+                    ->count('kode_kabupaten'),
                 'color' => 'cream',
                 'icon' => 'fa-city',
             ],
             [
                 'label' => 'Kecamatan',
-                'value' => DataWilayah::whereNotNull('district_code')
+                'value' => DataWilayah::whereNotNull('kode_kecamatan')
                     ->distinct()
-                    ->count('district_code'),
+                    ->count('kode_kecamatan'),
                 'color' => 'blue',
                 'icon' => 'fa-map',
             ],
             [
                 'label' => 'Desa/Kelurahan',
-                'value' => DataWilayah::whereNotNull('village_code')
+                'value' => DataWilayah::whereNotNull('kode_desa')
                     ->distinct()
-                    ->count('village_code'),
+                    ->count('kode_desa'),
                 'color' => 'red',
                 'icon' => 'fa-location-dot',
             ],
         ];
 
-        $regencyOptions = DataWilayah::query()
-            ->select('regency_code', 'regency_name')
-            ->whereNotNull('regency_code')
+        $kabupatenOptions = DataWilayah::query()
+            ->select('kode_kabupaten', 'nama_kabupaten')
+            ->whereNotNull('kode_kabupaten')
             ->distinct()
-            ->orderBy('regency_name')
+            ->orderBy('nama_kabupaten')
             ->get();
 
-        $districtOptions = DataWilayah::query()
-            ->select('district_code', 'district_name')
-            ->when($request->filled('regency_code'), function ($q) use ($request) {
-                $q->where('regency_code', $request->regency_code);
+        $kecamatanOptions = DataWilayah::query()
+            ->select('kode_kecamatan', 'nama_kecamatan')
+            ->when($request->filled('kode_kabupaten'), function ($q) use ($request) {
+                $q->where('kode_kabupaten', $request->kode_kabupaten);
             })
-            ->whereNotNull('district_code')
+            ->whereNotNull('kode_kecamatan')
             ->distinct()
-            ->orderBy('district_name')
+            ->orderBy('nama_kecamatan')
             ->get();
 
-        $villageOptions = DataWilayah::query()
-            ->select('village_code', 'village_name')
-            ->when($request->filled('district_code'), function ($q) use ($request) {
-                $q->where('district_code', $request->district_code);
+        $desaOptions = DataWilayah::query()
+            ->select('kode_desa', 'nama_desa')
+            ->when($request->filled('kode_kecamatan'), function ($q) use ($request) {
+                $q->where('kode_kecamatan', $request->kode_kecamatan);
             })
-            ->whereNotNull('village_code')
+            ->whereNotNull('kode_desa')
             ->distinct()
-            ->orderBy('village_name')
+            ->orderBy('nama_desa')
+            ->get();
+
+            $wilayahOptions = DataWilayah::query()
+            ->select(
+                'kode_provinsi',
+                'nama_provinsi',
+                'kode_kabupaten',
+                'nama_kabupaten',
+                'kode_kecamatan',
+                'nama_kecamatan'
+            )
+            ->distinct()
+            ->orderBy('nama_provinsi')
+            ->orderBy('nama_kabupaten')
+            ->orderBy('nama_kecamatan')
             ->get();
 
         $mode = $request->query('mode');
@@ -183,9 +183,10 @@ class DataWilayahController extends Controller
             'tableExists',
             'dataWilayah',
             'stats',
-            'regencyOptions',
-            'districtOptions',
-            'villageOptions',
+            'kabupatenOptions',
+            'kecamatanOptions',
+            'desaOptions',
+            'wilayahOptions',
             'mode',
             'editData'
         ));
@@ -201,7 +202,7 @@ class DataWilayahController extends Controller
 
         $data = $request->validate($this->rules(), $this->messages());
 
-        $data['no_urut'] = DataWilayah::max('no_urut') + 1;
+        $data['no_urut'] = (DataWilayah::max('no_urut') ?? 0) + 1;
 
         DataWilayah::create($data);
 
@@ -212,12 +213,6 @@ class DataWilayahController extends Controller
 
     public function update(Request $request, DataWilayah $dataWilayah)
     {
-        if (! Schema::hasTable('data_wilayah')) {
-            return redirect()
-                ->route('admin.data-wilayah.index')
-                ->with('error', 'Tabel data_wilayah belum tersedia di Supabase.');
-        }
-
         $data = $request->validate(
             $this->rules($dataWilayah->id),
             $this->messages()
@@ -242,71 +237,75 @@ class DataWilayahController extends Controller
     private function rules(?int $ignoreId = null): array
     {
         return [
-            'province_code' => [
+            'nama_provinsi' => ['required', 'string', 'max:255'],
+            'kode_provinsi' => ['required', 'string', 'max:20'],
+
+            'nama_kabupaten' => ['required', 'string', 'max:255'],
+            'kode_kabupaten' => ['required', 'string', 'max:20'],
+
+            'nama_kecamatan' => ['required', 'string', 'max:255'],
+            'kode_kecamatan' => ['required', 'string', 'max:30'],
+
+            'nama_desa' => ['required', 'string', 'max:255'],
+            'kode_desa' => [
                 'required',
                 'string',
-                'max:20',
+                'max:40',
+                Rule::unique('data_wilayah', 'kode_desa')->ignore($ignoreId),
             ],
-            'province_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'regency_code' => [
-                'required',
-                'string',
-                'max:20',
-            ],
-            'regency_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'district_code' => [
-                'required',
-                'string',
-                'max:20',
-            ],
-            'district_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'village_code' => [
-                'required',
-                'string',
-                'max:30',
-                Rule::unique('data_wilayah', 'village_code')->ignore($ignoreId),
-            ],
-            'village_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'status' => [
-                'required',
-                'in:Aktif,Nonaktif',
-            ],
-            'keterangan' => [
-                'nullable',
-                'string',
-            ],
+
+            'status' => ['required', 'in:Aktif,Nonaktif'],
+            'keterangan' => ['nullable', 'string'],
         ];
     }
 
     private function messages(): array
     {
         return [
-            'province_code.required' => 'Kode provinsi wajib diisi.',
-            'province_name.required' => 'Nama provinsi wajib diisi.',
-            'regency_code.required' => 'Kabupaten/Kota wajib dipilih.',
-            'regency_name.required' => 'Nama Kabupaten/Kota wajib diisi.',
-            'district_code.required' => 'Kecamatan wajib dipilih.',
-            'district_name.required' => 'Nama kecamatan wajib diisi.',
-            'village_code.required' => 'Desa/Kelurahan wajib dipilih.',
-            'village_code.unique' => 'Desa/Kelurahan ini sudah ada di data wilayah.',
-            'village_name.required' => 'Nama desa/kelurahan wajib diisi.',
+            'nama_provinsi.required' => 'Nama provinsi wajib diisi.',
+            'kode_provinsi.required' => 'Kode provinsi wajib diisi.',
+
+            'nama_kabupaten.required' => 'Nama kabupaten/kota wajib diisi.',
+            'kode_kabupaten.required' => 'Kode kabupaten/kota wajib diisi.',
+
+            'nama_kecamatan.required' => 'Nama kecamatan wajib diisi.',
+            'kode_kecamatan.required' => 'Kode kecamatan wajib diisi.',
+
+            'nama_desa.required' => 'Nama desa/kelurahan wajib diisi.',
+            'kode_desa.required' => 'Kode desa/kelurahan wajib diisi.',
+            'kode_desa.unique' => 'Kode desa/kelurahan ini sudah ada.',
+
             'status.required' => 'Status wajib dipilih.',
+        ];
+    }
+
+    private function emptyStats(): array
+    {
+        return [
+            [
+                'label' => 'Total Wilayah',
+                'value' => 0,
+                'color' => 'mint',
+                'icon' => 'fa-map-location-dot',
+            ],
+            [
+                'label' => 'Kab/Kota',
+                'value' => 0,
+                'color' => 'cream',
+                'icon' => 'fa-city',
+            ],
+            [
+                'label' => 'Kecamatan',
+                'value' => 0,
+                'color' => 'blue',
+                'icon' => 'fa-map',
+            ],
+            [
+                'label' => 'Desa/Kelurahan',
+                'value' => 0,
+                'color' => 'red',
+                'icon' => 'fa-location-dot',
+            ],
         ];
     }
 }
