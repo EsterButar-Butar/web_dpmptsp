@@ -2,6 +2,7 @@
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,53 +10,38 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <meta
-        name="csrf-token"
-        content="{{ csrf_token() }}"
-    >
-
     <title>
-        @yield('title', 'Profil Pengguna | DPMPTSP Provinsi Sumatera Utara')
+        @yield('title', 'Profil User | DPMPTSP Provinsi Sumatera Utara')
     </title>
 
-    {{-- GOOGLE FONT --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    @vite([
+        'resources/css/user.css',
+        'resources/js/app.js',
+    ])
 
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-    {{-- FONT AWESOME --}}
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
-    {{-- VITE --}}
-    @vite([
-        'resources/css/app.css',
-        'resources/js/app.js'
-    ])
-
-    @stack('styles')
-
 </head>
 
+<body>
 
-<body class="profile-body">
+    <div class="user-layout">
 
-    <main>
-        @yield('content')
-    </main>
+        {{-- SIDEBAR USER --}}
+        @include('partials.user.sidebar')
 
-    @stack('scripts')
+
+        {{-- CONTENT --}}
+        <main class="user-main">
+
+            @yield('content')
+
+        </main>
+
+    </div>
 
 </body>
 
