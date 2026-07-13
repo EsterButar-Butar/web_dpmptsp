@@ -22,7 +22,7 @@ Route::get('/', function () {
 
 
 Route::get('/tentang', function () {
-    return view('landing.home');
+    return view('landing.about');
 })->name('about');
 
 
@@ -37,6 +37,7 @@ Route::get(
         AnalysisController::class,
         'index',
     ]
+
 )->name('analysis');
 
 
@@ -197,6 +198,9 @@ require __DIR__ . '/auth.php';
 |--------------------------------------------------------------------------
 | ADMIN ROUTES
 |--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role admin.
+|
 */
 
 require __DIR__ . '/admin.php';
@@ -206,6 +210,9 @@ require __DIR__ . '/admin.php';
 |--------------------------------------------------------------------------
 | OPERATOR ROUTES
 |--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role operator.
+|
 */
 
 require __DIR__ . '/operator.php';
@@ -215,6 +222,9 @@ require __DIR__ . '/operator.php';
 |--------------------------------------------------------------------------
 | USER ROUTES
 |--------------------------------------------------------------------------
+|
+| Route khusus pengguna dengan role user.
+|
 */
 
 require __DIR__ . '/user.php';

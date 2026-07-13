@@ -40,6 +40,7 @@
     {{-- VITE --}}
     @vite([
         'resources/css/app.css',
+        'resources/css/comparison.css',
         'resources/js/app.js'
     ])
 
@@ -51,14 +52,7 @@
 
 <body>
 
-
-    {{-- NAVBAR --}}
-
     @include('partials.landing.navbar')
-
-
-
-    {{-- PAGE CONTENT --}}
 
     <main>
 
@@ -66,15 +60,7 @@
 
     </main>
 
-
-
-    {{-- FOOTER --}}
-
     @include('partials.landing.footer')
-
-
-
-    {{-- BACK TO TOP --}}
 
     <button
         type="button"

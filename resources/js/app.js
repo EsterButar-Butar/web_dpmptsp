@@ -1,12 +1,16 @@
 import './bootstrap';
+import '../css/app.css';
+import '../css/comparison.css';
 
 import Alpine from 'alpinejs';
 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import Chart from 'chart.js/auto'
 
-window.Chart = Chart
+import Chart from 'chart.js/auto';
+
+window.Chart = Chart;
+
 window.Alpine = Alpine;
 
 Alpine.start();
