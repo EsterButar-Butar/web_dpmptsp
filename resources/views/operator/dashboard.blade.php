@@ -3,22 +3,22 @@
 @section('content')
 
 <!-- Welcome Header -->
-<div class="bg-gradient-to-r from-slate-900 via-[#003b73] to-[#0056b3] rounded-2xl p-8 md:p-10 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] rounded-2xl p-8 md:p-10 pb-16 md:pb-24 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
     <!-- Background Ornaments -->
-    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob"></div>
-    <div class="absolute bottom-0 right-32 w-48 h-48 bg-cyan-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-    <div class="absolute top-10 left-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+    <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob"></div>
+    <div class="absolute bottom-0 right-32 w-48 h-48 bg-yellow-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+    <div class="absolute top-10 left-1/2 w-72 h-72 bg-emerald-500 rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
 
     <div class="relative z-10 text-white flex-1">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/50 border border-blue-700/50 text-blue-100 text-xs font-bold mb-4 backdrop-blur-sm">
-            <svg class="w-4 h-4 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/50 border border-emerald-700/50 text-emerald-100 text-xs font-bold mb-4 backdrop-blur-sm">
+            <svg class="w-4 h-4 text-[#FFD54F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Dashboard Utama
         </div>
-        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Selamat Datang, <span class="text-cyan-300">Operator</span></h1>
-        <p class="text-blue-100/90 font-medium max-w-xl text-sm leading-relaxed">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Selamat Datang, <span class="text-[#FFD54F]">Operator</span></h1>
+        <p class="text-emerald-100/90 font-medium max-w-xl text-sm leading-relaxed">
             Kelola dan pantau data serta hasil perhitungan analisis investasi dan ekonomi daerah Provinsi Sumatera Utara secara *real-time*.
         </p>
     </div>
@@ -27,19 +27,19 @@
     <div class="relative z-10 flex items-center mt-4 md:mt-0">
         <div class="flex flex-col items-end justify-center">
             <span class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
-            <span class="text-xs font-semibold text-cyan-200 uppercase tracking-wider mt-1">Tanggal Hari Ini</span>
+            <span class="text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-1">Tanggal Hari Ini</span>
         </div>
     </div>
 </div>
 
 <!-- Stats Row -->
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 !-mt-12 md:!-mt-16 relative z-20 px-2 md:px-4">
     <!-- Stat Card 1 -->
-    <div class="bg-white rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
+    <div class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
         <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Total Analisa</p>
         <div class="flex items-center justify-center gap-3 relative z-10">
-            <div class="bg-blue-600 text-white p-2 rounded-lg shadow-sm">
+            <div class="bg-emerald-600 text-white p-2 rounded-lg shadow-sm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
@@ -49,7 +49,7 @@
     </div>
     
     <!-- Stat Card 2 -->
-    <div class="bg-white rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+    <div class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
         <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
         <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis LQ</p>
         <div class="flex items-center justify-center gap-3 relative z-10">
@@ -63,7 +63,7 @@
     </div>
 
     <!-- Stat Card 3 -->
-    <div class="bg-white rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+    <div class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
         <div class="absolute top-0 right-0 w-16 h-16 bg-sky-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
         <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis SSA</p>
         <div class="flex items-center justify-center gap-3 relative z-10">
@@ -77,11 +77,11 @@
     </div>
 
     <!-- Stat Card 4 -->
-    <div class="bg-white rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
+    <div class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
         <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis TS</p>
         <div class="flex items-center justify-center gap-3 relative z-10">
-            <div class="bg-blue-600 text-white p-2 rounded-lg shadow-sm">
+            <div class="bg-emerald-600 text-white p-2 rounded-lg shadow-sm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
@@ -91,7 +91,7 @@
     </div>
 
     <!-- Stat Card 5 -->
-    <div class="bg-white rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+    <div class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
         <div class="absolute top-0 right-0 w-16 h-16 bg-cyan-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
         <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis Klassen</p>
         <div class="flex items-center justify-center gap-3 relative z-10">
@@ -182,8 +182,8 @@
             <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h3 class="font-bold text-slate-800 text-lg">Aktivitas Terbaru</h3>
                 <span class="flex h-3 w-3 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
             </div>
             <div class="p-5 space-y-5">
@@ -191,7 +191,7 @@
                     @php
                         $iconClass = match(strtolower($log['action'])) {
                             'ditambah' => 'bg-green-100 text-green-600',
-                            'diperbarui' => 'bg-blue-100 text-blue-600',
+                            'diperbarui' => 'bg-emerald-100 text-emerald-600',
                             'diimpor' => 'bg-purple-100 text-purple-600',
                             'dihapus' => 'bg-red-100 text-red-600',
                             default => 'bg-slate-100 text-slate-600'
@@ -224,7 +224,7 @@
                 @endforelse
             </div>
             <div class="p-4 bg-slate-50/50 border-t border-slate-100 text-sm">
-                <a href="{{ route('operator.aktivitas') }}" class="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group">
+                <a href="{{ route('operator.aktivitas') }}" class="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 group">
                     Lihat Semua Aktivitas
                     <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />

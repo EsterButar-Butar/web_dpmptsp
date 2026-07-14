@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class OperatorDashboardController extends Controller
+class OperatorController extends Controller
 {
     public static function logActivity($module, $action, $desc)
     {
@@ -36,7 +37,7 @@ class OperatorDashboardController extends Controller
 
         $color = match ($action) {
             'ditambah' => 'bg-green-100 text-green-700 border-green-200',
-            'diperbarui' => 'bg-blue-100 text-blue-700 border-blue-200',
+            'diperbarui' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
             'diimpor' => 'bg-purple-100 text-purple-700 border-purple-200',
             default => 'bg-slate-100 text-slate-700 border-slate-200'
         };
@@ -68,7 +69,7 @@ class OperatorDashboardController extends Controller
 
         $activityLogs = session('activity_log', []);
 
-        return view('partials.operator.dashboard', compact(
+        return view('operator.dashboard', compact(
             'countLq', 'countSs', 'countTipologi', 'countKlassen', 'totalAnalisa',
             'statusLq', 'statusSs', 'statusTipologi', 'statusKlassen',
             'activityLogs'
@@ -77,7 +78,7 @@ class OperatorDashboardController extends Controller
 
     public function profile()
     {
-        return view('partials.operator.profile');
+        return view('operator.profile');
     }
 
     public function aktivitas(Request $request)
@@ -137,12 +138,12 @@ class OperatorDashboardController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('partials.operator.aktivitas', compact('paginatedLogs', 'activityLogs', 'filterMonth', 'filterYear', 'availableYears'));
+        return view('operator.aktivitas', compact('paginatedLogs', 'activityLogs', 'filterMonth', 'filterYear', 'availableYears'));
     }
 
     public function settings()
     {
-        return view('partials.operator.settings');
+        return view('operator.settings');
     }
 
     // Simulasi aksi update
@@ -161,3 +162,4 @@ class OperatorDashboardController extends Controller
         return back()->with('success', 'Status Autentikasi Dua Faktor (2FA) berhasil diubah! (Mode Simulasi)');
     }
 }
+

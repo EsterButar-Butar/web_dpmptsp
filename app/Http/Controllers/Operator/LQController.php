@@ -3,79 +3,68 @@
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Operator\OperatorDashboardController;
+use App\Models\LQ;
+use App\Models\Sektor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
-class LQController extends Controller
+class LqController extends Controller
 {
+    private function mapDbToView($items)
+    {
+        return $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'tingkat_wilayah' => $item->tingkat_wilayah,
+                'daerah_analisis' => $item->daerah_analisis,
+                'daerah_pembanding' => $item->daerah_pembanding,
+                'provinsi' => $item->daerah_pembanding,
+                'kabupaten' => $item->daerah_analisis,
+                'sektor' => $item->sektor->nama_sektor ?? '-',
+                'tahun' => $item->tahun,
+                'pdrb_sektor_analisis' => $item->pdrb_sektor_analisis,
+                'total_pdrb_analisis' => $item->total_pdrb_analisis,
+                'pdrb_sektor_pembanding' => $item->pdrb_sektor_pembanding,
+                'total_pdrb_pembanding' => $item->total_pdrb_pembanding,
+                'nilai_lq' => $item->nilai_lq,
+                'keterangan' => $item->keterangan,
+                'kategori' => $item->kategori,
+                'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+            ];
+        })->toArray();
+    }
+
     public function index(Request $request)
     {
-        if (! session()->has('lq_data_v2')) {
-            $dummyData = [
-                [
-                    'id' => 1,
-                    'tingkat_wilayah' => 'Kabupaten/Kota',
-                    'daerah_analisis' => 'Medan',
-                    'daerah_pembanding' => 'Sumatera Utara',
-                    'provinsi' => 'Sumatera Utara',
-                    'kabupaten' => 'Medan',
-                    'sektor' => 'PERTANIAN, KEHUTANAN, DAN PERIKANAN',
-                    'tahun' => '2021',
-                    'pdrb_sektor_analisis' => 15000,
-                    'total_pdrb_analisis' => 50000,
-                    'pdrb_sektor_pembanding' => 20000,
-                    'total_pdrb_pembanding' => 100000,
-                    'nilai_lq' => 1.5,
-                    'keterangan' => 'Menunjukkan bahwa indikator dengan LQ > 1, yaitu sektor unggulan (surplus). Peranannya di daerah lebih dominan dibanding rata-rata nasional, sehingga berpotensi besar untuk diekspor.',
-                    'kategori' => 'BASIS',
-                    'riwayat' => 'Ditambah 22-2-2024',
-                ],
-                [
-                    'id' => 2,
-                    'tingkat_wilayah' => 'Kabupaten/Kota',
-                    'daerah_analisis' => 'Binjai',
-                    'daerah_pembanding' => 'Sumatera Utara',
-                    'provinsi' => 'Sumatera Utara',
-                    'kabupaten' => 'Binjai',
-                    'sektor' => 'INDUSTRI PENGOLAHAN',
-                    'tahun' => '2021',
-                    'pdrb_sektor_analisis' => 8000,
-                    'total_pdrb_analisis' => 50000,
-                    'pdrb_sektor_pembanding' => 20000,
-                    'total_pdrb_pembanding' => 100000,
-                    'nilai_lq' => 0.8,
-                    'keterangan' => 'Menunjukkan bahwa indikator dengan LQ < 1, yaitu sektor non-unggulan (defisit). Belum mampu memenuhi kebutuhan daerah karena peranannya lebih rendah dari nasional, sehingga memerlukan impor.',
-                    'kategori' => 'NON-BASIS',
-                    'riwayat' => 'Ditambah 22-2-2024',
-                ],
-            ];
-            session(['lq_data_v2' => $dummyData]);
-        }
-
-        $lqData = session('lq_data_v2', []);
+        $rawDbData = LQ::with('sektor')->latest()->get();
+        $lqData = collect($this->mapDbToView($rawDbData));
 
         $editItem = null;
         if ($request->has('edit')) {
-            $editItem = collect($lqData)->firstWhere('id', (int) $request->edit) ?? collect($lqData)->firstWhere('id', $request->edit);
+            $editItem = $lqData->firstWhere('id', $request->edit);
         }
 
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 10;
-        $currentItems = array_slice($lqData, $perPage * ($currentPage - 1), $perPage);
-        $paginatedData = new LengthAwarePaginator($currentItems, count($lqData), $perPage, $currentPage, [
-            'path' => LengthAwarePaginator::resolveCurrentPath(),
-            'query' => $request->query(),
-        ]);
+        $page = $request->get('page', 1);
+        $paginatedData = new LengthAwarePaginator(
+            $lqData->forPage($page, $perPage),
+            $lqData->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
-        return view('partials.operator.lq.index', [
+        return view('operator.lq.index', [
             'lqData' => $paginatedData,
             'editItem' => $editItem,
         ]);
     }
 
-    public function calculateLQData(Request $request)
+
+
+    private function calculateLQData(Request $request)
     {
         $request->validate([
             'tingkat_wilayah' => 'required|string',
@@ -132,60 +121,183 @@ class LQController extends Controller
         ];
     }
 
-    public function hitung(Request $request)
+    public function store(Request $request)
     {
-        $data = $this->calculateLQData($request);
-        if (! $data) {
-            return back()->with('error', 'Terdapat pembagian dengan nol. Periksa kembali input nilai Anda.');
+        $newData = $this->calculateLQData($request);
+
+        if (! $newData) {
+            return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
         }
 
-        $data['id'] = time();
-        $data['riwayat'] = 'Ditambah '.Carbon::now()->format('d-m-Y');
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
 
-        $lqData = session('lq_data_v2', []);
-        array_unshift($lqData, $data);
-        session(['lq_data_v2' => $lqData]);
+        LQ::create([
+            'user_id' => Auth::id() ?? 1,
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $newData['tingkat_wilayah'],
+            'daerah_analisis' => $newData['daerah_analisis'],
+            'daerah_pembanding' => $newData['daerah_pembanding'],
+            'tahun' => $newData['tahun'],
+            'pdrb_sektor_analisis' => $newData['pdrb_sektor_analisis'],
+            'total_pdrb_analisis' => $newData['total_pdrb_analisis'],
+            'pdrb_sektor_pembanding' => $newData['pdrb_sektor_pembanding'],
+            'total_pdrb_pembanding' => $newData['total_pdrb_pembanding'],
+            'nilai_lq' => $newData['nilai_lq'],
+            'kategori' => $newData['kategori'],
+            'keterangan' => $newData['keterangan']
+        ]);
 
-        OperatorDashboardController::logActivity('Analisis LQ', 'ditambah', "Menambahkan data perhitungan Analisis LQ untuk sektor {$request->sektor}.");
+        OperatorController::logActivity('Analisis LQ', 'ditambah', "Menambah data perhitungan LQ untuk daerah {$newData['daerah_analisis']} tahun {$newData['tahun']}");
 
-        return back()->with('success', 'Perhitungan LQ berhasil dan data ditambahkan!');
+        return redirect()->route('operator.lq.index')->with('success', 'Data perhitungan LQ berhasil disimpan secara permanen!');
     }
 
     public function update(Request $request, $id)
     {
-        $data = $this->calculateLQData($request);
-        if (! $data) {
-            return back()->with('error', 'Terdapat pembagian dengan nol. Periksa kembali input nilai Anda.');
+        $lq = LQ::find($id);
+        if (!$lq) {
+            return redirect()->route('operator.lq.index')->with('error', 'Data tidak ditemukan!');
         }
 
-        $lqData = session('lq_data_v2', []);
-        foreach ($lqData as $key => $item) {
-            if ($item['id'] == $id) {
-                $data['id'] = $item['id'];
-                $data['riwayat'] = 'Diperbarui '.Carbon::now()->format('d-m-Y');
-                $lqData[$key] = $data;
-                break;
-            }
+        $updatedData = $this->calculateLQData($request);
+
+        if (! $updatedData) {
+            return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
         }
 
-        session(['lq_data_v2' => $lqData]);
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $updatedData['sektor']]);
 
-        OperatorDashboardController::logActivity('Analisis LQ', 'diperbarui', "Memperbarui data perhitungan Analisis LQ untuk sektor {$request->sektor}.");
+        $lq->update([
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $updatedData['tingkat_wilayah'],
+            'daerah_analisis' => $updatedData['daerah_analisis'],
+            'daerah_pembanding' => $updatedData['daerah_pembanding'],
+            'tahun' => $updatedData['tahun'],
+            'pdrb_sektor_analisis' => $updatedData['pdrb_sektor_analisis'],
+            'total_pdrb_analisis' => $updatedData['total_pdrb_analisis'],
+            'pdrb_sektor_pembanding' => $updatedData['pdrb_sektor_pembanding'],
+            'total_pdrb_pembanding' => $updatedData['total_pdrb_pembanding'],
+            'nilai_lq' => $updatedData['nilai_lq'],
+            'kategori' => $updatedData['kategori'],
+            'keterangan' => $updatedData['keterangan']
+        ]);
 
-        return redirect()->route('operator.lq.index')->with('success', 'Data perhitungan LQ berhasil diperbarui!');
+        OperatorController::logActivity('Analisis LQ', 'diubah', "Mengubah data perhitungan LQ daerah {$updatedData['daerah_analisis']}");
+
+        return redirect()->route('operator.lq.index')->with('success', 'Data perhitungan LQ berhasil diperbarui secara permanen!');
     }
 
     public function destroy($id)
     {
-        $lqData = session('lq_data_v2', []);
-        $lqData = array_filter($lqData, function ($item) use ($id) {
-            return $item['id'] != $id;
-        });
+        $lq = LQ::find($id);
+        
+        if ($lq) {
+            $daerah = $lq->daerah_analisis;
+            $lq->delete();
+            OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus data perhitungan LQ daerah {$daerah}");
+        }
 
-        session(['lq_data_v2' => array_values($lqData)]);
+        return back()->with('success', 'Data perhitungan LQ berhasil dihapus secara permanen!');
+    }
 
-        OperatorDashboardController::logActivity('Analisis LQ', 'dihapus', 'Menghapus sebuah data perhitungan Analisis LQ.');
+    public function import(Request $request)
+    {
+        $payload = $request->json()->all();
+        if (! $payload || ! is_array($payload)) {
+            return response()->json(['success' => false, 'message' => 'Data format tidak valid.']);
+        }
 
-        return back()->with('success', 'Data perhitungan LQ berhasil dihapus!');
+        $successCount = 0;
+
+        foreach ($payload as $item) {
+            if (! isset($item['Provinsi']) || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
+                ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
+                ! isset($item['Total PDRB Analisis Awal']) || ! isset($item['Total PDRB Analisis Akhir']) ||
+                ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
+                ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
+                continue;
+            }
+
+            $tingkat = (isset($item['Kabupaten/Kota']) && $item['Kabupaten/Kota'] != '-' && $item['Kabupaten/Kota'] != '') ? 'Kabupaten/Kota' : 'Provinsi';
+            
+            $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $item['Sektor']]);
+
+            // 1. Data Tahun Awal
+            $mappedItemAwal = [
+                'tingkat_wilayah' => $tingkat,
+                'provinsi' => $item['Provinsi'],
+                'kabupaten' => $item['Kabupaten/Kota'] ?? '-',
+                'sektor' => $item['Sektor'],
+                'tahun' => $item['Tahun Awal'],
+                'pdrb_sektor_analisis' => $item['PDRB Sektor Analisis Awal'] ?? 0,
+                'total_pdrb_analisis' => $item['Total PDRB Analisis Awal'] ?? 0,
+                'pdrb_sektor_pembanding' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
+                'total_pdrb_pembanding' => $item['Total PDRB Pembanding Awal'] ?? 0,
+            ];
+            $requestObjAwal = new Request($mappedItemAwal);
+            $newDataAwal = $this->calculateLQData($requestObjAwal);
+            
+            if ($newDataAwal) {
+                LQ::create([
+                    'user_id' => Auth::id() ?? 1,
+                    'sektor_id' => $sektorModel->id,
+                    'tingkat_wilayah' => $newDataAwal['tingkat_wilayah'],
+                    'daerah_analisis' => $newDataAwal['daerah_analisis'],
+                    'daerah_pembanding' => $newDataAwal['daerah_pembanding'],
+                    'tahun' => $newDataAwal['tahun'],
+                    'pdrb_sektor_analisis' => $newDataAwal['pdrb_sektor_analisis'],
+                    'total_pdrb_analisis' => $newDataAwal['total_pdrb_analisis'],
+                    'pdrb_sektor_pembanding' => $newDataAwal['pdrb_sektor_pembanding'],
+                    'total_pdrb_pembanding' => $newDataAwal['total_pdrb_pembanding'],
+                    'nilai_lq' => $newDataAwal['nilai_lq'],
+                    'kategori' => $newDataAwal['kategori'],
+                    'keterangan' => $newDataAwal['keterangan']
+                ]);
+                $successCount++;
+            }
+
+            // 2. Data Tahun Akhir
+            $mappedItemAkhir = [
+                'tingkat_wilayah' => $tingkat,
+                'provinsi' => $item['Provinsi'],
+                'kabupaten' => $item['Kabupaten/Kota'] ?? '-',
+                'sektor' => $item['Sektor'],
+                'tahun' => $item['Tahun Akhir'],
+                'pdrb_sektor_analisis' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
+                'total_pdrb_analisis' => $item['Total PDRB Analisis Akhir'] ?? 0,
+                'pdrb_sektor_pembanding' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
+                'total_pdrb_pembanding' => $item['Total PDRB Pembanding Akhir'] ?? 0,
+            ];
+            $requestObjAkhir = new Request($mappedItemAkhir);
+            $newDataAkhir = $this->calculateLQData($requestObjAkhir);
+            
+            if ($newDataAkhir) {
+                LQ::create([
+                    'user_id' => Auth::id() ?? 1,
+                    'sektor_id' => $sektorModel->id,
+                    'tingkat_wilayah' => $newDataAkhir['tingkat_wilayah'],
+                    'daerah_analisis' => $newDataAkhir['daerah_analisis'],
+                    'daerah_pembanding' => $newDataAkhir['daerah_pembanding'],
+                    'tahun' => $newDataAkhir['tahun'],
+                    'pdrb_sektor_analisis' => $newDataAkhir['pdrb_sektor_analisis'],
+                    'total_pdrb_analisis' => $newDataAkhir['total_pdrb_analisis'],
+                    'pdrb_sektor_pembanding' => $newDataAkhir['pdrb_sektor_pembanding'],
+                    'total_pdrb_pembanding' => $newDataAkhir['total_pdrb_pembanding'],
+                    'nilai_lq' => $newDataAkhir['nilai_lq'],
+                    'kategori' => $newDataAkhir['kategori'],
+                    'keterangan' => $newDataAkhir['keterangan']
+                ]);
+                $successCount++;
+            }
+        }
+
+        if ($successCount > 0) {
+            OperatorController::logActivity('Analisis LQ', 'diimpor', "Mengimpor {$successCount} rekaman Analisis LQ secara massal dari template master.");
+            session()->flash('success', "Berhasil mengimpor $successCount data (karena format Awal & Akhir dipecah)!");
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Tidak ada data valid yang dapat diimpor. Pastikan format kolom sesuai dengan Template Master.']);
     }
 }
+

@@ -35,9 +35,6 @@
     <section id="hero" class="hero">
 
         <div class="hero-content">
-
-            <h5>Selamat Datang</h5>
-
             <h1>
                 Dashboard Analisis <br>
                 Potensi Investasi
@@ -52,11 +49,11 @@
 
             <div class="hero-button">
 
-                <a href="{{ route('analysis.index') }}" class="btn1">
+                <a href="{{ route('analysis') }}" class="btn1">
                     Mulai Analisis
                 </a>
 
-                <a href="{{ route('comparison.index') }}" class="btn1">
+                <a href="{{ route('comparison') }}" class="btn1">
                     Analisis Perbandingan
                 </a>
 

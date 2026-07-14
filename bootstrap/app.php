@@ -25,9 +25,9 @@ return Application::configure(
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
-
-        //
-
+        $exceptions->reportable(function (\Throwable $e) {
+            file_put_contents('D:\Magang\web_dpmptsp\error_trace.log', get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+        });
     })
 
     ->create();

@@ -21,8 +21,8 @@
     @endif
 
     <!-- Form Container -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
-        <div class="p-6 md:p-8">
+    <div class="op-card">
+        <div class="op-card-header">
             <!-- Header & Import Button -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
@@ -30,7 +30,7 @@
                     <p class="text-slate-600 mt-1">Masukkan Data Tipologi Sektor</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#0056b3] hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm">
+                    <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
@@ -55,9 +55,9 @@
         <!-- Top Inputs Row -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <div class="space-y-2 col-span-1">
-                <label class="block text-sm font-semibold text-slate-700">Tingkat Wilayah</label>
+                <label class="op-label">Tingkat Wilayah</label>
                 <div class="relative">
-                    <select name="tingkat_wilayah" x-model="tingkat_wilayah" class="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors appearance-none cursor-pointer" required>
+                    <select name="tingkat_wilayah" x-model="tingkat_wilayah" class="op-input op-input-icon op-select" required>
                         <option value="Kabupaten/Kota">Kabupaten/Kota</option>
                         <option value="Provinsi">Provinsi</option>
                     </select>
@@ -69,9 +69,9 @@
 
             <!-- Sektor -->
             <div class="space-y-2 col-span-1">
-                <label class="block text-sm font-semibold text-slate-700">Sektor</label>
+                <label class="op-label">Sektor</label>
                 <div class="relative">
-                    <input list="sektor-list" name="sektor" value="{{ old('sektor', $editItem['sektor'] ?? '') }}" class="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer" placeholder="Pilih Sektor" required>
+                    <input list="sektor-list" name="sektor" value="{{ old('sektor', $editItem['sektor'] ?? '') }}" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
                     <datalist id="sektor-list">
                         <option value="PERTANIAN, KEHUTANAN, DAN PERIKANAN">
                         <option value="PERTAMBANGAN DAN PENGGALIAN">
@@ -92,19 +92,19 @@
             </div>
             <!-- Tahun Awal -->
             <div class="space-y-2 col-span-1">
-                <label class="block text-sm font-semibold text-slate-700">Tahun Awal</label>
-                <input type="number" name="tahun_awal" value="{{ old('tahun_awal', $editItem['tahun_awal'] ?? '') }}" min="1900" max="2100" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Pilih Tahun" required>
+                <label class="op-label">Tahun Awal</label>
+                <input type="number" name="tahun_awal" value="{{ old('tahun_awal', $editItem['tahun_awal'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
             </div>
             <!-- Tahun Akhir -->
             <div class="space-y-2 col-span-1">
-                <label class="block text-sm font-semibold text-slate-700">Tahun Akhir</label>
-                <input type="number" name="tahun_akhir" value="{{ old('tahun_akhir', $editItem['tahun_akhir'] ?? '') }}" min="1900" max="2100" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Pilih Tahun" required>
+                <label class="op-label">Tahun Akhir</label>
+                <input type="number" name="tahun_akhir" value="{{ old('tahun_akhir', $editItem['tahun_akhir'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
             </div>
             <!-- Provinsi -->
             <div class="space-y-2 col-span-1">
-                <label class="block text-sm font-semibold text-slate-700">Provinsi</label>
+                <label class="op-label">Provinsi</label>
                 <div class="relative">
-                    <input list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer" placeholder="Pilih atau ketik Provinsi" required>
+                    <input list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
                     <datalist id="provinsi-list">
                         <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
                             <option :value="prov"></option>
@@ -120,9 +120,9 @@
 
             <!-- Kabupaten / Kota -->
             <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
-                <label class="block text-sm font-semibold text-slate-700">Kabupaten / Kota</label>
+                <label class="op-label">Kabupaten / Kota</label>
                 <div class="relative">
-                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer" placeholder="Pilih atau ketik Kab/Kota">
+                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
                     <datalist id="kabupaten-list">
                         <template x-for="kab in listKabupaten" :key="kab">
                             <option :value="kab"></option>
@@ -149,23 +149,23 @@
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_analisis_awal', $editItem['pdrb_sektor_analisis_awal'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">PDRB Sektor Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">PDRB Sektor Awal (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="pdrb_sektor_analisis_awal" :value="val.replace(/\./g, '')">
                     </div>
                     <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_analisis_akhir', $editItem['pdrb_sektor_analisis_akhir'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">PDRB Sektor Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">PDRB Sektor Akhir (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="pdrb_sektor_analisis_akhir" :value="val.replace(/\./g, '')">
                     </div>
                     <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_analisis_awal', $editItem['total_pdrb_analisis_awal'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">Total PDRB Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">Total PDRB Awal (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="total_pdrb_analisis_awal" :value="val.replace(/\./g, '')">
                     </div>
                     <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_analisis_akhir', $editItem['total_pdrb_analisis_akhir'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">Total PDRB Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">Total PDRB Akhir (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="total_pdrb_analisis_akhir" :value="val.replace(/\./g, '')">
                     </div>
                 </div>
@@ -180,23 +180,23 @@
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_pembanding_awal', $editItem['pdrb_sektor_pembanding_awal'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">PDRB Sektor Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">PDRB Sektor Awal (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="pdrb_sektor_pembanding_awal" :value="val.replace(/\./g, '')">
                     </div>
                     <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_pembanding_akhir', $editItem['pdrb_sektor_pembanding_akhir'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">PDRB Sektor Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">PDRB Sektor Akhir (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="pdrb_sektor_pembanding_akhir" :value="val.replace(/\./g, '')">
                     </div>
                     <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_pembanding_awal', $editItem['total_pdrb_pembanding_awal'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">Total PDRB Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">Total PDRB Awal (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="total_pdrb_pembanding_awal" :value="val.replace(/\./g, '')">
                     </div>
                     <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_pembanding_akhir', $editItem['total_pdrb_pembanding_akhir'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="text-xs font-semibold text-slate-700">Total PDRB Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-slate-700 text-sm transition-colors" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">Total PDRB Akhir (Rp)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
                     </div>
                 </div>
@@ -204,7 +204,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <button type="submit" class="flex items-center gap-2 bg-[#0056b3] hover:bg-blue-800 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md hover:shadow-lg">
+            <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
@@ -219,8 +219,8 @@
     </div>
 
     <!-- Table Container -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6 md:p-8">
+    <div class="op-card !mb-0">
+        <div class="op-card-header">
             <div class="mb-6">
                 <h2 class="text-xl font-bold text-slate-800 mb-2">Hasil Analisis Tipologi Sektor</h2>
                 <p class="text-slate-600 mb-6 text-sm">Data Analisis Tipologi Sektor Tersimpan</p>
@@ -228,7 +228,7 @@
 
             <div class="overflow-x-auto border border-slate-200 rounded-xl">
                 <table id="tipologiTable" class="w-full text-left border-collapse min-w-[1200px]">
-                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-sm">
+                    <thead class="op-table-header">
                         <tr>
                             <th class="px-4 py-4 whitespace-nowrap">No</th>
                             <th class="px-4 py-4 whitespace-nowrap">Kab/Kota</th>
@@ -264,7 +264,7 @@
                                             Kuadran I
                                         </span>
                                     @elseif($data['tipologi'] === 'Potensial / Berkembang Cepat')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm">
                                             Kuadran II
                                         </span>
                                     @elseif($data['tipologi'] === 'Berkembang / Maju Tapi Tertekan')
@@ -282,7 +282,7 @@
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('operator.tipologi.index', ['edit' => $data['id']]) }}" class="text-slate-400 hover:text-blue-600 transition-colors" title="Edit">
+                                        <a href="{{ route('operator.tipologi.index', ['edit' => $data['id']]) }}" class="text-slate-400 hover:text-emerald-600 transition-colors" title="Edit">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -333,7 +333,7 @@
 
             <!-- Export Buttons -->
             <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3 w-full">
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#0056b3] hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                <button type="button" onclick="exportToExcel()" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
@@ -344,121 +344,9 @@
         </div>
     </div>
 
-    <!-- Import Modal -->
-    <div id="importModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4" style="display: none;">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                <h3 class="text-lg font-bold text-slate-800">Unggah Data Massal</h3>
-                <button type="button" onclick="document.getElementById('importModal').style.display='none'" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="p-6 space-y-4">
-                <p class="text-sm text-slate-600">Pastikan format kolom tabel Excel yang Anda unggah sesuai dengan ketentuan agar sistem dapat memproses datanya secara tepat.</p>
-                <button type="button" onclick="downloadTemplate()" class="w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl text-sm font-bold transition-colors shadow-sm">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    1. Unduh Template Excel
-                </button>
-                
-                <div class="border-t border-slate-200 pt-4 mt-2">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih File Excel (.xlsx)</label>
-                    <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
-                </div>
-                <div id="importStatus" class="text-sm font-medium mt-2 hidden"></div>
-            </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('importModal').style.display='none'" class="px-5 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">Batal</button>
-                <button type="button" onclick="processImport()" id="processBtn" class="px-5 py-2 text-sm font-bold bg-[#0056b3] text-white rounded-xl hover:bg-blue-800 transition-colors shadow-sm">Mulai Unggah</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <x-import-modal action="{{ route('operator.tipologi.import') }}" />
 
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script>
-    function downloadTemplate() {
-        const wsData = [
-            ["Kabupaten/Kota", "Provinsi", "Sektor", "Tahun Awal", "Tahun Akhir", "PDRB Sektor Analisis Awal", "PDRB Sektor Analisis Akhir", "Total PDRB Analisis Awal", "Total PDRB Analisis Akhir", "PDRB Sektor Pembanding Awal", "PDRB Sektor Pembanding Akhir", "Total PDRB Pembanding Awal", "Total PDRB Pembanding Akhir"],
-            ["Medan", "Sumatera Utara", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2023", "2024", "1.000.000", "1.500.000", "4.000.000", "5.000.000", "15.000.000", "20.000.000", "80.000.000", "100.000.000"],
-            ["-", "Sumatera Utara", "INDUSTRI PENGOLAHAN", "2023", "2024", "40.000", "50.000", "4.000.000", "5.000.000", "60.000", "80.000", "80.000.000", "100.000.000"]
-        ];
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        ws['!cols'] = [{wch:15}, {wch:15}, {wch:40}, {wch:10}, {wch:10}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}];
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Template_Tipologi");
-        XLSX.writeFile(wb, "Template_Import_Tipologi.xlsx");
-    }
-
-    async function processImport() {
-        const fileInput = document.getElementById('excelFileInput');
-        const statusEl = document.getElementById('importStatus');
-        const processBtn = document.getElementById('processBtn');
-        
-        if (!fileInput.files.length) {
-            statusEl.textContent = 'Silakan pilih file terlebih dahulu!';
-            statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
-            return;
-        }
-
-        processBtn.disabled = true;
-        processBtn.textContent = 'Memproses...';
-        statusEl.textContent = 'Membaca file Excel...';
-        statusEl.className = 'text-sm font-medium mt-2 text-blue-600 block';
-
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-
-        reader.onload = async function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheet = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheet];
-                
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                
-                if (jsonData.length === 0) {
-                    throw new Error('Data Excel kosong atau format tidak sesuai.');
-                }
-                
-                statusEl.textContent = 'Menyimpan ' + jsonData.length + ' baris data ke sistem...';
-
-                const response = await fetch("{{ route('operator.tipologi.import') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify(jsonData)
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    statusEl.textContent = 'Berhasil! Memuat ulang halaman...';
-                    statusEl.className = 'text-sm font-medium mt-2 text-green-600 block';
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    throw new Error(result.message || 'Terjadi kesalahan saat menyimpan data.');
-                }
-            } catch (err) {
-                statusEl.textContent = 'Gagal: ' + err.message;
-                statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
-                processBtn.disabled = false;
-                processBtn.textContent = 'Mulai Unggah';
-            }
-        };
-
-        reader.onerror = function() {
-            statusEl.textContent = 'Gagal membaca file dari komputer Anda.';
-            statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
-            processBtn.disabled = false;
-            processBtn.textContent = 'Mulai Unggah';
-        };
-
-        reader.readAsArrayBuffer(file);
-    }
-
     function exportToExcel() {
         var table = document.getElementById("tipologiTable");
         var clone = table.cloneNode(true);

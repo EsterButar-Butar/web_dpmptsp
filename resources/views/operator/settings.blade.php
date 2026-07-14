@@ -19,7 +19,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Sidebar Settings -->
         <div class="col-span-1 space-y-2">
-            <a href="#" class="block px-4 py-3 bg-white border-l-4 border-blue-600 rounded-r-lg shadow-sm font-medium text-blue-700">
+            <a href="#" class="block px-4 py-3 bg-white border-l-4 border-emerald-600 rounded-r-lg shadow-sm font-medium text-emerald-700">
                 Keamanan & Password
             </a>
             <a href="#" class="block px-4 py-3 hover:bg-white border-l-4 border-transparent hover:border-slate-300 rounded-r-lg transition-colors font-medium text-slate-600">
@@ -38,20 +38,20 @@
                 <div class="p-6 space-y-5">
                     <div class="space-y-2">
                         <label class="text-sm font-medium text-slate-700">Password Saat Ini</label>
-                        <input type="password" name="current_password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" placeholder="••••••••" required>
+                        <input type="password" name="current_password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="••••••••" required>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Password Baru</label>
-                            <input type="password" name="new_password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" placeholder="Minimal 8 karakter" required>
+                            <input type="password" name="new_password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Minimal 8 karakter" required>
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Konfirmasi Password Baru</label>
-                            <input type="password" name="new_password_confirmation" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" placeholder="Ketik ulang password baru" required>
+                            <input type="password" name="new_password_confirmation" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Ketik ulang password baru" required>
                         </div>
                     </div>
                     <div class="pt-2">
-                        <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm shadow-blue-200 transition-all">Perbarui Password</button>
+                        <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm shadow-emerald-200 transition-all">Perbarui Password</button>
                     </div>
                 </div>
             </form>
@@ -68,7 +68,7 @@
                     </div>
                     <form action="{{ route('operator.settings.2fa') }}" method="POST">
                         @csrf
-                        <button type="submit" class="px-5 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors whitespace-nowrap">
+                        <button type="submit" class="px-5 py-2.5 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors whitespace-nowrap">
                             Aktifkan 2FA
                         </button>
                     </form>

@@ -4,24 +4,22 @@
 
 .main-header{
     position: fixed;
-    top:0;
-    left:0;
-    width:100%;
-    z-index:999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
 
-    background:#1E5D41;
-    transition:.35s;
+    background: #ffffff;
 
-    box-shadow:0 5px 20px rgba(0,0,0,.12);
+    box-shadow: 0 6px 20px rgba(0,0,0,.08);
+
+    transition: .35s;
 }
 
 .main-header.scrolled{
-
-    background:#ffffff;
-
-    box-shadow:0 8px 25px rgba(0,0,0,.08);
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0,0,0,.10);
 }
-
 .navbar-container{
 
     max-width: 1450px;
@@ -57,12 +55,9 @@
 }
 
 .brand-logo{
-
-    width:70px;
-
+    width:200px;
     height:auto;
-
-    transition:.3s;
+    object-fit:contain;
 }
 
 .brand-text{
@@ -76,18 +71,20 @@
 
 .brand-text strong{
 
-    color:#fff;
+    color:#145239;
 
-    font-size:28px;
+    font-size:26px;
 
     font-weight:700;
+
 }
 
 .brand-text span{
 
-    color:#f5f5f5;
+    color:#5F6B65;
 
-    font-size:14px;
+    font-size:13px;
+
 }
 
 /* =========================
@@ -95,38 +92,49 @@
 ========================= */
 
 .main-navigation{
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
-    gap: 55px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-    background: rgba(255,255,255,.10);
+    gap:55px;
 
-    padding: 18px 45px;
+    background:#E7F2EB;   /* hijau muda */
 
-    border-radius: 999px;
+    border:1px solid #CFE3D5;
 
-    backdrop-filter: blur(10px);
+    padding:18px 50px;
 
-    width: fit-content;
+    border-radius:999px;
 
-    margin: 0 auto;
+    box-shadow:0 5px 15px rgba(20,82,57,.06);
 
-    flex: none;
 }
 
 .nav-link{
 
-    color:#fff;
+    color:#145239;
 
-    font-size:21px;
+    font-size:17px;
 
     font-weight:600;
 
+    transition:.3s;
+
     position:relative;
 
-    transition:.3s;
+}
+
+.nav-link:hover{
+
+    color:#0F8A5F;
+
+}
+
+.nav-link.active{
+
+    color: #D4A017;
+
 }
 
 .nav-link::after{
@@ -137,35 +145,32 @@
 
     left:50%;
 
-    bottom:-8px;
-
     transform:translateX(-50%);
+
+    bottom:-8px;
 
     width:0;
 
     height:3px;
 
-    border-radius:20px;
+    border-radius:10px;
 
-    background:#FFD54F;
+    background: #D4A017;
 
     transition:.3s;
-}
 
-.nav-link:hover{
-
-    color:#FFD54F;
 }
 
 .nav-link:hover::after,
 .nav-link.active::after{
 
     width:100%;
+
 }
 
 .nav-link.active{
 
-    color:#FFD54F;
+    color:#efc53a;
 }
 
 /* =========================
@@ -187,24 +192,28 @@
 
     gap:10px;
 
-    padding:12px 25px;
-
-    border-radius:40px;
-
     background:#FFD54F;
 
-    color:#1E5D41;
+    color:#145239;
+
+    padding:13px 28px;
+
+    border-radius:40px;
 
     font-weight:600;
 
     transition:.3s;
+
 }
 
 .login-button:hover{
 
+    background:#145239;
+
+    color:white;
+
     transform:translateY(-3px);
 
-    background:#fff;
 }
 
 /* =========================

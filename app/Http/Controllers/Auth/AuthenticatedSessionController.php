@@ -36,19 +36,17 @@ class AuthenticatedSessionController extends Controller
         | REDIRECT SETELAH LOGIN
         |--------------------------------------------------------------------------
         |
-        | Semua pengguna diarahkan ke route dashboard.
-        |
-        | Route dashboard kemudian menentukan tujuan berdasarkan role:
-        |
-        | admin    -> admin.dashboard
-        | operator -> operator.dashboard
-        | user     -> profile.edit
+        | Pengguna diarahkan ke dashboard masing-masing berdasarkan rolenya.
         |
         */
 
-        return redirect()->intended(
-            route('dashboard', absolute: false)
-        );
+        $url = match ($request->user()->role) {
+            'admin' => route('admin.dashboard', absolute: false),
+            'operator' => route('operator.dashboard', absolute: false),
+            default => route('profile.show', absolute: false),
+        };
+
+        return redirect()->intended($url);
     }
 
 

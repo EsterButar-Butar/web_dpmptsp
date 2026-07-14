@@ -19,13 +19,13 @@
 
 
     <h1 class="analysis-title">
-        Dashboard Executive Summary Investment
+        Dashboard Executive of Sumatera Investment
     </h1>
 
 
     <form 
         method="GET"
-        action="{{ route('analysis.index') }}"
+        action="{{ route('analysis') }}"
         class="filter-box"
     >
 

@@ -21,26 +21,26 @@
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
     <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Semua Riwayat Aktivitas
         </h3>
         <div class="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
             <form action="{{ route('operator.aktivitas') }}" method="GET" class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                <select name="month" class="text-sm border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 py-1.5 flex-1 md:w-auto">
+                <select name="month" class="text-sm border-slate-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 py-1.5 flex-1 md:w-auto">
                     <option value="">Semua Bulan</option>
                     @foreach(['01'=>'Januari','02'=>'Februari','03'=>'Maret','04'=>'April','05'=>'Mei','06'=>'Juni','07'=>'Juli','08'=>'Agustus','09'=>'September','10'=>'Oktober','11'=>'November','12'=>'Desember'] as $num => $name)
                         <option value="{{ $num }}" {{ (isset($filterMonth) && $filterMonth == $num) ? 'selected' : '' }}>{{ $name }}</option>
                     @endforeach
                 </select>
-                <select name="year" class="text-sm border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 py-1.5 flex-1 md:w-auto">
+                <select name="year" class="text-sm border-slate-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 py-1.5 flex-1 md:w-auto">
                     <option value="">Semua Tahun</option>
                     @foreach($availableYears as $y)
                         <option value="{{ $y }}" {{ (isset($filterYear) && $filterYear == $y) ? 'selected' : '' }}>{{ $y }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap">
+                <button type="submit" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors whitespace-nowrap">
                     Filter
                 </button>
                 @if(isset($filterMonth) || isset($filterYear))
@@ -51,7 +51,7 @@
                     </a>
                 @endif
             </form>
-            <span class="text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 whitespace-nowrap self-start md:self-auto">
+            <span class="text-xs font-semibold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-200 whitespace-nowrap self-start md:self-auto">
                 Total: {{ $paginatedLogs->total() }} Log
             </span>
         </div>
@@ -62,7 +62,7 @@
             @php
                 $iconClass = match(strtolower($log['action'])) {
                     'ditambah' => 'bg-green-100 text-green-600',
-                    'diperbarui' => 'bg-blue-100 text-blue-600',
+                    'diperbarui' => 'bg-emerald-100 text-emerald-600',
                     'diimpor' => 'bg-purple-100 text-purple-600',
                     'dihapus' => 'bg-red-100 text-red-600',
                     default => 'bg-slate-100 text-slate-600'
@@ -89,8 +89,8 @@
                             </svg>
                             {{ $log['time'] }}
                         </span>
-                        <span class="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm text-blue-600">
-                            <svg class="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span class="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm text-emerald-600">
+                            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
                             Modul: {{ $log['module'] }}

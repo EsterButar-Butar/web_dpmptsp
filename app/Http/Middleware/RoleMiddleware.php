@@ -1,26 +1,29 @@
 <?php
 
-use App\Http\Middleware\RoleMiddleware;
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Foundation\Configuration\Middleware;
+namespace App\Http\Middleware;
 
-return Application::configure(
-    basePath: dirname(__DIR__)
-)
-    ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
-        health: '/up',
-    )
-    ->withMiddleware(function (Middleware $middleware): void {
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
-        $middleware->alias([
-            'role' => RoleMiddleware::class,
-        ]);
+class RoleMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next, $role): Response
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
 
-    })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })
-    ->create();
+        if (Auth::user()->role !== $role) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        return $next($request);
+    }
+}

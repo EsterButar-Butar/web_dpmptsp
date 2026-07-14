@@ -11,11 +11,6 @@
                 class="brand-logo"
             >
 
-            <div class="brand-text">
-                <strong>DPMPTSP</strong>
-                <span>Provinsi Sumatera Utara</span>
-            </div>
-
         </a>
 
         {{-- MOBILE BUTTON --}}

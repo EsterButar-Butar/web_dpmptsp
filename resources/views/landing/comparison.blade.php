@@ -31,7 +31,7 @@
     {{-- FILTER --}}
     <form 
         method="GET"
-        action="{{ route('comparison.index') }}"
+        action="{{ route('comparison') }}"
         class="comparison-filter"
     >
 
