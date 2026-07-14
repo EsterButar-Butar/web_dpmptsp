@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('import_histories')) {
-            Schema::create('import_histories', function (Blueprint $table) {
+        if (!Schema::hasTable('activity_logs')) {
+            Schema::create('activity_logs', function (Blueprint $table) {
                 $table->id();
+                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+                $table->string('module');
+                $table->string('action');
+                $table->text('desc')->nullable();
                 $table->timestamps();
             });
         }
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('import_histories');
+        Schema::dropIfExists('activity_logs');
     }
 };

@@ -31,11 +31,11 @@
         {{-- NAVIGATION --}}
      <nav class="main-navigation" id="mainNavigation">
 
-    <a href="#hero" class="nav-link active">
+    <a href="{{ route('home') }}#hero" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
         Beranda
     </a>
 
-    <a href="#tentang" class="nav-link">
+    <a href="{{ route('home') }}#tentang" class="nav-link">
         Tentang
     </a>
 

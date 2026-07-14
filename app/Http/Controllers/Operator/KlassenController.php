@@ -15,6 +15,21 @@ class KlassenController extends Controller
     private function mapDbToView($items)
     {
         return $items->map(function ($item) {
+            $ri = (float) $item->ri;
+            $r = (float) $item->r;
+            $yi = (float) $item->yi;
+            $y = (float) $item->y;
+
+            if ($yi > $y && $ri > $r) {
+                $kuadran = 'Kuadran I';
+            } elseif ($yi > $y && $ri < $r) {
+                $kuadran = 'Kuadran II';
+            } elseif ($yi < $y && $ri > $r) {
+                $kuadran = 'Kuadran III';
+            } else {
+                $kuadran = 'Kuadran IV';
+            }
+
             return [
                 'id' => $item->id,
                 'tingkat_wilayah' => $item->tingkat_wilayah,
@@ -37,6 +52,7 @@ class KlassenController extends Controller
                 'r' => $item->r,
                 'yi' => $item->yi,
                 'y' => $item->y,
+                'kuadran' => $kuadran,
                 'klasifikasi' => $item->klasifikasi,
                 'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
             ];
@@ -196,7 +212,6 @@ class KlassenController extends Controller
             'r' => $data['r'],
             'yi' => $data['yi'],
             'y' => $data['y'],
-            'kuadran' => $data['kuadran'],
             'klasifikasi' => $data['klasifikasi']
         ]);
 
@@ -238,7 +253,6 @@ class KlassenController extends Controller
             'r' => $data['r'],
             'yi' => $data['yi'],
             'y' => $data['y'],
-            'kuadran' => $data['kuadran'],
             'klasifikasi' => $data['klasifikasi']
         ]);
 
