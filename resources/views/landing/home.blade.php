@@ -54,12 +54,12 @@
 
             <div class="hero-button">
 
-                <a href="{{ route('login') }}" class="btn1">
+                <a href="{{ route('analysis.index') }}" class="btn1">
                     Mulai Analisis
                 </a>
 
-                <a href="#tentang" class="btn2">
-                    Pelajari Lebih Lanjut
+                <a href="{{ route('comparison.index') }}" class="btn1">
+                    Analisis Perbandingan
                 </a>
 
             </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -8,11 +9,11 @@ use Illuminate\Support\Facades\Route;
 | USER ROUTES
 |--------------------------------------------------------------------------
 |
-| Semua route pada file ini hanya dapat diakses oleh pengguna yang:
+| Route hanya dapat diakses oleh:
 |
-| 1. Sudah login
-| 2. Sudah melakukan verifikasi email
-| 3. Memiliki role "user"
+| 1. User sudah login
+| 2. Email sudah diverifikasi
+| 3. Role adalah user
 |
 */
 
@@ -29,15 +30,31 @@ Route::middleware([
         |--------------------------------------------------------------------------
         | USER DASHBOARD
         |--------------------------------------------------------------------------
-        |
-        | URL        : /user/dashboard
-        | View       : user.dashboard
-        | Route Name : user.dashboard
-        |
         */
 
         Route::get('/dashboard', function () {
-        return view('user.dashboard');
-    })->name('dashboard');
+            return view('user.dashboard');
+        })->name('dashboard');
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | USER PROFILE
+        |--------------------------------------------------------------------------
+        |
+        | GET   /user/profile
+        | PATCH /user/profile
+        |
+        */
+
+        Route::get(
+            '/profile',
+            [UserProfileController::class, 'edit']
+        )->name('profile.edit');
+
+
+        Route::patch(
+            '/profile',
+            [UserProfileController::class, 'update']
+        )->name('profile.update');
     });

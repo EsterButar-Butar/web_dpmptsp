@@ -23,7 +23,7 @@ Route::get('/', function () {
 
 
 Route::get('/tentang', function () {
-    return view('landing.home');
+    return view('landing.about');
 })->name('about');
 
 
@@ -36,16 +36,19 @@ Route::get(
         AnalysisController::class,
         'index',
     ]
-)->name('analysis');
+)->name('analysis.index');
 
 
-Route::get(
-    '/perbandingan-sektor',
-    [
-        ComparisonController::class,
-        'index',
-    ]
-)->name('comparison');
+
+
+// Route::get(
+//     '/perbandingan-sektor',
+//     [
+//         ComparisonController::class,
+//         'index',
+//     ]
+// )->name('comparison.index');
+
 
 
 /*

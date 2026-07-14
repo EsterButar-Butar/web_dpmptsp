@@ -43,6 +43,7 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     {{-- VITE --}}
     @vite([
         'resources/css/app.css',
+        'resources/css/comparison.css',
         'resources/js/app.js'
     ])
 
@@ -56,14 +57,7 @@ src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 
 <body>
 
-
-    {{-- NAVBAR --}}
-
     @include('partials.landing.navbar')
-
-
-
-    {{-- PAGE CONTENT --}}
 
     <main>
 
@@ -71,15 +65,7 @@ src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 
     </main>
 
-
-
-    {{-- FOOTER --}}
-
     @include('partials.landing.footer')
-
-
-
-    {{-- BACK TO TOP --}}
 
     <button
         type="button"

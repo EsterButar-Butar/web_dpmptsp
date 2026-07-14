@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import './comparison.css';
 
 
 /* =========================================================
@@ -9,18 +10,19 @@
 
 :root {
     /* Brand Colors */
-    --primary: #328a53;
-    --primary-dark: #236b3e;
+    --primary: #5089C6;
+    --primary-dark: #001E6C;
     --primary-light: #eaf5ee;
 
-    --secondary: #32a87d;
+    --secondary: #035397;
     --gold: #cbaa4c;
 
     /* Neutral Colors */
     --white: #ffffff;
     --off-white: #f9faf5;
 
-    --dark-green: #003c2f;
+    --dark-blue: #001E6C;
+;
 
     --text-primary: #17201c;
     --text-secondary: #667069;
@@ -217,7 +219,7 @@ NAVBAR BRAND
 
 
 .brand-text strong {
-    color: var(--dark-green);
+    color: var(--dark-blue);
 
     font-size: 18px;
     font-weight: 800;
@@ -341,7 +343,7 @@ NAVBAR BRAND
         gap: 7px;
 
         background:
-            var(--dark-green);
+            var(--dark-blue);
 
         color:
             var(--white);
@@ -383,7 +385,7 @@ NAVBAR BRAND
             transparent;
 
         color:
-            var(--dark-green);
+            var(--dark-blue);
 
         font-size: 22px;
     }
@@ -403,12 +405,12 @@ NAVBAR BRAND
         align-items: center;
 
         background:
-            linear-gradient(
-                90deg,
-                rgba(0, 60, 47, 0.96) 0%,
-                rgba(0, 60, 47, 0.84) 42%,
-                rgba(0, 60, 47, 0.2) 100%
-            ),
+        linear-gradient(
+            90deg,
+            rgba(0, 30, 108, 0.96) 0%,
+            rgba(3, 83, 151, 0.85) 45%,
+            rgba(143, 200, 255, 0.45) 100%
+        ),
             url("/images/hero/gedung-dpmptsp.jpg");
 
         background-size: cover;
@@ -575,7 +577,7 @@ NAVBAR BRAND
             var(--white);
 
         color:
-            var(--dark-green);
+            var(--dark-blue);
     }
 
 
@@ -584,7 +586,7 @@ NAVBAR BRAND
             var(--gold);
 
         color:
-            var(--dark-green);
+            var(--dark-blue);
     }
 
 
@@ -608,7 +610,9 @@ NAVBAR BRAND
 
         z-index: 10;
 
-        margin-top: -55px;
+        margin-top: -25px;
+
+        margin-bottom: 70px;
     }
 
 
@@ -618,22 +622,22 @@ NAVBAR BRAND
         grid-template-columns:
             repeat(4, minmax(0, 1fr));
 
-        gap: 18px;
+        gap: 22px;
     }
 
 
     .stat-card {
         min-width: 0;
 
-        min-height: 130px;
+        min-height: 145px;
 
-        padding: 22px;
+        padding: 30px;
 
         display: flex;
 
         align-items: center;
 
-        gap: 16px;
+        gap: 22px;
 
         background:
             var(--white);
@@ -642,10 +646,10 @@ NAVBAR BRAND
             1px solid var(--border);
 
         border-radius:
-            var(--radius-md);
+            18px;
 
         box-shadow:
-            var(--shadow-md);
+            0 15px 35px rgba(0, 60, 47, 0.12);
 
         transition:
             transform 0.25s ease,
@@ -653,18 +657,9 @@ NAVBAR BRAND
     }
 
 
-    .stat-card:hover {
-        transform:
-            translateY(-4px);
-
-        box-shadow:
-            var(--shadow-lg);
-    }
-
-
     .stat-icon {
-        width: 52px;
-        height: 52px;
+        width: 62px;
+        height: 62px;
 
         display: grid;
 
@@ -675,21 +670,22 @@ NAVBAR BRAND
         border-radius: 50%;
 
         background:
-            rgba(50, 138, 83, 0.1);
+            rgba(50, 138, 83, 0.12);
 
         color:
             var(--primary);
 
-        font-size: 20px;
+        font-size: 24px;
     }
 
 
-    .stat-content {
-        min-width: 0;
+    .stat-content strong {
+        color:
+            var(--dark-blue);
 
-        display: flex;
+        font-size: 30px;
 
-        flex-direction: column;
+        line-height: 1.2;
     }
 
 
@@ -697,27 +693,8 @@ NAVBAR BRAND
         color:
             var(--text-secondary);
 
-        font-size: 12px;
+        font-size: 13px;
     }
-
-
-    .stat-content strong {
-        color:
-            var(--dark-green);
-
-        font-size: 25px;
-
-        line-height: 1.3;
-    }
-
-
-    .stat-content small {
-        color:
-            var(--text-secondary);
-
-        font-size: 10px;
-    }
-
 
     /* =====================================================
     GENERAL SECTION
@@ -763,7 +740,7 @@ NAVBAR BRAND
     .section-header h2,
     .section-title-center h2 {
         color:
-            var(--dark-green);
+            var(--dark-blue);
 
         font-size:
             clamp(28px, 4vw, 34px);
@@ -886,7 +863,7 @@ NAVBAR BRAND
         margin-bottom: 18px;
 
         color:
-            var(--dark-green);
+            var(--dark-blue);
     }
 
 
@@ -1019,7 +996,7 @@ NAVBAR BRAND
         margin-bottom: 10px;
 
         color:
-            var(--dark-green);
+            var(--dark-blue);
     }
 
 
@@ -1077,7 +1054,7 @@ NAVBAR BRAND
         background:
             linear-gradient(
                 120deg,
-                var(--dark-green),
+                var(--dark-blue),
                 var(--primary)
             );
 
@@ -1126,7 +1103,7 @@ NAVBAR BRAND
             25px 0;
 
         background:
-            var(--dark-green);
+            var(--dark-blue);
 
         color:
             var(--white);
@@ -1226,7 +1203,7 @@ NAVBAR BRAND
             var(--gold);
 
         color:
-            var(--dark-green);
+            var(--dark-blue);
 
         transform:
             translateY(-2px);
@@ -1395,7 +1372,7 @@ NAVBAR BRAND
 
 
     .hero-section {
-        min-height: 600px;
+        min-height: 640px;
 
         background-position:
             65% center;
@@ -1485,7 +1462,7 @@ NAVBAR BRAND
 
 
     .hero-section {
-        min-height: 580px;
+        min-height: 650px;
 
         background:
             linear-gradient(

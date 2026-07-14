@@ -1,178 +1,152 @@
-@extends('layouts.landing')
+@vite([
+    'resources/css/navbar.css',
+    'resources/css/home.css',
+    'resources/css/about.css',
+    'resources/css/analysis.css',
+
+    'resources/js/navbar.js',
+    'resources/js/home.js',
+    'resources/js/about.js',
+    'resources/js/analysis.js',
+])
 
 
-@section('title','Executive Summary Investment')
-
-
-@section('content')
+{{-- NAVBAR --}}
+@include('partials.landing.navbar')
 
 
 <section class="analysis-page">
 
 
-<h1>
-Dashboard Executive Summary Investment
-</h1>
+    <h1 class="analysis-title">
+        Dashboard Executive Summary Investment
+    </h1>
 
 
-<form method="GET"
-      action="{{ route('analysis') }}"
-      class="filter-box">
+    <form 
+        method="GET"
+        action="{{ route('analysis.index') }}"
+        class="filter-box"
+    >
 
+        <select name="provinsi">
+            <option>
+                Sumatera Utara
+            </option>
+        </select>
 
-<select name="provinsi">
 
-<option>
-Sumatera Utara
-</option>
+        <select name="kabupaten">
+            <option>
+                Deli Serdang
+            </option>
+        </select>
 
-</select>
 
+        <select name="metode">
 
+            <option 
+                value="lq"
+                {{ $metode=='lq' ? 'selected' : '' }}
+            >
+                LQ
+            </option>
 
-<select name="kabupaten">
 
-<option>
-Deli Serdang
-</option>
+            <option 
+                value="ssa"
+                {{ $metode=='ssa' ? 'selected' : '' }}
+            >
+                SSA
+            </option>
 
-</select>
 
+            <option value="tipologi">
+                Tipologi Sektor
+            </option>
 
 
-<select name="metode">
+            <option value="klassen">
+                Tipologi Klassen
+            </option>
 
 
-<option value="lq"
-{{ $metode=='lq'?'selected':'' }}>
+        </select>
 
-LQ
 
-</option>
+        <select name="tahun">
 
+            @for($i=2021;$i<=2025;$i++)
 
+            <option 
+                value="{{ $i }}"
+                {{ $tahun==$i ? 'selected' : '' }}
+            >
+                {{ $i }}
+            </option>
 
-<option value="ssa"
-{{ $metode=='ssa'?'selected':'' }}>
+            @endfor
 
-SSA
+        </select>
 
-</option>
 
+        <button type="submit">
+            Analisis
+        </button>
 
-<option value="tipologi">
 
-Tipologi Sektor
+    </form>
 
-</option>
 
 
 
-<option value="klassen">
+    <div class="summary-grid">
 
-Tipologi Klassen
+        @foreach($summary as $item)
 
-</option>
+        <div class="summary-card">
 
+            <h3>
+                {{ $item['value'] }}
+            </h3>
 
-</select>
+            <strong>
+                {{ $item['title'] }}
+            </strong>
 
+            <p>
+                {{ $item['text'] }}
+            </p>
 
 
-<select name="tahun">
+        </div>
 
+        @endforeach
 
-@for($i=2021;$i<=2025;$i++)
+    </div>
 
 
-<option value="{{$i}}"
 
-{{$tahun==$i?'selected':''}}
 
->
 
-{{$i}}
+    <div class="chart-box">
 
-</option>
+        <canvas 
+            id="analysisChart">
+        </canvas>
 
-
-@endfor
-
-
-</select>
-
-
-
-<button>
-
-Analisis
-
-</button>
-
-
-
-</form>
-
-
-
-<div class="summary-grid">
-
-
-@foreach($summary as $item)
-
-<div class="summary-card">
-
-
-<h3>
-{{ $item['value'] }}
-</h3>
-
-
-<strong>
-{{ $item['title'] }}
-</strong>
-
-
-<p>
-{{ $item['text'] }}
-</p>
-
-
-</div>
-
-
-@endforeach
-
-
-</div>
-
-
-
-<div class="chart-box">
-
-<canvas 
-id="analysisChart"
-height="100">
-
-</canvas>
-
-</div>
-
+    </div>
 
 
 </section>
 
 
 
-@endsection
 
-
-
-@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 <script>
-
 
 const labels =
 @json($sektor);
@@ -185,55 +159,47 @@ const values =
 
 new Chart(
 
-document.getElementById('analysisChart'),
+    document.getElementById('analysisChart'),
+
+    {
+
+        type:'bar',
 
 
-{
-
-type:'bar',
+        data:{
 
 
-data:{
+            labels:labels,
 
 
-labels:labels,
+            datasets:[
+
+                {
+
+                    label:'Nilai {{ strtoupper($metode) }} Tahun {{ $tahun }}',
+
+                    data:values
+
+                }
+
+            ]
+
+        },
 
 
-datasets:[
-
-{
-
-label:'Nilai {{$metode}} Tahun {{$tahun}}',
-
-data:values
+        options:{
 
 
-}
-
-]
+            responsive:true,
 
 
-},
+            maintainAspectRatio:false
 
 
-options:{
+        }
 
-
-responsive:true,
-
-
-maintainAspectRatio:false
-
-
-}
-
-
-}
+    }
 
 );
 
-
 </script>
-
-
-@endpush
