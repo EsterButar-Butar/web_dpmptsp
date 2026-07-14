@@ -22,9 +22,9 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::get('/tentang', function () {
-    return view('landing.about');
-})->name('about');
+// Route::get('/tentang', function () {
+//     return view('landing.about');
+// })->name('about');
 
 
 Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
@@ -41,13 +41,13 @@ Route::get(
 
 
 
-// Route::get(
-//     '/perbandingan-sektor',
-//     [
-//         ComparisonController::class,
-//         'index',
-//     ]
-// )->name('comparison.index');
+Route::get(
+    '/perbandingan-sektor',
+    [
+        ComparisonController::class,
+        'index',
+    ]
+)->name('comparison.index');
 
 
 

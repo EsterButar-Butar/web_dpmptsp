@@ -31,14 +31,19 @@
         {{-- NAVIGATION --}}
      <nav class="main-navigation" id="mainNavigation">
 
-    <a href="#hero" class="nav-link active">
-        Beranda
-    </a>
+    <a
+    href="{{ route('home') }}"
+    class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}"
+>
+    Beranda
+</a>
 
-    <a href="#tentang" class="nav-link">
-        Tentang
-    </a>
-
+   <a
+    href="{{ route('home') }}#tentang"
+    class="nav-link {{ request()->routeIs('home') && request()->getRequestUri() == '/#tentang' ? 'active' : '' }}"
+>
+    Tentang
+</a>
     <a
     href="{{ route('investment.map') }}"
     class="nav-link {{ request()->routeIs('investment.map') ? 'active' : '' }}"
