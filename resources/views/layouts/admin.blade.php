@@ -202,6 +202,154 @@
                 width: 100%;
             }
         }
+
+        .logout-sidebar-area {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-sidebar-button {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            text-align: left;
+            color: #dc2626 !important;
+        }
+
+        .logout-sidebar-button i,
+        .logout-sidebar-button span {
+            color: #dc2626 !important;
+        }
+
+        .logout-sidebar-button:hover {
+            background: #fee2e2 !important;
+            color: #b91c1c !important;
+        }
+
+        .logout-sidebar-button:hover i,
+        .logout-sidebar-button:hover span {
+            color: #b91c1c !important;
+        }
+
+        /* POPUP LOGOUT */
+        .logout-confirm-modal[hidden] {
+            display: none !important;
+        }
+
+        .logout-confirm-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .logout-confirm-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(3px);
+        }
+
+        .logout-confirm-card {
+            position: relative;
+            width: min(430px, 100%);
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 30px 28px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
+            animation: logoutPopupIn 0.18s ease-out;
+        }
+
+        .logout-confirm-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 18px;
+            border-radius: 22px;
+            background: #fee2e2;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .logout-confirm-card h3 {
+            margin: 0;
+            color: #14213d;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .logout-confirm-card p {
+            margin: 12px 0 0;
+            color: #667085;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .logout-confirm-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .logout-cancel-button,
+        .logout-submit-button {
+            min-width: 130px;
+            height: 46px;
+            border-radius: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .logout-cancel-button {
+            border: 1px solid #d9dee8;
+            background: #ffffff;
+            color: #344054;
+        }
+
+        .logout-cancel-button:hover {
+            background: #f8fafc;
+        }
+
+        .logout-submit-button {
+            border: none;
+            background: #dc2626;
+            color: #ffffff;
+            box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
+        }
+
+        .logout-submit-button:hover {
+            background: #b91c1c;
+        }
+
+        @keyframes logoutPopupIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
     </style>
 </head>
 
@@ -287,8 +435,8 @@
 
                 <li>
                     <a
-                        href="#"
-                        class="sidebar-link"
+                        href="{{ route('admin.data-kbli.index') }}"
+                        class="sidebar-link {{ request()->is('admin/data-kbli*') ? 'active' : '' }}"
                     >
                         <i class="fa-solid fa-table-cells"></i>
                         <span>Kode KBLI</span>
@@ -297,12 +445,31 @@
 
                 <li>
                     <a
-                        href="#"
-                        class="sidebar-link"
+                        href="{{ route('admin.hs-code.index') }}"
+                        class="sidebar-link {{ request()->is('admin/hs-code*') ? 'active' : '' }}"
                     >
                         <i class="fa-solid fa-qrcode"></i>
                         <span>Kode HS</span>
                     </a>
+                    <div class="logout-sidebar-area">
+                        <form
+                            id="logoutForm"
+                            action="{{ route('logout') }}"
+                            method="POST"
+                            class="logout-form"
+                        >
+                            @csrf
+
+                            <button
+                                type="button"
+                                id="openLogoutModal"
+                                class="sidebar-link logout-sidebar-button"
+                            >
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Keluar</span>
+                            </button>
+                        </form>
+                    </div>
                 </li>
             </ul>
         </aside>
@@ -311,5 +478,79 @@
             @yield('content')
         </main>
     </div>
+    <div
+    id="logoutConfirmModal"
+    class="logout-confirm-modal"
+    hidden
+>
+    <div
+        class="logout-confirm-backdrop"
+        data-close-logout
+    ></div>
+
+    <div class="logout-confirm-card">
+        <div class="logout-confirm-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+
+        <h3>Keluar dari akun?</h3>
+
+        <p>
+            Kamu akan keluar dari halaman admin dan perlu login kembali untuk mengakses dashboard.
+        </p>
+
+        <div class="logout-confirm-actions">
+            <button
+                type="button"
+                class="logout-cancel-button"
+                data-close-logout
+            >
+                Batal
+            </button>
+
+            <button
+                type="button"
+                id="confirmLogoutButton"
+                class="logout-submit-button"
+            >
+                Ya, Keluar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const openButton = document.getElementById('openLogoutModal');
+        const modal = document.getElementById('logoutConfirmModal');
+        const confirmButton = document.getElementById('confirmLogoutButton');
+        const logoutForm = document.getElementById('logoutForm');
+        const closeButtons = document.querySelectorAll('[data-close-logout]');
+
+        if (!openButton || !modal || !confirmButton || !logoutForm) {
+            return;
+        }
+
+        openButton.addEventListener('click', function () {
+            modal.hidden = false;
+        });
+
+        confirmButton.addEventListener('click', function () {
+            logoutForm.submit();
+        });
+
+        closeButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                modal.hidden = true;
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                modal.hidden = true;
+            }
+        });
+    });
+</script>
 </body>
 </html>
