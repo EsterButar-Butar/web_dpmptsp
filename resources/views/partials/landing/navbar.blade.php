@@ -11,6 +11,11 @@
                 class="brand-logo"
             >
 
+            {{-- <div class="brand-text">
+                <strong>DPMPTSP</strong>
+                <span>Provinsi Sumatera Utara</span>
+            </div> --}}
+
         </a>
 
         {{-- MOBILE BUTTON --}}
@@ -34,9 +39,12 @@
         Tentang
     </a>
 
-    <a href="{{ route('investment.map') }}" class="nav-link">
-        Peta Investasi
-    </a>
+    <a
+    href="{{ route('investment.map') }}"
+    class="nav-link {{ request()->routeIs('investment.map') ? 'active' : '' }}"
+>
+    Peta Investasi
+</a>
 
 </nav>
 

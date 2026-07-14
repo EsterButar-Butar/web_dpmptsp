@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Landing\AnalysisController;
 use App\Http\Controllers\Landing\ComparisonController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\InvestmentMapController;
 
 
 /*
@@ -26,10 +27,8 @@ Route::get('/tentang', function () {
 })->name('about');
 
 
-Route::get('/peta-investasi', function () {
-    return view('landing.map');
-})->name('investment.map');
-
+Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
+    ->name('investment.map');
 
 Route::get(
     '/analisis',
@@ -41,13 +40,16 @@ Route::get(
 )->name('analysis');
 
 
-Route::get(
-    '/perbandingan-sektor',
-    [
-        ComparisonController::class,
-        'index',
-    ]
-)->name('comparison');
+Route::get('/perbandingan-sektor', [
+    ComparisonController::class,
+    'index',
+])->name('comparison');
+
+// Route::get('/perbandingan-sektor', [
+//     ComparisonController::class,
+//     'index',
+// ])->name('comparison.index');
+// ])->name('comparison.index');
 
 
 /*

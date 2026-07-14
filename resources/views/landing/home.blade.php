@@ -35,16 +35,21 @@
     <section id="hero" class="hero">
 
         <div class="hero-content">
+
+            {{-- <h5>Selamat Datang</h5> --}}
+
             <h1>
-                Dashboard Analisis <br>
-                Potensi Investasi
+                Dashboard Executive for Sumatera Investment
             </h1>
 
             <p>
-                Dashboard Analisis Potensi Investasi berbasis GIS,
-                PDRB, Location Quotient, Shift Share,
-                Tipologi Klassen, dan Tipologi Sektor
-                untuk Provinsi Sumatera Utara.
+                Dasbor eksekutif untuk investasi di Sumatera dirancang untuk 
+                memberikan gambaran cepat (high-level overview) bagi Gubernur, 
+                Bupati, Walikota, Investor dan Calon Investor serta para pengambil 
+                keputusan lain  guna memantau Potensi Unggulan Daerah berdasarkan 
+                Produk Domestik Regional Bruto (PDRB) Atas Dasar Harga Konstan
+                 Menurut Lapangan Usaha, Realisasi Investasi, Realisasi Ekspor dan Impor, 
+                Realisasi Perdagangan Dalam Negeri di seluruh wilayah Pulau Sumatera.
             </p>
 
             <div class="hero-button">
