@@ -18,7 +18,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 </head>
-<body class="antialiased bg-slate-50 text-slate-900" hx-boost="true">
+<body class="antialiased bg-slate-50 text-slate-900">
     <div class="min-h-screen flex">
         
         <!-- Sidebar -->
@@ -61,7 +61,7 @@
                         Settings
                     </a>
                     
-                    <form method="POST" action="#" onsubmit="event.preventDefault(); alert('Ini versi simulasi logout.')" class="mt-2 border-t border-[#CFE3D5]/20 pt-2">
+                    <form method="POST" action="{{ route('logout') }}" class="mt-2 border-t border-[#CFE3D5]/20 pt-2">
                         @csrf
                         <button type="submit" class="w-full flex items-center gap-3 px-2 py-2 text-sm font-medium text-red-300 hover:text-red-100 hover:bg-red-900/60 rounded-lg transition-colors">
                             <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,6 +132,38 @@
             </div>
         </main>
         
+        
     </div>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(event, form) {
+            event.preventDefault();
+            Swal.fire({
+                title: '<span class="text-lg">Hapus Data?</span>',
+                html: '<span class="text-sm">Data yang dihapus tidak dapat dikembalikan!</span>',
+                icon: 'warning',
+                width: '24em',
+                padding: '1.5em',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'rounded-lg text-sm px-4 py-2',
+                    cancelButton: 'rounded-lg text-sm px-4 py-2',
+                    popup: 'rounded-xl'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+    </script>
 </body>
 </html>

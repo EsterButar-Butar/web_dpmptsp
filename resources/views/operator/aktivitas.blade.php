@@ -60,14 +60,14 @@
     <div class="p-6 space-y-6">
         @forelse($paginatedLogs as $log)
             @php
-                $iconClass = match(strtolower($log['action'])) {
+                $iconClass = match(strtolower($log->action)) {
                     'ditambah' => 'bg-green-100 text-green-600',
                     'diperbarui' => 'bg-emerald-100 text-emerald-600',
                     'diimpor' => 'bg-purple-100 text-purple-600',
                     'dihapus' => 'bg-red-100 text-red-600',
                     default => 'bg-slate-100 text-slate-600'
                 };
-                $iconSvg = match(strtolower($log['action'])) {
+                $iconSvg = match(strtolower($log->action)) {
                     'ditambah' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />',
                     'diperbarui' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
                     'diimpor' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />',
@@ -81,19 +81,19 @@
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $iconSvg !!}</svg>
                 </div>
                 <div class="flex-1 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                    <p class="text-sm font-semibold text-slate-800">{{ $log['desc'] }}</p>
+                    <p class="text-sm font-semibold text-slate-800">{{ $log->desc }}</p>
                     <div class="mt-2 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500">
                         <span class="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm">
                             <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {{ $log['time'] }}
+                            {{ $log->created_at->format('d M Y H:i') }}
                         </span>
                         <span class="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm text-emerald-600">
                             <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
-                            Modul: {{ $log['module'] }}
+                            Modul: {{ $log->module }}
                         </span>
                     </div>
                 </div>

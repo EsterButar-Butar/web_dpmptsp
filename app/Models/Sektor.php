@@ -8,4 +8,6 @@ class Sektor extends Model
 {
     protected $table = 'sektor';
     protected $guarded = [];
+    
+    public const UPDATED_AT = null;
 }

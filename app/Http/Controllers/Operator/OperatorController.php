@@ -4,36 +4,32 @@ namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
 
+use App\Models\ActivityLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 class OperatorController extends Controller
 {
     public static function logActivity($module, $action, $desc)
     {
-        $logs = session('activity_log', []);
-        array_unshift($logs, [
+        ActivityLog::create([
+            'user_id' => Auth::id(),
             'module' => $module,
-            'action' => $action, // ditambah, diperbarui, dihapus, diimpor
-            'desc' => $desc,
-            'time' => Carbon::now()->format('d M Y H:i'),
+            'action' => $action,
+            'desc' => $desc
         ]);
-        // Menyimpan semua log tanpa batasan sesuai permintaan
-        session(['activity_log' => $logs]);
     }
 
-    private function getLatestStatus($sessionData)
+    private function getLatestStatus($modelClass)
     {
-        if (empty($sessionData)) {
-            return ['date' => '-', 'action' => 'Kosong', 'color' => 'bg-slate-100 text-slate-500'];
+        $latest = $modelClass::latest('updated_at')->first();
+        if (!$latest) {
+            return ['date' => '-', 'action' => 'Kosong', 'color' => 'bg-slate-100 text-slate-500 border-slate-200'];
         }
 
-        $latest = $sessionData[0];
-        $riwayat = $latest['riwayat'] ?? '';
-
-        $parts = explode(' ', $riwayat);
-        $action = strtolower($parts[0] ?? 'ditambah');
+        $action = ($latest->created_at == $latest->updated_at) ? 'ditambah' : 'diperbarui';
 
         $color = match ($action) {
             'ditambah' => 'bg-green-100 text-green-700 border-green-200',
@@ -43,7 +39,7 @@ class OperatorController extends Controller
         };
 
         return [
-            'date' => Carbon::now()->format('d M Y'), // Karena data dummy kadang tanggalnya beda, kita gunakan fallback
+            'date' => $latest->updated_at ? $latest->updated_at->format('d M Y') : '-',
             'action' => ucfirst($action),
             'color' => $color,
         ];
@@ -51,23 +47,18 @@ class OperatorController extends Controller
 
     public function index()
     {
-        $lqData = session('lq_data_v2', []);
-        $ssData = session('ss_data_v2', []);
-        $tipologiData = session('tipologi_data_v2', []);
-        $klassenData = session('klassen_data_v2', []);
-
-        $countLq = count($lqData);
-        $countSs = count($ssData);
-        $countTipologi = count($tipologiData);
-        $countKlassen = count($klassenData);
+        $countLq = \App\Models\LQ::count();
+        $countSs = \App\Models\ShiftShare::count();
+        $countTipologi = \App\Models\Tipologi::count();
+        $countKlassen = \App\Models\Klassen::count();
         $totalAnalisa = $countLq + $countSs + $countTipologi + $countKlassen;
 
-        $statusLq = $this->getLatestStatus($lqData);
-        $statusSs = $this->getLatestStatus($ssData);
-        $statusTipologi = $this->getLatestStatus($tipologiData);
-        $statusKlassen = $this->getLatestStatus($klassenData);
+        $statusLq = $this->getLatestStatus(\App\Models\LQ::class);
+        $statusSs = $this->getLatestStatus(\App\Models\ShiftShare::class);
+        $statusTipologi = $this->getLatestStatus(\App\Models\Tipologi::class);
+        $statusKlassen = $this->getLatestStatus(\App\Models\Klassen::class);
 
-        $activityLogs = session('activity_log', []);
+        $activityLogs = ActivityLog::latest()->take(10)->get();
 
         return view('operator.dashboard', compact(
             'countLq', 'countSs', 'countTipologi', 'countKlassen', 'totalAnalisa',
@@ -83,62 +74,59 @@ class OperatorController extends Controller
 
     public function aktivitas(Request $request)
     {
-        $activityLogs = session('activity_log', []);
-
+        $activityLogs = ActivityLog::latest()->get();
         $collection = collect($activityLogs);
 
-        // Ekstrak tahun unik yang ada di dalam log
-        $logYears = $collection->map(function ($log) {
-            try {
-                return (int) Carbon::parse($log['time'])->format('Y');
-            } catch (\Exception $e) {
-                return (int) date('Y');
+        $search = $request->input('search');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $filteredLogs = $collection->filter(function ($log) use ($search, $month, $year) {
+            $matchSearch = true;
+            $matchMonth = true;
+            $matchYear = true;
+
+            // Pencarian text
+            if ($search) {
+                $searchLower = strtolower($search);
+                $matchSearch = str_contains(strtolower($log->module), $searchLower) ||
+                               str_contains(strtolower($log->action), $searchLower) ||
+                               str_contains(strtolower($log->desc), $searchLower);
             }
-        })->toArray();
 
-        // Buat rentang tahun dasar dari tahun saat ini mundur hingga 2020
-        $baseYears = range(date('Y'), 2020);
+            // Filter bulan
+            if ($month) {
+                $matchMonth = $log->created_at->format('m') === str_pad($month, 2, '0', STR_PAD_LEFT);
+            }
 
-        // Gabungkan tahun dari log dengan tahun dasar, hapus duplikat, dan urutkan
-        $availableYears = collect(array_merge($logYears, $baseYears))
-            ->unique()
-            ->sortDesc()
-            ->values()
-            ->all();
+            // Filter tahun
+            if ($year) {
+                $matchYear = $log->created_at->format('Y') == $year;
+            }
 
-        // Filter variables
-        $filterMonth = $request->input('month');
-        $filterYear = $request->input('year');
+            return $matchSearch && $matchMonth && $matchYear;
+        });
 
-        // Filter logic
-        if ($filterMonth || $filterYear) {
-            $collection = $collection->filter(function ($log) use ($filterMonth, $filterYear) {
-                try {
-                    $date = Carbon::parse($log['time']);
-                    $matchMonth = $filterMonth ? $date->format('m') == $filterMonth : true;
-                    $matchYear = $filterYear ? $date->format('Y') == $filterYear : true;
-
-                    return $matchMonth && $matchYear;
-                } catch (\Exception $e) {
-                    return true;
-                }
-            });
-        }
-
-        $perPage = 20;
-        $page = $request->input('page', 1);
-
-        $currentPageItems = $collection->slice(($page - 1) * $perPage, $perPage)->all();
-
+        // Pagination
+        $perPage = 10;
+        $page = $request->get('page', 1);
+        
         $paginatedLogs = new LengthAwarePaginator(
-            $currentPageItems,
-            $collection->count(),
+            $filteredLogs->forPage($page, $perPage),
+            $filteredLogs->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('operator.aktivitas', compact('paginatedLogs', 'activityLogs', 'filterMonth', 'filterYear', 'availableYears'));
+        $baseYears = range(date('Y'), 2020);
+        $availableYears = collect(array_merge($activityLogs->pluck('created_at')->map(fn($d) => (int)$d->format('Y'))->toArray(), $baseYears))
+            ->unique()
+            ->sortDesc()
+            ->values()
+            ->all();
+
+        return view('operator.aktivitas', compact('paginatedLogs', 'search', 'month', 'year', 'availableYears'));
     }
 
     public function settings()

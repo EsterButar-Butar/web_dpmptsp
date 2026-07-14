@@ -293,7 +293,7 @@ class LqController extends Controller
 
         if ($successCount > 0) {
             OperatorController::logActivity('Analisis LQ', 'diimpor', "Mengimpor {$successCount} rekaman Analisis LQ secara massal dari template master.");
-            session()->flash('success', "Berhasil mengimpor $successCount data (karena format Awal & Akhir dipecah)!");
+            session()->flash('success', "Berhasil mengimpor $successCount data baru!");
             return response()->json(['success' => true]);
         }
 

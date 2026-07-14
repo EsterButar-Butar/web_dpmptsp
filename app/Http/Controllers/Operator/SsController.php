@@ -130,8 +130,7 @@ class SsController extends Controller
         ];
     }
 
-    // Menyimpan hasil perhitungan Shift Share ke session.
-    public function hitung(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'tingkat_wilayah' => 'required|string',
@@ -153,45 +152,83 @@ class SsController extends Controller
             return back()->with('error', 'Terdapat nilai 0 pada data awal. Periksa kembali input nilai Anda.');
         }
 
-        $data['id'] = time();
-        $data['riwayat'] = 'Ditambah '.Carbon::now()->format('d-m-Y');
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        $ssData = session('ss_data_v2', []);
-        array_unshift($ssData, $data);
-        session(['ss_data_v2' => $ssData]);
+        ShiftShare::create([
+            'user_id' => Auth::id() ?? 1,
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $data['tingkat_wilayah'],
+            'daerah_analisis' => $data['daerah_analisis'],
+            'daerah_pembanding' => $data['daerah_pembanding'],
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+            'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
+            'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
+            'pdrb_sektor_pembanding_awal' => $data['pdrb_sektor_pembanding_awal'],
+            'pdrb_sektor_pembanding_akhir' => $data['pdrb_sektor_pembanding_akhir'],
+            'total_pdrb_pembanding_awal' => $data['total_pdrb_pembanding_awal'],
+            'total_pdrb_pembanding_akhir' => $data['total_pdrb_pembanding_akhir'],
+            'rij' => $data['rij'],
+            'rin' => $data['rin'],
+            'rn' => $data['rn'],
+            'nij' => $data['nij'],
+            'mij' => $data['mij'],
+            'cij' => $data['cij'],
+            'dij' => $data['dij'],
+            'status_pertumbuhan' => $data['status_pertumbuhan'],
+            'status_daya_saing' => $data['status_daya_saing']
+        ]);
 
-        OperatorController::logActivity('Analisis SSA', 'ditambah', "Menambahkan data perhitungan Analisis Shift Share untuk sektor {$request->sektor}.");
+        OperatorController::logActivity('Analisis SSA', 'ditambah', "Menambahkan data perhitungan Analisis Shift Share untuk sektor {$data['sektor']}.");
 
-        return back()->with('success', 'Perhitungan SS berhasil dan data ditambahkan!');
+        return back()->with('success', 'Perhitungan SS berhasil disimpan secara permanen!');
     }
 
     public function update(Request $request, $id)
     {
+        $ss = ShiftShare::find($id);
+        if (!$ss) {
+            return redirect()->route('operator.ss.index')->with('error', 'Data tidak ditemukan!');
+        }
+
         $data = $this->calculateSSData($request->all());
         if (! $data) {
             return back()->with('error', 'Terdapat nilai 0 pada data awal. Periksa kembali input nilai Anda.');
         }
 
-        $ssData = session('ss_data_v2', []);
-        foreach ($ssData as $key => $item) {
-            if ($item['id'] == $id) {
-                $data['id'] = $item['id'];
-                $data['riwayat'] = 'Diperbarui '.Carbon::now()->format('d-m-Y');
-                $ssData[$key] = $data;
-                break;
-            }
-        }
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        session(['ss_data_v2' => $ssData]);
+        $ss->update([
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $data['tingkat_wilayah'],
+            'daerah_analisis' => $data['daerah_analisis'],
+            'daerah_pembanding' => $data['daerah_pembanding'],
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+            'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
+            'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
+            'pdrb_sektor_pembanding_awal' => $data['pdrb_sektor_pembanding_awal'],
+            'pdrb_sektor_pembanding_akhir' => $data['pdrb_sektor_pembanding_akhir'],
+            'total_pdrb_pembanding_awal' => $data['total_pdrb_pembanding_awal'],
+            'total_pdrb_pembanding_akhir' => $data['total_pdrb_pembanding_akhir'],
+            'rij' => $data['rij'],
+            'rin' => $data['rin'],
+            'rn' => $data['rn'],
+            'nij' => $data['nij'],
+            'mij' => $data['mij'],
+            'cij' => $data['cij'],
+            'dij' => $data['dij'],
+            'status_pertumbuhan' => $data['status_pertumbuhan'],
+            'status_daya_saing' => $data['status_daya_saing']
+        ]);
 
-        OperatorController::logActivity('Analisis SSA', 'diperbarui', "Memperbarui data perhitungan Analisis Shift Share untuk sektor {$request->sektor}.");
+        OperatorController::logActivity('Analisis SSA', 'diperbarui', "Memperbarui data perhitungan Analisis Shift Share untuk sektor {$data['sektor']}.");
 
-        return redirect()->route('operator.ss.index')->with('success', 'Data perhitungan SS berhasil diperbarui!');
+        return redirect()->route('operator.ss.index')->with('success', 'Data perhitungan SS berhasil diperbarui secara permanen!');
     }
 
     public function destroy($id)
     {
-        $ssData = session('ss_data_v2', []);
         $ss = ShiftShare::find($id);
         if ($ss) {
             $daerah = $ss->daerah_analisis;

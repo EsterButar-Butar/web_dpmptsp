@@ -139,8 +139,7 @@ class TipologiController extends Controller
         ];
     }
 
-    // Menyimpan hasil perhitungan Tipologi Sektor ke session.
-    public function hitung(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'tingkat_wilayah' => 'required|string',
@@ -164,40 +163,71 @@ class TipologiController extends Controller
             return back()->with('error', 'Terdapat nilai 0 pada data awal. Periksa kembali input nilai Anda agar tidak terjadi pembagian dengan nol.');
         }
 
-        $data['id'] = time();
-        $data['riwayat'] = 'Ditambah '.Carbon::now()->format('d-m-Y');
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        $tipologiData = session('tipologi_data_v2', []);
-        array_unshift($tipologiData, $data);
-        session(['tipologi_data_v2' => $tipologiData]);
+        Tipologi::create([
+            'user_id' => Auth::id() ?? 1,
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $data['tingkat_wilayah'],
+            'daerah_analisis' => $data['daerah_analisis'],
+            'daerah_pembanding' => $data['daerah_pembanding'],
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+            'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
+            'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
+            'total_pdrb_analisis_awal' => $data['total_pdrb_analisis_awal'],
+            'total_pdrb_analisis_akhir' => $data['total_pdrb_analisis_akhir'],
+            'pdrb_sektor_pembanding_awal' => $data['pdrb_sektor_pembanding_awal'],
+            'pdrb_sektor_pembanding_akhir' => $data['pdrb_sektor_pembanding_akhir'],
+            'total_pdrb_pembanding_awal' => $data['total_pdrb_pembanding_awal'],
+            'total_pdrb_pembanding_akhir' => $data['total_pdrb_pembanding_akhir'],
+            'nilai_ss' => $data['nilai_ss'],
+            'nilai_lq' => $data['nilai_lq'],
+            'tipologi' => $data['tipologi']
+        ]);
 
-        OperatorController::logActivity('Analisis Tipologi', 'ditambah', "Menambahkan data perhitungan Analisis Tipologi Sektor untuk sektor {$request->sektor}.");
+        OperatorController::logActivity('Analisis Tipologi', 'ditambah', "Menambahkan data perhitungan Analisis Tipologi Sektor untuk sektor {$data['sektor']}.");
 
-        return back()->with('success', 'Perhitungan Tipologi Sektor berhasil dan data ditambahkan!');
+        return back()->with('success', 'Perhitungan Tipologi Sektor berhasil disimpan secara permanen!');
     }
 
     public function update(Request $request, $id)
     {
+        $tipologi = Tipologi::find($id);
+        if (!$tipologi) {
+            return redirect()->route('operator.tipologi.index')->with('error', 'Data tidak ditemukan!');
+        }
+
         $data = $this->calculateTipologiData($request->all());
         if (! $data) {
             return back()->with('error', 'Terdapat nilai 0 pada data awal. Periksa kembali input nilai Anda.');
         }
 
-        $tipologiData = session('tipologi_data_v2', []);
-        foreach ($tipologiData as $key => $item) {
-            if ($item['id'] == $id) {
-                $data['id'] = $item['id'];
-                $data['riwayat'] = 'Diperbarui '.Carbon::now()->format('d-m-Y');
-                $tipologiData[$key] = $data;
-                break;
-            }
-        }
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        session(['tipologi_data_v2' => $tipologiData]);
+        $tipologi->update([
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $data['tingkat_wilayah'],
+            'daerah_analisis' => $data['daerah_analisis'],
+            'daerah_pembanding' => $data['daerah_pembanding'],
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+            'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
+            'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
+            'total_pdrb_analisis_awal' => $data['total_pdrb_analisis_awal'],
+            'total_pdrb_analisis_akhir' => $data['total_pdrb_analisis_akhir'],
+            'pdrb_sektor_pembanding_awal' => $data['pdrb_sektor_pembanding_awal'],
+            'pdrb_sektor_pembanding_akhir' => $data['pdrb_sektor_pembanding_akhir'],
+            'total_pdrb_pembanding_awal' => $data['total_pdrb_pembanding_awal'],
+            'total_pdrb_pembanding_akhir' => $data['total_pdrb_pembanding_akhir'],
+            'nilai_ss' => $data['nilai_ss'],
+            'nilai_lq' => $data['nilai_lq'],
+            'tipologi' => $data['tipologi']
+        ]);
 
-        OperatorController::logActivity('Analisis Tipologi', 'diperbarui', "Memperbarui data perhitungan Analisis Tipologi Sektor untuk sektor {$request->sektor}.");
+        OperatorController::logActivity('Analisis Tipologi', 'diperbarui', "Memperbarui data perhitungan Analisis Tipologi Sektor untuk sektor {$data['sektor']}.");
 
-        return redirect()->route('operator.tipologi.index')->with('success', 'Data perhitungan Tipologi Sektor berhasil diperbarui!');
+        return redirect()->route('operator.tipologi.index')->with('success', 'Data perhitungan Tipologi Sektor berhasil diperbarui secara permanen!');
     }
 
     public function destroy($id)

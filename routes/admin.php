@@ -5,7 +5,12 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\DataWilayahController;
 
-Route::prefix('admin')
+Route::middleware([
+    'auth',
+    'verified',
+    'role:admin',
+])
+    ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 

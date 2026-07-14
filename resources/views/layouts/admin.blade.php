@@ -304,6 +304,16 @@
                         <span>Kode HS</span>
                     </a>
                 </li>
+                
+                <li style="margin-top: 32px;">
+                    <form method="POST" action="{{ route('logout') }}" style="margin: 0; padding: 0;">
+                        @csrf
+                        <button type="submit" class="sidebar-link" style="width: 100%; text-align: left; background: #fee2e2; border: none; cursor: pointer; color: #b91c1c;">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </li>
             </ul>
         </aside>
 

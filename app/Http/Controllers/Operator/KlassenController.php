@@ -150,8 +150,7 @@ class KlassenController extends Controller
         ];
     }
 
-    // Menyimpan hasil perhitungan Klassen ke session.
-    public function hitung(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'tingkat_wilayah' => 'required|string',
@@ -175,40 +174,77 @@ class KlassenController extends Controller
             return back()->with('error', 'Terdapat nilai 0 pada input awal yang menyebabkan pembagian nol. Periksa kembali input Anda.');
         }
 
-        $data['id'] = time();
-        $data['riwayat'] = 'Ditambah '.Carbon::now()->format('d-m-Y');
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        $klassenData = session('klassen_data_v2', []);
-        array_unshift($klassenData, $data);
-        session(['klassen_data_v2' => $klassenData]);
+        Klassen::create([
+            'user_id' => Auth::id() ?? 1,
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $data['tingkat_wilayah'],
+            'daerah_analisis' => $data['daerah_analisis'],
+            'daerah_pembanding' => $data['daerah_pembanding'],
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+            'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
+            'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
+            'total_pdrb_analisis_awal' => $data['total_pdrb_analisis_awal'],
+            'total_pdrb_analisis_akhir' => $data['total_pdrb_analisis_akhir'],
+            'pdrb_sektor_pembanding_awal' => $data['pdrb_sektor_pembanding_awal'],
+            'pdrb_sektor_pembanding_akhir' => $data['pdrb_sektor_pembanding_akhir'],
+            'total_pdrb_pembanding_awal' => $data['total_pdrb_pembanding_awal'],
+            'total_pdrb_pembanding_akhir' => $data['total_pdrb_pembanding_akhir'],
+            'ri' => $data['ri'],
+            'r' => $data['r'],
+            'yi' => $data['yi'],
+            'y' => $data['y'],
+            'kuadran' => $data['kuadran'],
+            'klasifikasi' => $data['klasifikasi']
+        ]);
 
-        OperatorController::logActivity('Analisis Klassen', 'ditambah', "Menambahkan data perhitungan Analisis Tipologi Klassen untuk sektor {$request->sektor}.");
+        OperatorController::logActivity('Analisis Klassen', 'ditambah', "Menambahkan data perhitungan Analisis Tipologi Klassen untuk sektor {$data['sektor']}.");
 
-        return back()->with('success', 'Analisis Klassen berhasil dihitung dan data ditambahkan!');
+        return back()->with('success', 'Analisis Klassen berhasil disimpan secara permanen!');
     }
 
     public function update(Request $request, $id)
     {
+        $klassen = Klassen::find($id);
+        if (!$klassen) {
+            return redirect()->route('operator.klassen.index')->with('error', 'Data tidak ditemukan!');
+        }
+
         $data = $this->calculateKlassenData($request->all());
         if (! $data) {
             return back()->with('error', 'Terdapat nilai 0 pada input awal. Periksa kembali nilai Anda.');
         }
 
-        $klassenData = session('klassen_data_v2', []);
-        foreach ($klassenData as $key => $item) {
-            if ($item['id'] == $id) {
-                $data['id'] = $item['id'];
-                $data['riwayat'] = 'Diperbarui '.Carbon::now()->format('d-m-Y');
-                $klassenData[$key] = $data;
-                break;
-            }
-        }
+        $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        session(['klassen_data_v2' => $klassenData]);
+        $klassen->update([
+            'sektor_id' => $sektorModel->id,
+            'tingkat_wilayah' => $data['tingkat_wilayah'],
+            'daerah_analisis' => $data['daerah_analisis'],
+            'daerah_pembanding' => $data['daerah_pembanding'],
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+            'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
+            'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
+            'total_pdrb_analisis_awal' => $data['total_pdrb_analisis_awal'],
+            'total_pdrb_analisis_akhir' => $data['total_pdrb_analisis_akhir'],
+            'pdrb_sektor_pembanding_awal' => $data['pdrb_sektor_pembanding_awal'],
+            'pdrb_sektor_pembanding_akhir' => $data['pdrb_sektor_pembanding_akhir'],
+            'total_pdrb_pembanding_awal' => $data['total_pdrb_pembanding_awal'],
+            'total_pdrb_pembanding_akhir' => $data['total_pdrb_pembanding_akhir'],
+            'ri' => $data['ri'],
+            'r' => $data['r'],
+            'yi' => $data['yi'],
+            'y' => $data['y'],
+            'kuadran' => $data['kuadran'],
+            'klasifikasi' => $data['klasifikasi']
+        ]);
 
-        OperatorController::logActivity('Analisis Klassen', 'diperbarui', "Memperbarui data perhitungan Analisis Tipologi Klassen untuk sektor {$request->sektor}.");
+        OperatorController::logActivity('Analisis Klassen', 'diperbarui', "Memperbarui data perhitungan Analisis Tipologi Klassen untuk sektor {$data['sektor']}.");
 
-        return redirect()->route('operator.klassen.index')->with('success', 'Data perhitungan Klassen berhasil diperbarui!');
+        return redirect()->route('operator.klassen.index')->with('success', 'Data perhitungan Klassen berhasil diperbarui secara permanen!');
     }
 
     public function destroy($id)
