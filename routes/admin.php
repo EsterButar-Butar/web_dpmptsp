@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\DataWilayahController;
+use App\Http\Controllers\Admin\DataKbliController;
+use App\Http\Controllers\Admin\DataHsCodeController;
 
 Route::middleware([
     'auth',
@@ -40,5 +42,29 @@ Route::middleware([
 
         Route::delete('/data-wilayah/{dataWilayah}', [DataWilayahController::class, 'destroy'])
             ->name('data-wilayah.destroy');
+
+        Route::get('/data-kbli', [DataKbliController::class, 'index'])
+            ->name('data-kbli.index');
+
+        Route::post('/data-kbli', [DataKbliController::class, 'store'])
+            ->name('data-kbli.store');
+
+        Route::put('/data-kbli/{id}', [DataKbliController::class, 'update'])
+            ->name('data-kbli.update');
+
+        Route::delete('/data-kbli/{id}', [DataKbliController::class, 'destroy'])
+            ->name('data-kbli.destroy');
+
+        Route::get('/hs-code', [DataHsCodeController::class, 'index'])
+            ->name('hs-code.index');
+
+        Route::post('/hs-code', [DataHsCodeController::class, 'store'])
+            ->name('hs-code.store');
+
+        Route::put('/hs-code/{id}', [DataHsCodeController::class, 'update'])
+            ->name('hs-code.update');
+
+        Route::delete('/hs-code/{id}', [DataHsCodeController::class, 'destroy'])
+            ->name('hs-code.destroy');
 
     });
