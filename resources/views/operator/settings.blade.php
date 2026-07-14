@@ -39,11 +39,17 @@
                     <div class="space-y-2">
                         <label class="text-sm font-medium text-slate-700">Password Saat Ini</label>
                         <input type="password" name="current_password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="••••••••" required>
+                        @error('current_password')
+                            <p class="text-xs text-red-500 mt-1 font-semibold">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Password Baru</label>
                             <input type="password" name="new_password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Minimal 8 karakter" required>
+                            @error('new_password')
+                                <p class="text-xs text-red-500 mt-1 font-semibold">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Konfirmasi Password Baru</label>
@@ -63,14 +69,33 @@
                 </div>
                 <div class="p-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                     <div>
-                        <h3 class="font-medium text-slate-800">Tingkatkan Keamanan Akun</h3>
+                        <h3 class="font-medium text-slate-800 flex items-center gap-2">
+                            Tingkatkan Keamanan Akun
+                            @if(Auth::user()->two_factor_enabled)
+                                <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    Aktif
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-500 border border-slate-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    Tidak Aktif
+                                </span>
+                            @endif
+                        </h3>
                         <p class="text-sm text-slate-500 mt-1 max-w-md">Aktifkan Autentikasi Dua Langkah untuk lapisan keamanan ekstra saat login ke sistem operator.</p>
                     </div>
                     <form action="{{ route('operator.settings.2fa') }}" method="POST">
                         @csrf
-                        <button type="submit" class="px-5 py-2.5 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors whitespace-nowrap">
-                            Aktifkan 2FA
-                        </button>
+                        @if(Auth::user()->two_factor_enabled)
+                            <button type="submit" class="px-5 py-2.5 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors whitespace-nowrap">
+                                Nonaktifkan 2FA
+                            </button>
+                        @else
+                            <button type="submit" class="px-5 py-2.5 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors whitespace-nowrap">
+                                Aktifkan 2FA
+                            </button>
+                        @endif
                     </form>
                 </div>
             </div>

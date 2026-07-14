@@ -205,7 +205,7 @@
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['sektor'] }}</td>
                                 <td class="px-4 py-4 text-center">{{ $data['tahun'] }}</td>
-                                <td class="px-4 py-4 text-center">{{ $data['nilai_lq'] }}</td>
+                                <td class="px-4 py-4 text-center">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4 leading-relaxed text-xs">
                                     {{ $data['keterangan'] }}
                                 </td>

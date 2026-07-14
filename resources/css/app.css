@@ -2301,3 +2301,9 @@ NAVBAR BRAND
     }
 
 }
+
+/* Hide Microsoft Edge / IE default password reveal and clear buttons */
+input::-ms-reveal,
+input::-ms-clear {
+    display: none !important;
+}

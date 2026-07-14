@@ -256,8 +256,8 @@
                                 <td class="px-4 py-4">{{ number_format($data['pdrb_sektor_analisis_akhir'], 0, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['total_pdrb_analisis_awal'], 0, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['total_pdrb_analisis_akhir'], 0, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['nilai_ss'] ?? 0, 4, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['nilai_lq'] ?? 0, 4, ',', '.') }}</td>
+                                <td class="px-4 py-4">{{ number_format($data['nilai_ss'] ?? 0, 2, ',', '.') }}</td>
+                                <td class="px-4 py-4">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     @if($data['tipologi'] === 'Maju dan Tumbuh Cepat')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm">

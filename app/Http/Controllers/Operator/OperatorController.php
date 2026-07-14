@@ -9,11 +9,17 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class OperatorController extends Controller
 {
     public static function logActivity($module, $action, $desc)
     {
+        if ($module !== 'Autentikasi') {
+            return;
+        }
+
         ActivityLog::create([
             'user_id' => Auth::id(),
             'module' => $module,
@@ -58,7 +64,11 @@ class OperatorController extends Controller
         $statusTipologi = $this->getLatestStatus(\App\Models\Tipologi::class);
         $statusKlassen = $this->getLatestStatus(\App\Models\Klassen::class);
 
-        $activityLogs = ActivityLog::latest()->take(10)->get();
+        $activityLogs = ActivityLog::where('module', 'Autentikasi')
+            ->whereIn('action', ['Login', 'Logout'])
+            ->latest()
+            ->take(10)
+            ->get();
 
         return view('operator.dashboard', compact(
             'countLq', 'countSs', 'countTipologi', 'countKlassen', 'totalAnalisa',
@@ -74,7 +84,10 @@ class OperatorController extends Controller
 
     public function aktivitas(Request $request)
     {
-        $activityLogs = ActivityLog::latest()->get();
+        $activityLogs = ActivityLog::where('module', 'Autentikasi')
+            ->whereIn('action', ['Login', 'Logout'])
+            ->latest()
+            ->get();
         $collection = collect($activityLogs);
 
         $search = $request->input('search');
@@ -134,20 +147,68 @@ class OperatorController extends Controller
         return view('operator.settings');
     }
 
-    // Simulasi aksi update
+    // Aksi update profil nyata
     public function updateProfile(Request $request)
     {
-        return back()->with('success', 'Data profil berhasil diperbarui! (Mode Simulasi)');
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:2048'],
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            // Hapus avatar lama jika ada
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Simpan avatar baru
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = $path;
+        }
+
+        $user->update($validated);
+
+        // Catat aktivitas
+        self::logActivity('Profile', 'Update', 'Memperbarui profil operator: ' . $user->name);
+
+        return back()->with('success', 'Data profil berhasil diperbarui!');
     }
 
     public function updatePassword(Request $request)
     {
-        return back()->with('success', 'Password akun berhasil diubah! (Mode Simulasi)');
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+        ]);
+
+        // Catat aktivitas
+        self::logActivity('Profile', 'Change Password', 'Mengubah password akun operator');
+
+        return back()->with('success', 'Password akun berhasil diubah!');
     }
 
     public function toggle2FA(Request $request)
     {
-        return back()->with('success', 'Status Autentikasi Dua Faktor (2FA) berhasil diubah! (Mode Simulasi)');
+        $user = Auth::user();
+        $newStatus = !$user->two_factor_enabled;
+
+        $user->update([
+            'two_factor_enabled' => $newStatus,
+        ]);
+
+        $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
+
+        return back()->with('success', 'Status Autentikasi Dua Faktor (2FA) berhasil ' . $statusText . '!');
     }
 }
 

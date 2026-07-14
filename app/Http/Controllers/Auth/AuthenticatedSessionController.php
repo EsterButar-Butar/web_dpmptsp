@@ -31,6 +31,14 @@ class AuthenticatedSessionController extends Controller
         // Membuat ulang session ID untuk keamanan
         $request->session()->regenerate();
 
+        if ($request->user()->isOperator()) {
+            \App\Http\Controllers\Operator\OperatorController::logActivity(
+                'Autentikasi',
+                'Login',
+                'Operator (' . $request->user()->name . ') berhasil login ke sistem.'
+            );
+        }
+
         /*
         |--------------------------------------------------------------------------
         | REDIRECT SETELAH LOGIN
@@ -55,6 +63,15 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        if ($user && $user->isOperator()) {
+            \App\Http\Controllers\Operator\OperatorController::logActivity(
+                'Autentikasi',
+                'Logout',
+                'Operator (' . $user->name . ') logout dari sistem.'
+            );
+        }
+
         // Logout dari guard web
         Auth::guard('web')->logout();
 

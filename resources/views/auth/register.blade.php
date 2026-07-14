@@ -1,23 +1,22 @@
 <x-guest-layout>
 
-    <div class="w-full max-w-[480px] mx-auto">
+    <div class="w-full max-w-[480px] mx-auto bg-white">
 
-        {{-- TITLE --}}
-        <div class="text-center mb-10 md:mb-12">
-
-            <h1
-                class="
-                    text-[28px]
-                    md:text-[32px]
-                    font-bold
-                    text-blue-600
-                "
-            >
-                Daftar Akun
-            </h1>
-
+        {{-- LOGO --}}
+        <div class="flex justify-center mb-6">
+            <img src="{{ asset('images/logo-dpmptsp.png') }}" class="h-20 w-auto object-contain" alt="Logo DPMPTSP">
         </div>
 
+        {{-- WELCOME HEADERS --}}
+        <div class="text-center mb-2">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-[#1E5E3F] tracking-wider">SELAMAT DATANG</h2>
+            <p class="text-[#476F5B] text-sm md:text-base font-bold mt-2">Dasbor Eksekutif untuk Investasi Sumatera</p>
+        </div>
+
+        {{-- SECTION TITLE --}}
+        <div class="text-center mb-8">
+            <h3 class="text-xl md:text-2xl font-black text-[#1E5E3F]">Daftar Akun</h3>
+        </div>
 
         <form
             method="POST"
@@ -26,61 +25,44 @@
         >
             @csrf
 
-
             {{-- NAME --}}
             <div>
-
                 <div
                     class="
                         relative
                         flex
                         items-center
-                        min-h-[54px]
+                        min-h-[64px]
                         px-4
-                        rounded-xl
-                        bg-gray-100
+                        rounded-2xl
+                        bg-[#ECEFF1]
                         border
                         border-transparent
-                        focus-within:border-blue-500
+                        focus-within:border-[#1E5E3F]
                         focus-within:ring-2
-                        focus-within:ring-blue-100
-                        transition
+                        focus-within:ring-[#1E5E3F]/10
+                        transition-all
+                        duration-200
                     "
                 >
-
-                    <div
-                        class="
-                            w-10
-                            flex
-                            items-center
-                            justify-center
-                            flex-shrink-0
-                            text-black
-                        "
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="w-6 h-6"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.75 20.105a8.25 8.25 0 0116.5 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5a18.683 18.683 0 01-7.813-1.7.75.75 0 01-.437-.695z"
-                                clip-rule="evenodd"
-                            />
+                    {{-- ICON WRAPPER --}}
+                    <div class="w-10 h-10 bg-black text-white flex items-center justify-center rounded-xl flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                         </svg>
                     </div>
 
-
-                    <div class="flex-1 ml-3">
-
+                    {{-- INPUT FIELD --}}
+                    <div class="flex-1 ml-4">
                         <label
                             for="name"
                             class="
                                 block
                                 text-[10px]
-                                text-gray-500
+                                font-bold
+                                text-gray-400
+                                uppercase
+                                tracking-wider
                                 mb-0.5
                             "
                         >
@@ -92,7 +74,7 @@
                             type="text"
                             name="name"
                             value="{{ old('name') }}"
-                            placeholder="Nama lengkap"
+                            placeholder="Nama Lengkap"
                             required
                             autofocus
                             autocomplete="name"
@@ -103,83 +85,61 @@
                                 border-0
                                 bg-transparent
                                 text-sm
+                                font-medium
                                 text-gray-900
-                                placeholder:text-gray-500
+                                placeholder:text-gray-400
                                 focus:ring-0
                                 focus:outline-none
                             "
                         >
-
                     </div>
-
                 </div>
 
-
                 @error('name')
-                    <p class="mt-2 text-sm text-red-600">
+                    <p class="mt-2 text-xs font-semibold text-red-600">
                         {{ $message }}
                     </p>
                 @enderror
-
             </div>
-
 
             {{-- EMAIL --}}
             <div>
-
                 <div
                     class="
                         relative
                         flex
                         items-center
-                        min-h-[54px]
+                        min-h-[64px]
                         px-4
-                        rounded-xl
-                        bg-gray-100
+                        rounded-2xl
+                        bg-[#ECEFF1]
                         border
                         border-transparent
-                        focus-within:border-blue-500
+                        focus-within:border-[#1E5E3F]
                         focus-within:ring-2
-                        focus-within:ring-blue-100
-                        transition
+                        focus-within:ring-[#1E5E3F]/10
+                        transition-all
+                        duration-200
                     "
                 >
-
-                    <div
-                        class="
-                            w-10
-                            flex
-                            items-center
-                            justify-center
-                            flex-shrink-0
-                            text-black
-                        "
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="w-6 h-6"
-                        >
-                            <path
-                                d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z"
-                            />
-
-                            <path
-                                d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z"
-                            />
+                    {{-- ICON WRAPPER --}}
+                    <div class="w-10 h-10 bg-black text-white flex items-center justify-center rounded-xl flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                         </svg>
                     </div>
 
-
-                    <div class="flex-1 ml-3">
-
+                    {{-- INPUT FIELD --}}
+                    <div class="flex-1 ml-4">
                         <label
                             for="email"
                             class="
                                 block
                                 text-[10px]
-                                text-gray-500
+                                font-bold
+                                text-gray-400
+                                uppercase
+                                tracking-wider
                                 mb-0.5
                             "
                         >
@@ -201,81 +161,61 @@
                                 border-0
                                 bg-transparent
                                 text-sm
+                                font-medium
                                 text-gray-900
-                                placeholder:text-gray-500
+                                placeholder:text-gray-400
                                 focus:ring-0
                                 focus:outline-none
                             "
                         >
-
                     </div>
-
                 </div>
 
-
                 @error('email')
-                    <p class="mt-2 text-sm text-red-600">
+                    <p class="mt-2 text-xs font-semibold text-red-600">
                         {{ $message }}
                     </p>
                 @enderror
-
             </div>
-
 
             {{-- PASSWORD --}}
             <div>
-
                 <div
                     class="
                         relative
                         flex
                         items-center
-                        min-h-[54px]
+                        min-h-[64px]
                         px-4
-                        rounded-xl
-                        bg-gray-100
+                        rounded-2xl
+                        bg-[#ECEFF1]
                         border
                         border-transparent
-                        focus-within:border-blue-500
+                        focus-within:border-[#1E5E3F]
                         focus-within:ring-2
-                        focus-within:ring-blue-100
-                        transition
+                        focus-within:ring-[#1E5E3F]/10
+                        transition-all
+                        duration-200
                     "
                 >
-
-                    <div
-                        class="
-                            w-10
-                            flex
-                            items-center
-                            justify-center
-                            flex-shrink-0
-                            text-black
-                        "
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="w-6 h-6"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M15.75 1.5a6.75 6.75 0 00-6.593 8.2L1.72 17.137a.75.75 0 00-.22.53v3.583c0 .414.336.75.75.75h3.583a.75.75 0 00.53-.22l.97-.97h1.917a.75.75 0 00.75-.75v-1.917h1.917a.75.75 0 00.53-.22l1.903-1.903A6.75 6.75 0 1015.75 1.5z"
-                                clip-rule="evenodd"
-                            />
+                    {{-- ICON WRAPPER --}}
+                    <div class="w-10 h-10 bg-black text-white flex items-center justify-center rounded-xl flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 rotate-45">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H3.75v-2.25c0-.527.21-1.033.586-1.414l5.379-5.379c.403-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
                         </svg>
                     </div>
 
-
-                    <div class="flex-1 ml-3">
-
+                    {{-- INPUT FIELD --}}
+                    <div class="flex-1 ml-4 pr-8">
                         <label
                             for="password"
                             class="
                                 block
                                 text-[10px]
-                                text-gray-500
+                                font-bold
+                                text-gray-400
+                                uppercase
+                                tracking-wider
                                 mb-0.5
                             "
                         >
@@ -293,108 +233,91 @@
                                 block
                                 w-full
                                 p-0
-                                pr-10
                                 border-0
                                 bg-transparent
                                 text-sm
+                                font-medium
                                 text-gray-900
+                                placeholder:text-gray-400
                                 focus:ring-0
                                 focus:outline-none
                             "
                         >
-
                     </div>
 
-
+                    {{-- SHOW PASSWORD EYE --}}
                     <button
                         type="button"
-                        onclick="togglePassword('password')"
+                        onclick="togglePassword('password', 'regEye')"
                         class="
                             absolute
                             right-4
-                            text-gray-600
-                            hover:text-blue-600
+                            text-gray-400
+                            hover:text-[#1E5E3F]
+                            transition-colors
                         "
                         aria-label="Tampilkan password"
                     >
                         <svg
+                            id="regEye"
                             xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
                             viewBox="0 0 24 24"
-                            fill="currentColor"
+                            stroke-width="2"
+                            stroke="currentColor"
                             class="w-5 h-5"
                         >
-                            <path
-                                d="M12 4.5c-4.8 0-8.7 3-10.5 7.5C3.3 16.5 7.2 19.5 12 19.5s8.7-3 10.5-7.5C20.7 7.5 16.8 4.5 12 4.5zm0 12a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"
-                            />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.43 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         </svg>
                     </button>
-
                 </div>
 
-
                 @error('password')
-                    <p class="mt-2 text-sm text-red-600">
+                    <p class="mt-2 text-xs font-semibold text-red-600">
                         {{ $message }}
                     </p>
                 @enderror
-
             </div>
-
 
             {{-- PASSWORD CONFIRMATION --}}
             <div>
-
                 <div
                     class="
                         relative
                         flex
                         items-center
-                        min-h-[54px]
+                        min-h-[64px]
                         px-4
-                        rounded-xl
-                        bg-gray-100
+                        rounded-2xl
+                        bg-[#ECEFF1]
                         border
                         border-transparent
-                        focus-within:border-blue-500
+                        focus-within:border-[#1E5E3F]
                         focus-within:ring-2
-                        focus-within:ring-blue-100
-                        transition
+                        focus-within:ring-[#1E5E3F]/10
+                        transition-all
+                        duration-200
                     "
                 >
-
-                    <div
-                        class="
-                            w-10
-                            flex
-                            items-center
-                            justify-center
-                            flex-shrink-0
-                            text-black
-                        "
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="w-6 h-6"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M12.516 2.17a.75.75 0 00-1.032 0 11.2 11.2 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.75.75 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516 11.2 11.2 0 01-7.877-3.08z"
-                                clip-rule="evenodd"
-                            />
+                    {{-- ICON WRAPPER --}}
+                    <div class="w-10 h-10 bg-black text-white flex items-center justify-center rounded-xl flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 rotate-45">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H3.75v-2.25c0-.527.21-1.033.586-1.414l5.379-5.379c.403-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
                         </svg>
                     </div>
 
-
-                    <div class="flex-1 ml-3">
-
+                    {{-- INPUT FIELD --}}
+                    <div class="flex-1 ml-4 pr-8">
                         <label
                             for="password_confirmation"
                             class="
                                 block
                                 text-[10px]
-                                text-gray-500
+                                font-bold
+                                text-gray-400
+                                uppercase
+                                tracking-wider
                                 mb-0.5
                             "
                         >
@@ -412,89 +335,133 @@
                                 block
                                 w-full
                                 p-0
-                                pr-10
                                 border-0
                                 bg-transparent
                                 text-sm
+                                font-medium
                                 text-gray-900
+                                placeholder:text-gray-400
                                 focus:ring-0
                                 focus:outline-none
                             "
                         >
-
                     </div>
 
-
+                    {{-- SHOW PASSWORD EYE --}}
                     <button
                         type="button"
-                        onclick="togglePassword('password_confirmation')"
+                        onclick="togglePassword('password_confirmation', 'confirmRegEye')"
                         class="
                             absolute
                             right-4
-                            text-gray-600
-                            hover:text-blue-600
+                            text-gray-400
+                            hover:text-[#1E5E3F]
+                            transition-colors
                         "
-                        aria-label="Tampilkan konfirmasi password"
+                        aria-label="Tampilkan password"
                     >
                         <svg
+                            id="confirmRegEye"
                             xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
                             viewBox="0 0 24 24"
-                            fill="currentColor"
+                            stroke-width="2"
+                            stroke="currentColor"
                             class="w-5 h-5"
                         >
-                            <path
-                                d="M12 4.5c-4.8 0-8.7 3-10.5 7.5C3.3 16.5 7.2 19.5 12 19.5s8.7-3 10.5-7.5C20.7 7.5 16.8 4.5 12 4.5zm0 12a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"
-                            />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.43 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         </svg>
                     </button>
-
                 </div>
-
             </div>
 
+            {{-- REMEMBER & FORGOT --}}
+            <div class="flex items-center justify-between pt-2 pb-4 text-xs font-semibold text-gray-400">
+                <label
+                    for="remember"
+                    class="
+                        flex
+                        items-center
+                        gap-2
+                        cursor-pointer
+                        hover:text-gray-600
+                        transition-colors
+                    "
+                >
+                    <input
+                        id="remember"
+                        type="checkbox"
+                        name="remember"
+                        class="
+                            w-4
+                            h-4
+                            rounded
+                            border-gray-300
+                            text-[#1E5E3F]
+                            focus:ring-[#1E5E3F]
+                            focus:ring-offset-0
+                        "
+                    >
+                    <span>Ingat akun saya</span>
+                </label>
 
-            {{-- REGISTER BUTTON --}}
+                @if (Route::has('password.request'))
+                    <a
+                        href="{{ route('password.request') }}"
+                        class="hover:text-[#1E5E3F] hover:underline"
+                    >
+                        Lupa Kata sandi
+                    </a>
+                @endif
+            </div>
+
+            {{-- SUBMIT --}}
             <button
                 type="submit"
                 class="
                     w-full
-                    h-[54px]
-                    mt-4
-                    rounded-xl
-                    bg-blue-600
+                    h-14
+                    rounded-2xl
+                    bg-[#4A705B]
                     text-white
                     text-sm
-                    font-semibold
-                    hover:bg-blue-700
+                    font-bold
+                    hover:bg-[#3B5B49]
+                    focus:outline-none
                     focus:ring-4
-                    focus:ring-blue-200
-                    transition
+                    focus:ring-[#4A705B]/20
+                    transition-all
+                    duration-200
+                    shadow-sm
                 "
             >
                 Daftar
             </button>
 
-
             {{-- LOGIN LINK --}}
-            <p class="text-center text-sm text-gray-800 pt-1">
-
-                Sudah memiliki akun?
-
+            <p class="text-center text-xs text-gray-500 pt-2">
+                Belum punya akun?
                 <a
                     href="{{ route('login') }}"
                     class="
-                        text-blue-600
+                        text-[#1E5E3F]
+                        hover:text-[#3B5B49]
+                        font-bold
                         hover:underline
                     "
                 >
                     Masuk
                 </a>
-
             </p>
 
-
-            {{-- GOOGLE --}}
+            {{-- GOOGLE REGISTRATION --}}
             @if (Route::has('google.redirect'))
+                <div class="relative flex py-3 items-center">
+                    <div class="flex-grow border-t border-gray-100"></div>
+                    <span class="flex-shrink mx-4 text-[10px] text-gray-400 uppercase font-bold tracking-wider">Atau</span>
+                    <div class="flex-grow border-t border-gray-100"></div>
+                </div>
 
                 <a
                     href="{{ route('google.redirect') }}"
@@ -502,74 +469,59 @@
                         flex
                         items-center
                         justify-center
-                        gap-4
+                        gap-3
                         w-full
-                        h-[54px]
-                        mt-8
-                        rounded-xl
+                        h-12
+                        rounded-2xl
                         bg-white
                         border
-                        border-gray-100
-                        shadow-md
+                        border-gray-200
                         text-sm
+                        font-semibold
                         text-gray-700
                         hover:bg-gray-50
-                        hover:shadow-lg
-                        transition
+                        transition-all
+                        duration-200
                     "
                 >
-
-                    <svg
-                        class="w-6 h-6"
-                        viewBox="0 0 48 48"
-                    >
-                        <path
-                            fill="#FFC107"
-                            d="M43.6 20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11.6 0 19.3-8.2 19.3-19.7 0-1.3-.1-2.4-.3-3.3z"
-                        />
-
-                        <path
-                            fill="#FF3D00"
-                            d="M6.3 14.7l6.6 4.8C14.7 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6 29.3 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"
-                        />
-
-                        <path
-                            fill="#4CAF50"
-                            d="M24 44c5.1 0 9.8-1.9 13.3-5.1l-6.1-5.2C29.2 35.2 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.5 16.2 44 24 44z"
-                        />
-
-                        <path
-                            fill="#1976D2"
-                            d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.1 5.2c-.4.4 6.8-5 6.8-14.9 0-1.3-.1-2.7-.4-4z"
-                        />
+                    <svg class="w-5 h-5" viewBox="0 0 48 48">
+                        <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11.6 0 19.3-8.2 19.3-19.7 0-1.3-.1-2.4-.3-3.3z"/>
+                        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6 29.3 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/>
+                        <path fill="#4CAF50" d="M24 44c5.1 0 9.8-1.9 13.3-5.1l-6.1-5.2C29.2 35.2 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.5 16.2 44 24 44z"/>
+                        <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.1 5.2c-.4.4 6.8-5 6.8-14.9 0-1.3-.1-2.7-.4-4z"/>
                     </svg>
-
-                    <span>
-                        Login dengan Google
-                    </span>
-
+                    <span>Masuk dengan Google</span>
                 </a>
-
             @endif
 
         </form>
 
     </div>
 
-
+    @push('scripts')
     <script>
-        function togglePassword(inputId) {
+        function togglePassword(inputId, iconId) {
             const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
 
-            if (!input) {
+            if (!input || !icon) {
                 return;
             }
 
-            input.type =
-                input.type === 'password'
-                    ? 'text'
-                    : 'password';
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.815 7.815 3 3m-3-3a3 3 0 0 1-4.243-4.243m0 0-3.65-3.65m0 0a3 3 0 0 1 4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532 3.29 3.29" />
+                `;
+            } else {
+                input.type = 'password';
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.43 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                `;
+            }
         }
     </script>
+    @endpush
 
 </x-guest-layout>

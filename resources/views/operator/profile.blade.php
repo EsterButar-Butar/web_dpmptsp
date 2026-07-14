@@ -33,7 +33,7 @@
 
                     <div class="w-32 h-32 rounded-full bg-emerald-100 overflow-hidden border-4 border-white shadow-lg relative group" @click="$refs.photo.click()">
                         <!-- Current Profile Photo -->
-                        <img x-show="!photoPreview" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()?->name ?? 'Siti') }}&background=EBF4FF&color=1E3A8A" alt="Profile" class="w-full h-full object-cover">
+                        <img x-show="!photoPreview" src="{{ Auth::user()?->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()?->name ?? 'Siti') . '&background=EBF4FF&color=1E3A8A' }}" alt="Profile" class="w-full h-full object-cover">
                         <!-- New Profile Photo Preview -->
                         <span x-show="photoPreview" class="block w-full h-full bg-cover bg-no-repeat bg-center" x-bind:style="'background-image: url(\'' + photoPreview + '\');'" style="display: none;"></span>
 
@@ -49,6 +49,9 @@
                         Ubah Foto
                     </button>
                     <p class="text-xs text-slate-400 text-center max-w-[150px]">Format JPG, PNG atau GIF. Maksimal 2MB.</p>
+                    @error('avatar')
+                        <p class="text-xs text-red-500 mt-1 font-semibold text-center">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Form Section -->
@@ -56,19 +59,28 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Nama Lengkap</label>
-                            <input type="text" name="name" value="{{ Auth::user()?->name ?? 'Siti' }}" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Masukkan nama">
+                            <input type="text" name="name" value="{{ old('name', Auth::user()?->name) }}" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Masukkan nama" required>
+                            @error('name')
+                                <p class="text-xs text-red-500 mt-1 font-semibold">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Email</label>
-                            <input type="email" name="email" value="{{ Auth::user()?->email ?? 'siti@operator.com' }}" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Masukkan email">
+                            <input type="email" name="email" value="{{ old('email', Auth::user()?->email) }}" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Masukkan email" required>
+                            @error('email')
+                                <p class="text-xs text-red-500 mt-1 font-semibold">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Peran / Jabatan</label>
-                            <input type="text" value="Operator Lapangan" disabled class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed">
+                            <input type="text" value="{{ ucfirst(Auth::user()?->role) }}" disabled class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-slate-700">Nomor Telepon</label>
-                            <input type="text" name="phone" value="081234567890" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Masukkan nomor">
+                            <input type="text" name="phone" value="{{ old('phone', Auth::user()?->phone) }}" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none" placeholder="Masukkan nomor">
+                            @error('phone')
+                                <p class="text-xs text-red-500 mt-1 font-semibold">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
                     
