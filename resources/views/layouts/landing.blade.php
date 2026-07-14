@@ -2,7 +2,10 @@
 <html lang="id">
 
 <head>
-
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
     <meta charset="UTF-8">
 
     <meta
@@ -47,7 +50,9 @@
     @stack('styles')
 
 </head>
-
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
 <body>
 

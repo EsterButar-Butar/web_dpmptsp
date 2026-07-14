@@ -39,9 +39,12 @@
         Tentang
     </a>
 
-    <a href="{{ route('investment.map') }}" class="nav-link">
-        Peta Investasi
-    </a>
+    <a
+    href="{{ route('investment.map') }}"
+    class="nav-link {{ request()->routeIs('investment.map') ? 'active' : '' }}"
+>
+    Peta Investasi
+</a>
 
 </nav>
 
