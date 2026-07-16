@@ -89,7 +89,7 @@
     </section>
 
     {{-- ABOUT --}}
-    @include('landing.about')
+    @include('landing.about-section')
 
     {{-- FOOTER --}}
     {{-- @include('partials.landing.footer') --}}

@@ -22,9 +22,9 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::get('/tentang', function () {
-    return view('landing.about');
-})->name('about');
+// Route::get('/tentang', function () {
+//     return view('landing.about');
+// })->name('about');
 
 
 Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
@@ -36,20 +36,19 @@ Route::get(
         AnalysisController::class,
         'index',
     ]
+)->name('analysis.index');
 
-)->name('analysis');
 
 
-Route::get('/perbandingan-sektor', [
-    ComparisonController::class,
-    'index',
-])->name('comparison');
 
-// Route::get('/perbandingan-sektor', [
-//     ComparisonController::class,
-//     'index',
-// ])->name('comparison.index');
-// ])->name('comparison.index');
+Route::get(
+    '/perbandingan-sektor',
+    [
+        ComparisonController::class,
+        'index',
+    ]
+)->name('comparison.index');
+
 
 
 /*
@@ -200,9 +199,6 @@ require __DIR__ . '/auth.php';
 |--------------------------------------------------------------------------
 | ADMIN ROUTES
 |--------------------------------------------------------------------------
-|
-| Route khusus pengguna dengan role admin.
-|
 */
 
 require __DIR__ . '/admin.php';
@@ -212,9 +208,6 @@ require __DIR__ . '/admin.php';
 |--------------------------------------------------------------------------
 | OPERATOR ROUTES
 |--------------------------------------------------------------------------
-|
-| Route khusus pengguna dengan role operator.
-|
 */
 
 require __DIR__ . '/operator.php';
@@ -224,9 +217,6 @@ require __DIR__ . '/operator.php';
 |--------------------------------------------------------------------------
 | USER ROUTES
 |--------------------------------------------------------------------------
-|
-| Route khusus pengguna dengan role user.
-|
 */
 
 require __DIR__ . '/user.php';

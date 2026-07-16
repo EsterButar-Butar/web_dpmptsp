@@ -31,25 +31,31 @@
         {{-- NAVIGATION --}}
      <nav class="main-navigation" id="mainNavigation">
 
-    <a href="{{ route('home') }}#hero" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
-        Beranda
-    </a>
+  <a
+    id="nav-home"
+    href="{{ route('home') }}"
+    class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+    Beranda
+</a>
 
-    <a href="{{ route('home') }}#tentang" class="nav-link">
-        Tentang
-    </a>
+<a
+    id="nav-about"
+    href="{{ route('home') }}#tentang"
+    class="nav-link">
+    Tentang
+</a>
 
-    <a
+<a
+    id="nav-map"
     href="{{ route('investment.map') }}"
-    class="nav-link {{ request()->routeIs('investment.map') ? 'active' : '' }}"
->
+    class="nav-link {{ request()->routeIs('investment.map') ? 'active' : '' }}">
     Peta Investasi
 </a>
 
 </nav>
 
         {{-- LOGIN --}}
-    <div class="navbar-action">
+       <div class="navbar-action">
 
     @auth
 
