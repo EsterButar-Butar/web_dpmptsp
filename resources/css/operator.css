@@ -1,0 +1,50 @@
+@layer components {
+    /* Cards */
+    .op-card {
+        @apply bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8;
+    }
+
+    .op-card-header {
+        @apply p-6 md:p-8;
+    }
+
+    /* Labels */
+    .op-label {
+        @apply block text-sm font-semibold text-slate-700;
+    }
+
+    /* Inputs */
+    .op-input {
+        @apply w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-[#145239] focus:ring-2 focus:ring-emerald-200 outline-none text-slate-700 text-sm transition-colors;
+    }
+
+    .op-input-icon {
+        @apply pr-10;
+    }
+
+    .op-select {
+        @apply appearance-none cursor-pointer bg-none;
+    }
+
+    .op-datalist {
+        @apply [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer;
+    }
+
+    /* Buttons */
+    .op-btn-primary {
+        @apply flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm;
+    }
+
+    .op-btn-secondary {
+        @apply flex items-center justify-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200 px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm;
+    }
+
+    .op-btn-outline {
+        @apply w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-emerald-200 text-[#145239] bg-emerald-50 hover:bg-emerald-100 rounded-xl text-sm font-bold transition-colors shadow-sm;
+    }
+
+    /* Tables */
+    .op-table-header {
+        @apply bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-sm;
+    }
+}

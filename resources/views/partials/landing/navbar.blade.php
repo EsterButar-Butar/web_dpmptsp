@@ -11,10 +11,10 @@
                 class="brand-logo"
             >
 
-            <div class="brand-text">
+            {{-- <div class="brand-text">
                 <strong>DPMPTSP</strong>
                 <span>Provinsi Sumatera Utara</span>
-            </div>
+            </div> --}}
 
         </a>
 
@@ -31,17 +31,20 @@
         {{-- NAVIGATION --}}
      <nav class="main-navigation" id="mainNavigation">
 
-    <a href="#hero" class="nav-link active">
+    <a href="{{ route('home') }}#hero" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
         Beranda
     </a>
 
-    <a href="#tentang" class="nav-link">
+    <a href="{{ route('home') }}#tentang" class="nav-link">
         Tentang
     </a>
 
-    <a href="{{ route('investment.map') }}" class="nav-link">
-        Peta Investasi
-    </a>
+    <a
+    href="{{ route('investment.map') }}"
+    class="nav-link {{ request()->routeIs('investment.map') ? 'active' : '' }}"
+>
+    Peta Investasi
+</a>
 
 </nav>
 

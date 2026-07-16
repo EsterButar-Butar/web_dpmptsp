@@ -12,9 +12,6 @@ return new class extends Migration
 
             $table->id();
 
-            $table->string('kode_sektor')
-                ->nullable();
-
             $table->string('nama_sektor');
 
             $table->timestamps();

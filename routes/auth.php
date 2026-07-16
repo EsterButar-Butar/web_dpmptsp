@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 
 use Illuminate\Support\Facades\Route;
@@ -23,8 +23,8 @@ use Illuminate\Support\Facades\Route;
 | Fitur:
 | - Register
 | - Login
-| - Forgot Password
-| - Reset Password
+| - Lupa password
+| - Reset password
 |
 */
 
@@ -35,13 +35,6 @@ Route::middleware('guest')->group(function () {
     |--------------------------------------------------------------------------
     | REGISTER
     |--------------------------------------------------------------------------
-    |
-    | GET  /register
-    | Menampilkan halaman registrasi.
-    |
-    | POST /register
-    | Menyimpan pengguna baru.
-    |
     */
 
     Route::get(
@@ -66,13 +59,6 @@ Route::middleware('guest')->group(function () {
     |--------------------------------------------------------------------------
     | LOGIN
     |--------------------------------------------------------------------------
-    |
-    | GET  /login
-    | Menampilkan halaman login.
-    |
-    | POST /login
-    | Memproses autentikasi pengguna.
-    |
     */
 
     Route::get(
@@ -98,7 +84,7 @@ Route::middleware('guest')->group(function () {
     | FORGOT PASSWORD
     |--------------------------------------------------------------------------
     |
-    | Menampilkan form lupa password dan mengirimkan
+    | Menampilkan halaman lupa password dan mengirim
     | link reset password ke email pengguna.
     |
     */
@@ -125,10 +111,6 @@ Route::middleware('guest')->group(function () {
     |--------------------------------------------------------------------------
     | RESET PASSWORD
     |--------------------------------------------------------------------------
-    |
-    | Menampilkan halaman reset password berdasarkan token
-    | dan menyimpan password baru.
-    |
     */
 
     Route::get(
@@ -156,15 +138,8 @@ Route::middleware('guest')->group(function () {
 | AUTHENTICATED ROUTES
 |--------------------------------------------------------------------------
 |
-| Route berikut hanya dapat diakses oleh pengguna
-| yang sudah berhasil login.
-|
-| Fitur:
-| - Email Verification
-| - Resend Verification Email
-| - Confirm Password
-| - Update Password
-| - Logout
+| Semua route di dalam group ini hanya dapat diakses
+| oleh pengguna yang sudah login.
 |
 */
 
@@ -176,8 +151,7 @@ Route::middleware('auth')->group(function () {
     | EMAIL VERIFICATION NOTICE
     |--------------------------------------------------------------------------
     |
-    | Menampilkan halaman pemberitahuan bahwa pengguna
-    | harus melakukan verifikasi email.
+    | Menampilkan halaman pemberitahuan verifikasi email.
     |
     */
 
@@ -192,7 +166,7 @@ Route::middleware('auth')->group(function () {
     | VERIFY EMAIL
     |--------------------------------------------------------------------------
     |
-    | Memproses link verifikasi email.
+    | Memproses link verifikasi yang dikirim melalui email.
     |
     */
 
@@ -232,8 +206,8 @@ Route::middleware('auth')->group(function () {
     | CONFIRM PASSWORD
     |--------------------------------------------------------------------------
     |
-    | Meminta pengguna memasukkan password kembali
-    | sebelum mengakses fitur sensitif.
+    | Meminta pengguna mengonfirmasi password sebelum
+    | melakukan tindakan sensitif.
     |
     */
 
@@ -260,7 +234,8 @@ Route::middleware('auth')->group(function () {
     | UPDATE PASSWORD
     |--------------------------------------------------------------------------
     |
-    | Memperbarui password pengguna yang sedang login.
+    | Digunakan untuk mengganti password pengguna
+    | yang sedang login.
     |
     */
 
@@ -275,10 +250,14 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | LOGOUT CUSTOM
+    | LOGOUT
     |--------------------------------------------------------------------------
     |
-    | Logout ditangani oleh AuthenticatedSessionController custom.
+    | Logout hanya memiliki SATU route.
+    |
+    | Method : POST
+    | URL    : /logout
+    | Name   : logout
     |
     */
 

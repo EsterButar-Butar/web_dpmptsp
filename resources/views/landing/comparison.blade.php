@@ -1,289 +1,487 @@
-@extends('layouts.landing')
+@vite([
+    'resources/css/navbar.css',
+    'resources/css/home.css',
+    'resources/css/about.css',
+    'resources/css/analysis.css',
+    'resources/css/comparison.css',
+
+    'resources/js/navbar.js',
+    'resources/js/home.js',
+    'resources/js/about.js',
+    'resources/js/analysis.js',
+    'resources/js/comparison.js',
+])
 
 
-@section('title','Perbandingan Sektor')
+{{-- NAVBAR --}}
+@include('partials.landing.navbar')
 
-
-@section('content')
 
 
 <section class="comparison-page">
 
 
-<h1>
-    Analisis Perbandingan Sektor
-</h1>
+    {{-- TITLE --}}
+    <h1 class="comparison-title">
+        Analisis Perbandingan Sektor
+    </h1>
 
 
-<form 
-    method="GET"
-    action="{{ route('comparison.index') }}"
-    class="comparison-filter"
->
 
-<select name="provinsi">
-<option>
-{{ $filter['provinsi'] }}
-</option>
-</select>
+    {{-- FILTER --}}
+    <form 
+        method="GET"
+        action="{{ route('comparison') }}"
+        class="comparison-filter"
+    >
 
 
-<select name="kabupaten">
-<option>
-{{ $filter['kabupaten'] }}
-</option>
-</select>
+        <select name="provinsi">
 
+            <option>
+                {{ $filter['provinsi'] }}
+            </option>
 
-<select name="sektor">
-<option>
-{{ $filter['sektor'] }}
-</option>
-</select>
+        </select>
 
 
-<select name="tahun_awal">
 
-@for($i=2019;$i<=2026;$i++)
+        <select name="kabupaten">
 
-<option 
-value="{{ $i }}"
-{{ $filter['tahun_awal']==$i?'selected':'' }}
->
-{{ $i }}
-</option>
+            <option>
+                {{ $filter['kabupaten'] }}
+            </option>
 
-@endfor
+        </select>
 
-</select>
 
 
-<select name="tahun_akhir">
+        <select name="sektor">
 
-@for($i=2019;$i<=2026;$i++)
+            <option>
+                {{ $filter['sektor'] }}
+            </option>
 
-<option 
-value="{{ $i }}"
-{{ $filter['tahun_akhir']==$i?'selected':'' }}
->
-{{ $i }}
-</option>
+        </select>
 
-@endfor
 
-</select>
 
+        <select name="tahun_awal">
 
-<button>
-Analisis
-</button>
 
+            @for($i=2019;$i<=2026;$i++)
 
-</form>
+            <option 
+                value="{{ $i }}"
+                {{ $filter['tahun_awal']==$i ? 'selected' : '' }}
+            >
 
+                {{ $i }}
 
+            </option>
 
-<div class="summary-grid">
+            @endfor
 
 
-<div>
-<h2>{{ $summary['growth'] }}%</h2>
-<p>Pertumbuhan rata-rata</p>
-</div>
+        </select>
 
 
-<div>
-<h2>{{ $summary['contribution'] }}%</h2>
-<p>Kontribusi rata-rata</p>
-</div>
 
 
-<div>
-<h2>{{ $summary['lq'] }}</h2>
-<p>Nilai LQ terakhir</p>
-</div>
+        <select name="tahun_akhir">
 
 
-<div>
-<h2>{{ $summary['status'] }}</h2>
-<p>{{ $summary['kategori'] }}</p>
-</div>
+            @for($i=2019;$i<=2026;$i++)
 
+            <option 
+                value="{{ $i }}"
+                {{ $filter['tahun_akhir']==$i ? 'selected' : '' }}
+            >
 
-</div>
+                {{ $i }}
 
+            </option>
 
+            @endfor
 
-<div class="chart-grid">
 
+        </select>
 
-<div class="chart-card">
 
-<h3>
-Trend Pertumbuhan Sektor (%)
-</h3>
 
-<canvas id="growthChart"></canvas>
 
-</div>
+        <button type="submit">
 
+            Analisis
 
+        </button>
 
-<div class="chart-card">
 
-<h3>
-Perbandingan Indikator Tahunan
-</h3>
 
-<canvas id="indicatorChart"></canvas>
+    </form>
 
-</div>
 
 
-</div>
 
 
+    {{-- SUMMARY --}}
 
+    <div class="comparison-summary">
 
-<div class="table-card">
 
-<h3>
-Daftar Sektor Berdasarkan Tipologi
-</h3>
 
+        <div class="summary-card">
 
-<table>
+            <h2>
+                {{ $summary['growth'] }}%
+            </h2>
 
-<thead>
+            <p>
+                Pertumbuhan rata-rata
+            </p>
 
-<tr>
-<th>Tahun</th>
-<th>Pertumbuhan</th>
-<th>Kontribusi</th>
-<th>LQ</th>
-<th>SSA</th>
-<th>Kuadran</th>
-<th>Status</th>
-</tr>
+        </div>
 
-</thead>
 
 
-<tbody>
 
-@foreach($trend as $row)
 
-<tr>
+        <div class="summary-card">
 
-<td>{{ $row['tahun'] }}</td>
+            <h2>
+                {{ $summary['contribution'] }}%
+            </h2>
 
-<td>{{ $row['growth'] }}</td>
+            <p>
+                Kontribusi rata-rata
+            </p>
 
-<td>{{ $row['contribution'] }}</td>
+        </div>
 
-<td>{{ $row['lq'] }}</td>
 
-<td>{{ $row['ssa'] }}</td>
 
-<td>{{ $row['kuadran'] }}</td>
 
-<td>{{ $row['status'] }}</td>
 
-</tr>
 
+        <div class="summary-card">
 
-@endforeach
+            <h2>
+                {{ $summary['lq'] }}
+            </h2>
 
-</tbody>
+            <p>
+                Nilai LQ terakhir
+            </p>
 
-</table>
+        </div>
 
 
-</div>
+
+
+
+        <div class="summary-card">
+
+            <h2>
+                {{ $summary['status'] }}
+            </h2>
+
+            <p>
+                {{ $summary['kategori'] }}
+            </p>
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    {{-- CHART --}}
+
+    <div class="comparison-chart-grid">
+
+
+        <div class="chart-card">
+
+
+            <h3>
+                Trend Pertumbuhan Sektor (%)
+            </h3>
+
+
+            <canvas id="growthChart"></canvas>
+
+
+        </div>
+
+
+
+
+
+
+        <div class="chart-card">
+
+
+            <h3>
+                Perbandingan Indikator Tahunan
+            </h3>
+
+
+            <canvas id="indicatorChart"></canvas>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    {{-- TABLE --}}
+
+    <div class="table-card">
+
+
+        <h3>
+            Daftar Sektor Berdasarkan Tipologi
+        </h3>
+
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    <th>Tahun</th>
+                    <th>Pertumbuhan</th>
+                    <th>Kontribusi</th>
+                    <th>LQ</th>
+                    <th>SSA</th>
+                    <th>Kuadran</th>
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+
+
+
+
+            <tbody>
+
+
+            @foreach($trend as $row)
+
+
+                <tr>
+
+                    <td>{{ $row['tahun'] }}</td>
+
+                    <td>{{ $row['growth'] }}</td>
+
+                    <td>{{ $row['contribution'] }}</td>
+
+                    <td>{{ $row['lq'] }}</td>
+
+                    <td>{{ $row['ssa'] }}</td>
+
+                    <td>{{ $row['kuadran'] }}</td>
+
+                    <td>{{ $row['status'] }}</td>
+
+
+                </tr>
+
+
+            @endforeach
+
+
+            </tbody>
+
+
+
+        </table>
+
+
+    </div>
+
+
 
 
 </section>
 
 
-@endsection
 
 
 
-@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 
 <script>
 
 
-let data = @json($trend);
+const comparisonData =
+@json($trend);
 
 
-new Chart(
-document.getElementById('growthChart'),
-{
-type:'line',
-
-data:{
-
-labels:data.map(x=>x.tahun),
-
-datasets:[{
-
-label:'Pertumbuhan',
-
-data:data.map(x=>x.growth)
-
-}]
-
-}
-
-}
-);
 
 
 
 new Chart(
-document.getElementById('indicatorChart'),
-{
 
-type:'line',
+    document.getElementById('growthChart'),
 
-data:{
+    {
 
-labels:data.map(x=>x.tahun),
-
-datasets:[
+        type:'line',
 
 
-{
-label:'LQ',
-data:data.map(x=>x.lq)
-},
+        data:{
 
 
-{
-label:'SSA',
-data:data.map(x=>x.ssa)
-},
+            labels:
+                comparisonData.map(
+                    item => item.tahun
+                ),
 
 
-{
-label:'Kontribusi',
-data:data.map(x=>x.contribution)
-}
+
+            datasets:[
+
+                {
+
+                    label:'Pertumbuhan',
+
+                    data:
+                        comparisonData.map(
+                            item => item.growth
+                        )
+
+                }
+
+            ]
 
 
-]
-
-}
+        }
 
 
-}
+    }
 
 );
+
+
+
+
+
+
+
+new Chart(
+
+    document.getElementById('indicatorChart'),
+
+
+    {
+
+        type:'line',
+
+
+
+        data:{
+
+
+            labels:
+
+                comparisonData.map(
+
+                    item => item.tahun
+
+                ),
+
+
+
+
+            datasets:[
+
+
+                {
+
+                    label:'LQ',
+
+                    data:
+
+                        comparisonData.map(
+
+                            item => item.lq
+
+                        )
+
+                },
+
+
+
+
+                {
+
+                    label:'SSA',
+
+                    data:
+
+                        comparisonData.map(
+
+                            item => item.ssa
+
+                        )
+
+                },
+
+
+
+
+
+                {
+
+                    label:'Kontribusi',
+
+                    data:
+
+                        comparisonData.map(
+
+                            item => item.contribution
+
+                        )
+
+                }
+
+
+
+            ]
+
+
+        }
+
+
+    }
+
+
+);
+
 
 
 </script>
-
-
-@endpush
