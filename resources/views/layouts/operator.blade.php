@@ -17,12 +17,30 @@
     <script src="{{ asset('js/data-wilayah.js') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="antialiased bg-slate-50 text-slate-900">
-    <div class="min-h-screen flex">
+<body class="antialiased bg-slate-50 text-slate-900" x-data="{ sidebarOpen: false }">
+    <div class="min-h-screen flex relative overflow-hidden">
+        
+        <!-- Mobile Sidebar Backdrop -->
+        <div x-show="sidebarOpen" 
+             @click="sidebarOpen = false" 
+             class="fixed inset-0 bg-black/50 z-30 md:hidden"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-cloak>
+        </div>
         
         <!-- Sidebar -->
-        <aside class="w-64 flex-shrink-0 bg-gradient-to-b from-[#145239] to-[#0F8A5F] text-white min-h-screen shadow-xl transition-all duration-300 relative z-20">
+        <aside 
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+            class="fixed md:static inset-y-0 left-0 w-64 flex-shrink-0 bg-gradient-to-b from-[#145239] to-[#0F8A5F] text-white min-h-screen shadow-xl transition-transform duration-300 ease-in-out z-40">
             <!-- Logo Section -->
             <div class="p-6 pb-2 flex justify-center">
                 <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo DPMPTSP Sumut" class="w-48 h-auto object-contain" onerror="this.src='https://ui-avatars.com/api/?name=DPMPTSP&color=fff&background=145239'">
@@ -126,8 +144,21 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 min-h-screen overflow-y-auto relative">
-            <div class="p-4 md:p-6 lg:p-8 w-full space-y-6">
+        <main class="flex-1 min-h-screen overflow-y-auto relative w-full flex flex-col">
+            <!-- Mobile Top Bar -->
+            <header class="md:hidden flex items-center justify-between bg-[#145239] text-white p-4 shadow-md z-30">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo" class="h-8 w-auto object-contain" onerror="this.src='https://ui-avatars.com/api/?name=DPMPTSP&color=fff&background=145239'">
+                    <span class="font-bold text-sm">Operator Panel</span>
+                </div>
+                <button @click="sidebarOpen = true" class="p-2 text-white hover:bg-[#1E5D41] rounded-lg focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </header>
+
+            <div class="p-4 md:p-6 lg:p-8 w-full space-y-6 flex-1">
                 @yield('content')
             </div>
         </main>
@@ -150,6 +181,33 @@
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#64748b',
                 confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'rounded-lg text-sm px-4 py-2',
+                    cancelButton: 'rounded-lg text-sm px-4 py-2',
+                    popup: 'rounded-xl'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+
+        function confirmDeleteAll(event, form) {
+            event.preventDefault();
+            Swal.fire({
+                title: '<span class="text-lg">Hapus Semua Data?</span>',
+                html: '<span class="text-sm">Apakah Anda yakin ingin menghapus semua data? Aksi ini tidak dapat dibatalkan!</span>',
+                icon: 'warning',
+                width: '24em',
+                padding: '1.5em',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, hapus semua!',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
                 customClass: {

@@ -43,7 +43,7 @@ class TipologiController extends Controller
 
     public function index(Request $request)
     {
-        $rawDbData = Tipologi::with('sektor')->latest()->get();
+        $rawDbData = Tipologi::with('sektor')->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
         $tipologiData = collect($this->mapDbToView($rawDbData));
 
         $editItem = null;
@@ -53,13 +53,13 @@ class TipologiController extends Controller
 
         $perPage = 10;
         $page = $request->get('page', 1);
-        $paginatedData = new LengthAwarePaginator(
+        $paginatedData = (new LengthAwarePaginator(
             $tipologiData->forPage($page, $perPage),
             $tipologiData->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
-        );
+        ))->onEachSide(1);
 
         return view('operator.tipologi.index', [
             'tipologiData' => $paginatedData,
@@ -101,13 +101,13 @@ class TipologiController extends Controller
 
         // 3. MENENTUKAN TIPOLOGI SEKTOR
         if ($dij > 0 && $lq > 1) {
-            $tipologi = 'Maju dan Tumbuh Cepat';
-        } elseif ($dij > 0 && $lq <= 1) {
-            $tipologi = 'Potensial / Berkembang Cepat';
+            $tipologi = 'Sektor Cepat Maju dan Cepat Tumbuh'; // Kuadran I
         } elseif ($dij <= 0 && $lq > 1) {
-            $tipologi = 'Berkembang / Maju Tapi Tertekan';
+            $tipologi = 'Sektor Potensial'; // Kuadran II
+        } elseif ($dij > 0 && $lq <= 1) {
+            $tipologi = 'Sektor Berkembang'; // Kuadran III
         } else {
-            $tipologi = 'Relatif Tertinggal';
+            $tipologi = 'Sektor Relatif Tertinggal'; // Kuadran IV
         }
 
         $daerah_analisis = ($item['tingkat_wilayah'] ?? 'Kabupaten/Kota') === 'Provinsi' ? $item['provinsi'] : $item['kabupaten'];
@@ -133,7 +133,7 @@ class TipologiController extends Controller
             'total_pdrb_pembanding_awal' => $pdrbTotalProvAwal,
             'total_pdrb_pembanding_akhir' => $pdrbTotalProvAkhir,
 
-            'nilai_ss' => round($dij, 4),
+            'nilai_ss' => round($dij, 2),
             'nilai_lq' => round($lq, 4),
             'tipologi' => $tipologi,
         ];
@@ -167,7 +167,7 @@ class TipologiController extends Controller
 
         Tipologi::create([
             'user_id' => Auth::id() ?? 1,
-            'sektor_id' => $sektorModel->id,
+            'sektor_id' => $sektorModel->sektor_id,
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
@@ -206,7 +206,7 @@ class TipologiController extends Controller
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
         $tipologi->update([
-            'sektor_id' => $sektorModel->id,
+            'sektor_id' => $sektorModel->sektor_id,
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
@@ -242,9 +242,16 @@ class TipologiController extends Controller
         return back()->with('success', 'Data Tipologi berhasil dihapus secara permanen!');
     }
 
-    // Memproses import data massal dari file Excel.
+    public function empty()
+    {
+        Tipologi::truncate();
+        OperatorController::logActivity('Tipologi Sektor', 'dihapus', "Menghapus semua data Tipologi.");
+        return back()->with('success', 'Semua data Tipologi berhasil dihapus secara permanen!');
+    }
+
     public function import(Request $request)
     {
+        set_time_limit(300);
         $payload = $request->json()->all();
         if (! $payload || ! is_array($payload)) {
             return response()->json(['success' => false, 'message' => 'Format data tidak valid.']);
@@ -252,62 +259,81 @@ class TipologiController extends Controller
 
         $successCount = 0;
 
-        foreach ($payload as $item) {
-            if (! isset($item['Provinsi']) || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
-                ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
-                ! isset($item['Total PDRB Analisis Awal']) || ! isset($item['Total PDRB Analisis Akhir']) ||
-                ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
-                ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
-                continue;
-            }
+        // Preload all sectors in memory
+        $sektorsCache = Sektor::all()->pluck('sektor_id', 'nama_sektor')->mapWithKeys(fn($id, $name) => [strtolower(trim($name)) => $id])->toArray();
 
-            $tingkat = (isset($item['Kabupaten/Kota']) && $item['Kabupaten/Kota'] != '-' && $item['Kabupaten/Kota'] != '') ? 'Kabupaten/Kota' : 'Provinsi';
-            
-            $mappedItem = [
-                'tingkat_wilayah' => $tingkat,
-                'provinsi' => $item['Provinsi'],
-                'kabupaten' => $item['Kabupaten/Kota'] ?? '-',
-                'sektor' => $item['Sektor'],
-                'tahun_awal' => $item['Tahun Awal'],
-                'tahun_akhir' => $item['Tahun Akhir'],
-                'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
-                'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
-                'total_pdrb_analisis_awal' => $item['Total PDRB Analisis Awal'] ?? 0,
-                'total_pdrb_analisis_akhir' => $item['Total PDRB Analisis Akhir'] ?? 0,
-                'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
-                'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
-                'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
-                'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
-            ];
+        \Illuminate\Support\Facades\DB::transaction(function () use ($payload, &$successCount, &$sektorsCache) {
+            foreach ($payload as $item) {
+                $hasProvinsi = isset($item['Provinsi']) || isset($item['Kode Provinsi']) || isset($item['Kode_Provinsi']) || isset($item['Kode Wilayah']) || isset($item['Kode_Wilayah']);
+                if (!$hasProvinsi || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
+                    ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
+                    ! isset($item['Total PDRB Analisis Awal']) || ! isset($item['Total PDRB Analisis Akhir']) ||
+                    ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
+                    ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
+                    continue;
+                }
 
-            $newData = $this->calculateTipologiData($mappedItem);
+                $resolved = $this->resolveRegionNames($item);
+                $provinsi = $resolved['provinsi'];
+                $kabupaten = $resolved['kabupaten'];
 
-            if ($newData) {
-                $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
+                $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
                 
-                Tipologi::create([
-                    'user_id' => Auth::id() ?? 1,
-                    'sektor_id' => $sektorModel->id,
-                    'tingkat_wilayah' => $newData['tingkat_wilayah'],
-                    'daerah_analisis' => $newData['daerah_analisis'],
-                    'daerah_pembanding' => $newData['daerah_pembanding'],
-                    'tahun_awal' => $newData['tahun_awal'],
-                    'tahun_akhir' => $newData['tahun_akhir'],
-                    'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
-                    'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
-                    'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],
-                    'total_pdrb_analisis_akhir' => $newData['total_pdrb_analisis_akhir'],
-                    'pdrb_sektor_pembanding_awal' => $newData['pdrb_sektor_pembanding_awal'],
-                    'pdrb_sektor_pembanding_akhir' => $newData['pdrb_sektor_pembanding_akhir'],
-                    'total_pdrb_pembanding_awal' => $newData['total_pdrb_pembanding_awal'],
-                    'total_pdrb_pembanding_akhir' => $newData['total_pdrb_pembanding_akhir'],
-                    'nilai_ss' => $newData['nilai_ss'],
-                    'nilai_lq' => $newData['nilai_lq'],
-                    'tipologi' => $newData['tipologi']
-                ]);
-                $successCount++;
+                $sektorName = $this->resolveSektorName($item);
+                $sektorKey = strtolower(trim($sektorName));
+                
+                if (isset($sektorsCache[$sektorKey])) {
+                    $sektorId = $sektorsCache[$sektorKey];
+                } else {
+                    $sektorModel = Sektor::create(['nama_sektor' => $sektorName]);
+                    $sektorsCache[$sektorKey] = $sektorModel->sektor_id;
+                    $sektorId = $sektorModel->sektor_id;
+                }
+
+                $mappedItem = [
+                    'tingkat_wilayah' => $tingkat,
+                    'provinsi' => $provinsi,
+                    'kabupaten' => $kabupaten,
+                    'sektor' => $sektorName,
+                    'tahun_awal' => $item['Tahun Awal'],
+                    'tahun_akhir' => $item['Tahun Akhir'],
+                    'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
+                    'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
+                    'total_pdrb_analisis_awal' => $item['Total PDRB Analisis Awal'] ?? 0,
+                    'total_pdrb_analisis_akhir' => $item['Total PDRB Analisis Akhir'] ?? 0,
+                    'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
+                    'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
+                    'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
+                    'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
+                ];
+
+                $newData = $this->calculateTipologiData($mappedItem);
+
+                if ($newData) {
+                    Tipologi::create([
+                        'user_id' => Auth::id() ?? 1,
+                        'sektor_id' => $sektorId,
+                        'tingkat_wilayah' => $newData['tingkat_wilayah'],
+                        'daerah_analisis' => $newData['daerah_analisis'],
+                        'daerah_pembanding' => $newData['daerah_pembanding'],
+                        'tahun_awal' => $newData['tahun_awal'],
+                        'tahun_akhir' => $newData['tahun_akhir'],
+                        'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
+                        'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
+                        'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],
+                        'total_pdrb_analisis_akhir' => $newData['total_pdrb_analisis_akhir'],
+                        'pdrb_sektor_pembanding_awal' => $newData['pdrb_sektor_pembanding_awal'],
+                        'pdrb_sektor_pembanding_akhir' => $newData['pdrb_sektor_pembanding_akhir'],
+                        'total_pdrb_pembanding_awal' => $newData['total_pdrb_pembanding_awal'],
+                        'total_pdrb_pembanding_akhir' => $newData['total_pdrb_pembanding_akhir'],
+                        'nilai_ss' => $newData['nilai_ss'],
+                        'nilai_lq' => $newData['nilai_lq'],
+                        'tipologi' => $newData['tipologi']
+                    ]);
+                    $successCount++;
+                }
             }
-        }
+        });
 
         if ($successCount > 0) {
             OperatorController::logActivity('Analisis Tipologi', 'diimpor', "Mengimpor {$successCount} data Analisis Tipologi Sektor secara massal dari Template Master.");

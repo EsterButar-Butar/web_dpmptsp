@@ -48,10 +48,10 @@ class KlassenController extends Controller
                 'pdrb_sektor_pembanding_akhir' => $item->pdrb_sektor_pembanding_akhir,
                 'total_pdrb_pembanding_awal' => $item->total_pdrb_pembanding_awal,
                 'total_pdrb_pembanding_akhir' => $item->total_pdrb_pembanding_akhir,
-                'ri' => $item->ri,
-                'r' => $item->r,
-                'yi' => $item->yi,
-                'y' => $item->y,
+                'ri' => number_format((float) $item->ri, 3, '.', ''),
+                'r' => number_format((float) $item->r, 3, '.', ''),
+                'yi' => number_format((float) $item->yi, 3, '.', ''),
+                'y' => number_format((float) $item->y, 3, '.', ''),
                 'kuadran' => $kuadran,
                 'klasifikasi' => $item->klasifikasi,
                 'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
@@ -61,7 +61,7 @@ class KlassenController extends Controller
 
     public function index(Request $request)
     {
-        $rawDbData = Klassen::with('sektor')->latest()->get();
+        $rawDbData = Klassen::with('sektor')->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
         $klassenData = collect($this->mapDbToView($rawDbData));
 
         $editData = null;
@@ -71,13 +71,13 @@ class KlassenController extends Controller
 
         $perPage = 10;
         $page = $request->get('page', 1);
-        $paginatedData = new LengthAwarePaginator(
+        $paginatedData = (new LengthAwarePaginator(
             $klassenData->forPage($page, $perPage),
             $klassenData->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
-        );
+        ))->onEachSide(1);
 
         return view('operator.klassen.index', [
             'klassenData' => $paginatedData,
@@ -113,7 +113,7 @@ class KlassenController extends Controller
 
         // 1. MENGHITUNG LAJU PERTUMBUHAN SEKTOR (Estimasi Rata-rata Tahunan Aritmatika)
         $ri = ((($pdrbSektorKabAkhir - $pdrbSektorKabAwal) / $pdrbSektorKabAwal) * 100) / $n;
-        $r = ((($pdrbSektorProvAkhir - $pdrbSektorProvAwal) / $pdrbSektorProvAwal) * 100) / $n;
+        $r = ((($pdrbTotalProvAkhir - $pdrbTotalProvAwal) / $pdrbTotalProvAwal) * 100) / $n;
 
         // 2. MENGHITUNG KONTRIBUSI SEKTOR
         $yi = ((($pdrbSektorKabAwal / $pdrbTotalKabAwal) + ($pdrbSektorKabAkhir / $pdrbTotalKabAkhir)) / 2) * 100;
@@ -122,16 +122,16 @@ class KlassenController extends Controller
         // 3. KLASIFIKASI TIPOLOGI KLASSEN
         if ($yi > $y && $ri > $r) {
             $kuadran = 'Kuadran I';
-            $klasifikasi = 'Sektor maju dan tumbuh cepat';
+            $klasifikasi = 'Sektor Maju, tumbuh pesat';
         } elseif ($yi > $y && $ri < $r) {
             $kuadran = 'Kuadran II';
-            $klasifikasi = 'Sektor maju tetapi tertekan';
+            $klasifikasi = 'Sektor Maju dan Tertekan';
         } elseif ($yi < $y && $ri > $r) {
             $kuadran = 'Kuadran III';
-            $klasifikasi = 'Sektor berkembang cepat';
+            $klasifikasi = 'Sektor Potensial';
         } else {
             $kuadran = 'Kuadran IV';
-            $klasifikasi = 'Sektor relatif tertinggal';
+            $klasifikasi = 'Sektor Relatif Tertinggal';
         }
 
         $daerah_analisis = ($item['tingkat_wilayah'] ?? 'Kabupaten/Kota') === 'Provinsi' ? $item['provinsi'] : $item['kabupaten'];
@@ -194,7 +194,7 @@ class KlassenController extends Controller
 
         Klassen::create([
             'user_id' => Auth::id() ?? 1,
-            'sektor_id' => $sektorModel->id,
+            'sektor_id' => $sektorModel->sektor_id,
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
@@ -235,7 +235,7 @@ class KlassenController extends Controller
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
         $klassen->update([
-            'sektor_id' => $sektorModel->id,
+            'sektor_id' => $sektorModel->sektor_id,
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
@@ -273,9 +273,16 @@ class KlassenController extends Controller
         return back()->with('success', 'Data Tipologi Klassen berhasil dihapus secara permanen!');
     }
 
-    // Memproses import data massal dari file Excel.
+    public function empty()
+    {
+        Klassen::truncate();
+        OperatorController::logActivity('Tipologi Klassen', 'dihapus', "Menghapus semua data Tipologi Klassen.");
+        return back()->with('success', 'Semua data Tipologi Klassen berhasil dihapus secara permanen!');
+    }
+
     public function import(Request $request)
     {
+        set_time_limit(300);
         $payload = $request->json()->all();
         if (! $payload || ! is_array($payload)) {
             return response()->json(['success' => false, 'message' => 'Format data tidak valid.']);
@@ -283,73 +290,94 @@ class KlassenController extends Controller
 
         $successCount = 0;
 
-        foreach ($payload as $item) {
-            if (! isset($item['Provinsi']) || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
-                ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
-                ! isset($item['Total PDRB Analisis Awal']) || ! isset($item['Total PDRB Analisis Akhir']) ||
-                ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
-                ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
-                continue;
-            }
+        // Preload all sectors in memory
+        $sektorsCache = Sektor::all()->pluck('sektor_id', 'nama_sektor')->mapWithKeys(fn($id, $name) => [strtolower(trim($name)) => $id])->toArray();
 
-            $tingkat = (isset($item['Kabupaten/Kota']) && $item['Kabupaten/Kota'] != '-' && $item['Kabupaten/Kota'] != '') ? 'Kabupaten/Kota' : 'Provinsi';
-            
-            $mappedItem = [
-                'tingkat_wilayah' => $tingkat,
-                'provinsi' => $item['Provinsi'],
-                'kabupaten' => $item['Kabupaten/Kota'] ?? '-',
-                'sektor' => $item['Sektor'],
-                'tahun_awal' => $item['Tahun Awal'],
-                'tahun_akhir' => $item['Tahun Akhir'],
-                'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
-                'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
-                'total_pdrb_analisis_awal' => $item['Total PDRB Analisis Awal'] ?? 0,
-                'total_pdrb_analisis_akhir' => $item['Total PDRB Analisis Akhir'] ?? 0,
-                'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
-                'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
-                'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
-                'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
-            ];
+        \Illuminate\Support\Facades\DB::transaction(function () use ($payload, &$successCount, &$sektorsCache) {
+            foreach ($payload as $item) {
+                $hasProvinsi = isset($item['Provinsi']) || isset($item['Kode Provinsi']) || isset($item['Kode_Provinsi']) || isset($item['Kode Wilayah']) || isset($item['Kode_Wilayah']);
+                if (!$hasProvinsi || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
+                    ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
+                    ! isset($item['Total PDRB Analisis Awal']) || ! isset($item['Total PDRB Analisis Akhir']) ||
+                    ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
+                    ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
+                    continue;
+                }
 
-            $newData = $this->calculateKlassenData($mappedItem);
+                $resolved = $this->resolveRegionNames($item);
+                $provinsi = $resolved['provinsi'];
+                $kabupaten = $resolved['kabupaten'];
 
-            if ($newData) {
-                $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
+                $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
                 
-                Klassen::create([
-                    'user_id' => Auth::id() ?? 1,
-                    'sektor_id' => $sektorModel->id,
-                    'tingkat_wilayah' => $newData['tingkat_wilayah'],
-                    'daerah_analisis' => $newData['daerah_analisis'],
-                    'daerah_pembanding' => $newData['daerah_pembanding'],
-                    'tahun_awal' => $newData['tahun_awal'],
-                    'tahun_akhir' => $newData['tahun_akhir'],
-                    'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
-                    'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
-                    'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],
-                    'total_pdrb_analisis_akhir' => $newData['total_pdrb_analisis_akhir'],
-                    'pdrb_sektor_pembanding_awal' => $newData['pdrb_sektor_pembanding_awal'],
-                    'pdrb_sektor_pembanding_akhir' => $newData['pdrb_sektor_pembanding_akhir'],
-                    'total_pdrb_pembanding_awal' => $newData['total_pdrb_pembanding_awal'],
-                    'total_pdrb_pembanding_akhir' => $newData['total_pdrb_pembanding_akhir'],
-                    'ri' => $newData['ri'],
-                    'r' => $newData['r'],
-                    'yi' => $newData['yi'],
-                    'y' => $newData['y'],
-                    'klasifikasi' => $newData['klasifikasi']
-                ]);
-                $successCount++;
+                $sektorName = $this->resolveSektorName($item);
+                $sektorKey = strtolower(trim($sektorName));
+                
+                if (isset($sektorsCache[$sektorKey])) {
+                    $sektorId = $sektorsCache[$sektorKey];
+                } else {
+                    $sektorModel = Sektor::create(['nama_sektor' => $sektorName]);
+                    $sektorsCache[$sektorKey] = $sektorModel->sektor_id;
+                    $sektorId = $sektorModel->sektor_id;
+                }
+
+                $mappedItem = [
+                    'tingkat_wilayah' => $tingkat,
+                    'provinsi' => $provinsi,
+                    'kabupaten' => $kabupaten,
+                    'sektor' => $sektorName,
+                    'tahun_awal' => $item['Tahun Awal'],
+                    'tahun_akhir' => $item['Tahun Akhir'],
+                    'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
+                    'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
+                    'total_pdrb_analisis_awal' => $item['Total PDRB Analisis Awal'] ?? 0,
+                    'total_pdrb_analisis_akhir' => $item['Total PDRB Analisis Akhir'] ?? 0,
+                    'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
+                    'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
+                    'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
+                    'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
+                ];
+
+                $newData = $this->calculateKlassenData($mappedItem);
+
+                if ($newData) {
+                    Klassen::create([
+                        'user_id' => Auth::id() ?? 1,
+                        'sektor_id' => $sektorId,
+                        'tingkat_wilayah' => $newData['tingkat_wilayah'],
+                        'daerah_analisis' => $newData['daerah_analisis'],
+                        'daerah_pembanding' => $newData['daerah_pembanding'],
+                        'tahun_awal' => $newData['tahun_awal'],
+                        'tahun_akhir' => $newData['tahun_akhir'],
+                        'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
+                        'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
+                        'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],
+                        'total_pdrb_analisis_akhir' => $newData['total_pdrb_analisis_akhir'],
+                        'pdrb_sektor_pembanding_awal' => $newData['pdrb_sektor_pembanding_awal'],
+                        'pdrb_sektor_pembanding_akhir' => $newData['pdrb_sektor_pembanding_akhir'],
+                        'total_pdrb_pembanding_awal' => $newData['total_pdrb_pembanding_awal'],
+                        'total_pdrb_pembanding_akhir' => $newData['total_pdrb_pembanding_akhir'],
+                        'ri' => $newData['ri'],
+                        'r' => $newData['r'],
+                        'yi' => $newData['yi'],
+                        'y' => $newData['y'],
+                        'klasifikasi' => $newData['klasifikasi']
+                    ]);
+                    $successCount++;
+                }
             }
-        }
+        });
 
         if ($successCount > 0) {
             OperatorController::logActivity('Analisis Klassen', 'diimpor', "Mengimpor {$successCount} data Analisis Tipologi Klassen secara massal dari Template Master.");
+            session()->flash('success', "Berhasil mengimpor $successCount data baru!");
+            return response()->json([
+                'success' => true,
+                'message' => $successCount.' data berhasil diimpor.',
+            ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => $successCount.' data berhasil diimpor.',
-        ]);
+        return response()->json(['success' => false, 'message' => 'Tidak ada data valid yang dapat diimpor. Pastikan format kolom sesuai dengan Template Master.']);
     }
 }
 

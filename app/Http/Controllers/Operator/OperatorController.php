@@ -16,9 +16,7 @@ class OperatorController extends Controller
 {
     public static function logActivity($module, $action, $desc)
     {
-        if ($module !== 'Autentikasi') {
-            return;
-        }
+
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -64,8 +62,7 @@ class OperatorController extends Controller
         $statusTipologi = $this->getLatestStatus(\App\Models\Tipologi::class);
         $statusKlassen = $this->getLatestStatus(\App\Models\Klassen::class);
 
-        $activityLogs = ActivityLog::where('module', 'Autentikasi')
-            ->whereIn('action', ['Login', 'Logout'])
+        $activityLogs = ActivityLog::whereNotIn('module', ['Autentikasi'])
             ->latest()
             ->take(10)
             ->get();
@@ -84,8 +81,7 @@ class OperatorController extends Controller
 
     public function aktivitas(Request $request)
     {
-        $activityLogs = ActivityLog::where('module', 'Autentikasi')
-            ->whereIn('action', ['Login', 'Logout'])
+        $activityLogs = ActivityLog::whereNotIn('module', ['Autentikasi'])
             ->latest()
             ->get();
         $collection = collect($activityLogs);
@@ -144,7 +140,13 @@ class OperatorController extends Controller
 
     public function settings()
     {
-        return view('operator.settings');
+        $authLogs = \App\Models\ActivityLog::where('user_id', Auth::id())
+            ->where('module', 'Autentikasi')
+            ->latest()
+            ->limit(50)
+            ->get();
+            
+        return view('operator.settings', compact('authLogs'));
     }
 
     // Aksi update profil nyata
