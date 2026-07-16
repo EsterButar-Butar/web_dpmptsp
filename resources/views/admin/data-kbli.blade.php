@@ -3,1025 +3,1040 @@
 @section('title', 'Data KBLI')
 
 @section('content')
-    @php
-        $isModalOpen = in_array(
-            $mode,
-            ['create', 'edit'],
-            true
-        );
+@php
+    $isModalOpen = in_array($mode, ['create', 'edit']);
+    $isEdit = $mode === 'edit' && $editData;
 
-        $isEdit = $mode === 'edit' && $editData;
+    $formAction = $isEdit
+        ? route('admin.data-kbli.update', $editData->id)
+        : route('admin.data-kbli.store');
+@endphp
 
-        $formAction = $isEdit
-            ? route(
-                'admin.data-kbli.update',
-                $editData->id
-            )
-            : route('admin.data-kbli.store');
+<style>
+    :root {
+        --green-dark: #255d3e;
+        --green-main: #2f6b48;
+        --green-soft: #eaf7ef;
+        --yellow-soft: #fff8e6;
+        --blue-soft: #eef7ff;
+        --red-soft: #fff3f3;
+        --navy: #14213d;
+        --text-dark: #243042;
+        --text-muted: #667085;
+        --border: #e1e7ef;
+        --danger: #ef4444;
+    }
 
-        $closeModalUrl = route(
-            'admin.data-kbli.index',
-            request()->except(['mode', 'edit'])
-        );
+    .kbli-page {
+        min-height: 100vh;
+        padding: 28px 30px;
+        background: #f8faf8;
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-dark);
+    }
 
-        $statStyles = [
-            'green' => [
-                'icon' => 'bg-emerald-600',
-                'corner' => 'bg-emerald-50',
-            ],
-            'yellow' => [
-                'icon' => 'bg-amber-500',
-                'corner' => 'bg-amber-50',
-            ],
-            'blue' => [
-                'icon' => 'bg-sky-600',
-                'corner' => 'bg-sky-50',
-            ],
-            'red' => [
-                'icon' => 'bg-red-500',
-                'corner' => 'bg-red-50',
-            ],
-        ];
-    @endphp
+    .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
 
-    @push('styles')
-        <style>
-            #adminKbliTableCard {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                position: relative !important;
-                width: 100% !important;
-                height: auto !important;
-                min-height: 100px !important;
-                overflow: hidden !important;
-                transform: none !important;
-            }
+    .page-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--green-soft);
+        color: var(--green-dark);
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
 
-            #adminKbliTableWrapper {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                width: 100% !important;
-                overflow-x: auto !important;
-                overflow-y: visible !important;
-                transform: none !important;
-            }
+    .page-heading h1 {
+        margin: 0;
+        color: var(--green-dark);
+        font-size: 30px;
+        line-height: 1.25;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
 
-            #adminKbliTable {
-                display: table !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                width: 100% !important;
-                min-width: 1260px !important;
-                border-collapse: collapse !important;
-                table-layout: auto !important;
-                transform: none !important;
-            }
+    .page-heading p {
+        margin: 8px 0 0;
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 400;
+    }
 
-            #adminKbliTable thead {
-                display: table-header-group !important;
-                visibility: visible !important;
-            }
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: var(--green-dark);
+        color: #ffffff;
+        border: none;
+        border-radius: 16px;
+        padding: 14px 20px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 12px 28px rgba(37, 93, 62, 0.16);
+        white-space: nowrap;
+    }
 
-            #adminKbliTable tbody {
-                display: table-row-group !important;
-                visibility: visible !important;
-            }
+    .btn-primary:hover {
+        background: #1f4f35;
+        color: #ffffff;
+    }
 
-            #adminKbliTable tr {
-                display: table-row !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
+    .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        background: #ffffff;
+        color: var(--text-muted);
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-            #adminKbliTable th,
-            #adminKbliTable td {
-                display: table-cell !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
+    .alert {
+        padding: 14px 16px;
+        border-radius: 14px;
+        margin-bottom: 18px;
+        font-size: 14px;
+        font-weight: 500;
+    }
 
-            #adminKbliTable th {
-                white-space: nowrap !important;
-            }
-        </style>
-    @endpush
+    .alert-success {
+        color: #166534;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+    }
 
-    <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8">
-        <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 shadow-lg md:p-8">
-            <div class="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400 opacity-20 blur-3xl mix-blend-overlay"></div>
+    .alert-error {
+        color: #991b1b;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+    }
 
-            <div class="absolute bottom-0 right-32 h-40 w-40 rounded-full bg-yellow-400 opacity-20 blur-3xl mix-blend-overlay"></div>
+    .kbli-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
 
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+    .kbli-stat-card {
+        min-height: 162px;
+        padding: 22px;
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        box-shadow: 0 14px 30px rgba(31, 41, 55, 0.05);
+        overflow: hidden;
+    }
 
-            <div class="relative z-10 flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
-                <div>
-                    <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-700/50 bg-emerald-800/50 px-3 py-1 text-xs font-bold text-emerald-100 backdrop-blur-sm">
-                        <i class="fa-solid fa-table-cells-large text-[#FFD54F]"></i>
-                        Menu Admin
-                    </div>
+    .kbli-stat-mint {
+        background: linear-gradient(135deg, #ecfbf4 0%, #f8fdfa 100%);
+    }
 
-                    <h1 class="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
-                        Manajemen
-                        <span class="text-[#FFD54F]">
-                            Data KBLI
-                        </span>
-                    </h1>
+    .kbli-stat-cream {
+        background: linear-gradient(135deg, #fff8e6 0%, #fffdf5 100%);
+    }
 
-                    <p class="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-emerald-100/90">
-                        Kelola kode, judul, cakupan, dan pengecualian cakupan Klasifikasi Baku Lapangan Usaha Indonesia.
-                    </p>
-                </div>
+    .kbli-stat-blue {
+        background: linear-gradient(135deg, #eef7ff 0%, #f8fbff 100%);
+    }
 
-                @if ($columnsReady)
-                    <a
-                        href="{{ route(
-                            'admin.data-kbli.index',
-                            array_merge(
-                                request()->except(['edit']),
-                                ['mode' => 'create']
-                            )
-                        ) }}"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FFD54F] px-5 py-3 text-sm font-bold text-emerald-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-300"
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                        Tambah KBLI
-                    </a>
-                @endif
+    .kbli-stat-red {
+        background: linear-gradient(135deg, #fff2f2 0%, #fff9f9 100%);
+    }
+
+    .kbli-stat-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .kbli-stat-label {
+        color: #344054;
+        font-size: 15px;
+        line-height: 1.5;
+        font-weight: 500;
+        max-width: 140px;
+    }
+
+    .kbli-stat-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 20px;
+        background: rgba(20, 33, 61, 0.10);
+        color: var(--navy);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+        flex-shrink: 0;
+    }
+
+    .kbli-stat-value {
+        color: var(--text-dark);
+        font-size: 34px;
+        line-height: 1;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .kbli-stat-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 13px;
+        border-top: 1px solid rgba(20, 33, 61, 0.07);
+        color: #38a78f;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .toolbar {
+        display: grid;
+        grid-template-columns: 210px minmax(300px, 1fr) 130px;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .filter-control,
+    .search-control {
+        position: relative;
+        height: 52px;
+        background: #ffffff;
+        border: 1px solid #d9dee8;
+        border-radius: 18px;
+        box-shadow: 0 8px 20px rgba(31, 41, 55, 0.035);
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-control select,
+    .search-control input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 0 48px 0 18px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text-dark);
+        appearance: none;
+    }
+
+    .filter-control i {
+        position: absolute;
+        right: 18px;
+        color: var(--green-dark);
+        pointer-events: none;
+    }
+
+    .search-control button {
+        position: absolute;
+        right: 9px;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 12px;
+        background: var(--green-soft);
+        color: var(--green-dark);
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    .btn-reset {
+        height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        border: 1px solid #d9dee8;
+        border-radius: 18px;
+        text-decoration: none;
+        color: var(--green-dark);
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 8px 20px rgba(31, 41, 55, 0.035);
+    }
+
+    .table-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #dce3ec;
+        border-radius: 24px;
+        box-shadow: 0 16px 30px rgba(31, 41, 55, 0.05);
+    }
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        min-width: 1150px;
+        border-collapse: collapse;
+    }
+
+    .data-table thead {
+        background: #fbfcfd;
+    }
+
+    .data-table th {
+        text-align: left;
+        padding: 20px 24px;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e8edf3;
+    }
+
+    .data-table td {
+        padding: 22px 24px;
+        border-bottom: 1px solid #edf2f7;
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 400;
+        vertical-align: top;
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .kode-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 13px;
+        border-radius: 12px;
+        background: var(--green-soft);
+        color: var(--green-dark);
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .judul-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f2937;
+        line-height: 1.5;
+        max-width: 310px;
+    }
+
+    .text-preview {
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.6;
+        max-width: 300px;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .badge-active {
+        background: #d7f7c8;
+        color: #2b8f3d;
+    }
+
+    .badge-inactive {
+        background: #ffe1e1;
+        color: #dc2626;
+    }
+
+    .action-group {
+        display: inline-flex;
+        border: 1px solid #dde4ed;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .action-btn {
+        width: 46px;
+        height: 40px;
+        border: none;
+        background: #ffffff;
+        color: #667085;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        text-decoration: none;
+        border-right: 1px solid #dde4ed;
+        font-size: 15px;
+    }
+
+    .action-btn:last-child {
+        border-right: none;
+    }
+
+    .action-btn:hover {
+        background: var(--green-soft);
+        color: var(--green-dark);
+    }
+
+    .action-btn.delete {
+        color: var(--danger);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 42px 20px;
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+
+    .pagination-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 20px 6px 0;
+    }
+
+    .pagination-info {
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-link,
+    .page-dots {
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        color: var(--navy);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .page-dots {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+    }
+
+    .page-link.active {
+        background: var(--green-dark);
+        color: #ffffff;
+        border-color: var(--green-dark);
+    }
+
+    .page-link.disabled {
+        pointer-events: none;
+        opacity: 0.45;
+        background: #f3f4f6;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.38);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .modal-card {
+        width: min(860px, 100%);
+        max-height: 92vh;
+        overflow-y: auto;
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
+        padding: 24px;
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        color: var(--green-dark);
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .modal-header p {
+        margin: 6px 0 0;
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+
+    .btn-close {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: #ffffff;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--navy);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        border: 1px solid #d9dee8;
+        border-radius: 14px;
+        padding: 0 14px;
+        outline: none;
+        background: #ffffff;
+        color: var(--text-dark);
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select {
+        height: 48px;
+    }
+
+    .form-group textarea {
+        min-height: 130px;
+        padding-top: 12px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .error-text {
+        margin-top: 7px;
+        color: #dc2626;
+        font-size: 13px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 22px;
+    }
+
+    @media (max-width: 1280px) {
+        .kbli-stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .toolbar {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .kbli-page {
+            padding: 18px;
+        }
+
+        .page-heading {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .kbli-stats-grid,
+        .toolbar,
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pagination-wrap {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="kbli-page">
+    <div class="page-heading">
+        <div>
+            <div class="page-kicker">
+                <i class="fa-solid fa-table-cells-large"></i>
+                Profil Admin
             </div>
-        </section>
 
-        @if (! $tableExists)
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+            <h1>Manajemen Data KBLI</h1>
 
-                <span>
-                    Tabel
-                    <strong>data_kbli</strong>
-                    belum tersedia di Supabase.
-                </span>
-            </div>
-        @elseif (! $columnsReady)
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+            <p>
+                Kelola kode, judul, cakupan, dan pengecualian cakupan KBLI.
+            </p>
+        </div>
 
-                <span>
-                    Kolom tabel
-                    <strong>data_kbli</strong>
-                    belum sesuai. Minimal harus tersedia kolom kode dan judul.
-                </span>
-            </div>
-        @endif
-
-        @if (session('success'))
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                <i class="fa-solid fa-circle-check mt-0.5"></i>
-
-                <span>
-                    {{ session('success') }}
-                </span>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-
-                <span>
-                    {{ session('error') }}
-                </span>
-            </div>
-        @endif
-
-        <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            @foreach ($stats as $stat)
-                @php
-                    $style = $statStyles[$stat['color']]
-                        ?? $statStyles['green'];
-                @endphp
-
-                <article class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-                    <div class="absolute -mr-8 -mt-8 right-0 top-0 h-20 w-20 rounded-bl-full transition-transform duration-500 group-hover:scale-150 {{ $style['corner'] }}"></div>
-
-                    <div class="relative z-10 flex items-center justify-between gap-4">
-                        <div>
-                            <p class="m-0 text-xs font-semibold text-slate-500">
-                                {{ $stat['label'] }}
-                            </p>
-
-                            <p class="mb-0 mt-2 text-3xl font-black tracking-tight text-slate-800">
-                                {{ number_format(
-                                    $stat['value'],
-                                    0,
-                                    ',',
-                                    '.'
-                                ) }}
-                            </p>
-                        </div>
-
-                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-sm {{ $style['icon'] }}">
-                            <i class="fa-solid {{ $stat['icon'] }}"></i>
-                        </div>
-                    </div>
-                </article>
-            @endforeach
-        </section>
-
-        <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <form
-                action="{{ route('admin.data-kbli.index') }}"
-                method="GET"
-                class="grid grid-cols-1 gap-4 md:grid-cols-[210px_minmax(280px,1fr)_auto]"
-            >
-                @if ($hasStatusColumn)
-                    <div class="relative">
-                        <select
-                            name="status"
-                            class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                        >
-                            <option value="">
-                                Semua Status
-                            </option>
-
-                            <option
-                                value="Aktif"
-                                @selected(
-                                    strtolower(
-                                        request('status', '')
-                                    ) === 'aktif'
-                                )
-                            >
-                                Aktif
-                            </option>
-
-                            <option
-                                value="Nonaktif"
-                                @selected(
-                                    strtolower(
-                                        request('status', '')
-                                    ) === 'nonaktif'
-                                )
-                            >
-                                Nonaktif
-                            </option>
-                        </select>
-
-                        <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
-                    </div>
-                @endif
-
-                <div class="relative">
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Cari kode, judul, cakupan, atau pengecualian..."
-                        class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    >
-
-                    <button
-                        type="submit"
-                        aria-label="Cari KBLI"
-                        class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100"
-                    >
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
-
-                <div class="flex gap-2">
-                    <button
-                        type="submit"
-                        class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                    >
-                        <i class="fa-solid fa-filter"></i>
-                        Terapkan
-                    </button>
-
-                    <a
-                        href="{{ route('admin.data-kbli.index') }}"
-                        title="Reset filter"
-                        class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600"
-                    >
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                </div>
-            </form>
-        </section>
-
-        <section
-            id="adminKbliTableCard"
-            class="mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
+        <a
+            href="{{ route('admin.data-kbli.index', array_merge(request()->query(), ['mode' => 'create'])) }}"
+            class="btn-primary"
         >
-            <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-800">
-                        Daftar Data KBLI
-                    </h2>
-
-                    <p class="mt-1 text-xs text-slate-500">
-                        Daftar klasifikasi kegiatan usaha yang tersedia dalam sistem.
-                    </p>
-                </div>
-
-                <div class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                    <i class="fa-solid fa-database"></i>
-
-                    {{ number_format(
-                        $dataKbli->total(),
-                        0,
-                        ',',
-                        '.'
-                    ) }}
-                    Data
-                </div>
-            </header>
-
-            <div id="adminKbliTableWrapper">
-                <table
-                    id="adminKbliTable"
-                    class="w-full min-w-[1260px] border-collapse text-left"
-                >
-                    <thead>
-                        <tr class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            <th class="px-5 py-3">
-                                No.
-                            </th>
-
-                            <th class="px-5 py-3">
-                                Kode
-                            </th>
-
-                            <th class="px-5 py-3">
-                                Judul KBLI
-                            </th>
-
-                            <th class="px-5 py-3">
-                                Cakupan
-                            </th>
-
-                            <th class="px-5 py-3">
-                                Tidak Cakupan
-                            </th>
-
-                            <th class="px-5 py-3">
-                                Status
-                            </th>
-
-                            <th class="px-5 py-3 text-center">
-                                Aksi
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody class="divide-y divide-slate-100 text-sm">
-                        @forelse ($dataKbli as $item)
-                            @php
-                                $nomor =
-                                    ($dataKbli->currentPage() - 1)
-                                    * $dataKbli->perPage()
-                                    + $loop->iteration;
-
-                                $status = trim(
-                                    $item->status ?? 'Aktif'
-                                );
-
-                                $statusLower = strtolower(
-                                    $status
-                                );
-                            @endphp
-
-                            <tr class="transition-colors hover:bg-slate-50/60">
-                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">
-                                    {{ str_pad(
-                                        $nomor,
-                                        3,
-                                        '0',
-                                        STR_PAD_LEFT
-                                    ) }}
-                                </td>
-
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 font-mono text-xs font-bold text-emerald-700">
-                                        {{ $item->kode_kbli ?? '-' }}
-                                    </span>
-                                </td>
-
-                                <td class="px-5 py-4">
-                                    <div
-                                        class="max-w-[300px] font-semibold leading-relaxed text-slate-700"
-                                        title="{{ $item->judul_kbli }}"
-                                    >
-                                        {{ \Illuminate\Support\Str::limit(
-                                            $item->judul_kbli ?? '-',
-                                            90
-                                        ) }}
-                                    </div>
-                                </td>
-
-                                <td class="px-5 py-4">
-                                    <div
-                                        class="max-w-[300px] text-xs leading-relaxed text-slate-500"
-                                        title="{{ $item->cakupan }}"
-                                    >
-                                        {{ \Illuminate\Support\Str::limit(
-                                            $item->cakupan ?? '-',
-                                            130
-                                        ) }}
-                                    </div>
-                                </td>
-
-                                <td class="px-5 py-4">
-                                    <div
-                                        class="max-w-[300px] text-xs leading-relaxed text-slate-500"
-                                        title="{{ $item->tidak_cakupan }}"
-                                    >
-                                        {{ \Illuminate\Support\Str::limit(
-                                            $item->tidak_cakupan ?? '-',
-                                            130
-                                        ) }}
-                                    </div>
-                                </td>
-
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusLower === 'nonaktif' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $statusLower === 'nonaktif' ? 'bg-red-500' : 'bg-emerald-500' }}"></span>
-
-                                        {{ $status }}
-                                    </span>
-                                </td>
-
-                                <td class="px-5 py-4">
-                                    @if (
-                                        $hasIdColumn
-                                        && $item->id
-                                    )
-                                        <div class="flex items-center justify-center gap-2">
-                                            <a
-                                                href="{{ route(
-                                                    'admin.data-kbli.index',
-                                                    array_merge(
-                                                        request()->query(),
-                                                        [
-                                                            'edit' => $item->id,
-                                                            'mode' => 'edit',
-                                                        ]
-                                                    )
-                                                ) }}"
-                                                title="Edit KBLI"
-                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
-                                            >
-                                                <i class="fa-regular fa-pen-to-square"></i>
-                                            </a>
-
-                                            <button
-                                                type="button"
-                                                title="Hapus KBLI"
-                                                data-delete-kbli
-                                                data-delete-url="{{ route(
-                                                    'admin.data-kbli.destroy',
-                                                    $item->id
-                                                ) }}"
-                                                data-delete-name="{{ $item->kode_kbli }}"
-                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                                            >
-                                                <i class="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </div>
-                                    @else
-                                        <div class="text-center text-slate-400">
-                                            -
-                                        </div>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td
-                                    colspan="7"
-                                    class="px-5 py-14 text-center"
-                                >
-                                    <div class="mx-auto flex max-w-sm flex-col items-center">
-                                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400">
-                                            <i class="fa-solid fa-table-cells-large"></i>
-                                        </div>
-
-                                        <h3 class="mb-0 mt-4 text-sm font-semibold text-slate-700">
-                                            Data KBLI tidak ditemukan
-                                        </h3>
-
-                                        <p class="mb-0 mt-1 text-xs leading-relaxed text-slate-400">
-                                            Coba ubah filter atau kata pencarian yang digunakan.
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        @if ($dataKbli->hasPages())
-            <section class="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <p class="m-0 text-sm text-slate-500">
-                    Menampilkan
-
-                    <span class="font-semibold text-slate-700">
-                        {{ $dataKbli->firstItem() }}
-                    </span>
-
-                    sampai
-
-                    <span class="font-semibold text-slate-700">
-                        {{ $dataKbli->lastItem() }}
-                    </span>
-
-                    dari
-
-                    <span class="font-semibold text-slate-700">
-                        {{ $dataKbli->total() }}
-                    </span>
-
-                    data KBLI
-                </p>
-
-                <div class="flex flex-wrap items-center gap-2">
-                    @if ($dataKbli->onFirstPage())
-                        <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
-                            <i class="fa-solid fa-chevron-left"></i>
-                            Prev
-                        </span>
-                    @else
-                        <a
-                            href="{{ $dataKbli->previousPageUrl() }}"
-                            class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                        >
-                            <i class="fa-solid fa-chevron-left"></i>
-                            Prev
-                        </a>
-                    @endif
-
-                    @php
-                        $currentPage =
-                            $dataKbli->currentPage();
-
-                        $lastPage =
-                            $dataKbli->lastPage();
-
-                        $pages = collect([
-                            1,
-                            2,
-                            $currentPage - 1,
-                            $currentPage,
-                            $currentPage + 1,
-                            $lastPage - 1,
-                            $lastPage,
-                        ])
-                            ->filter(
-                                fn ($page) =>
-                                    $page >= 1
-                                    && $page <= $lastPage
-                            )
-                            ->unique()
-                            ->sort()
-                            ->values();
-
-                        $previousPageNumber = null;
-                    @endphp
-
-                    @foreach ($pages as $page)
-                        @if (
-                            $previousPageNumber
-                            && $page - $previousPageNumber > 1
-                        )
-                            <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">
-                                ...
-                            </span>
-                        @endif
-
-                        @if ($page === $currentPage)
-                            <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#FFD54F] bg-[#FFD54F] px-3 text-xs font-bold text-emerald-900">
-                                {{ $page }}
-                            </span>
-                        @else
-                            <a
-                                href="{{ $dataKbli->url($page) }}"
-                                class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                            >
-                                {{ $page }}
-                            </a>
-                        @endif
-
-                        @php
-                            $previousPageNumber = $page;
-                        @endphp
-                    @endforeach
-
-                    @if ($dataKbli->hasMorePages())
-                        <a
-                            href="{{ $dataKbli->nextPageUrl() }}"
-                            class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                        >
-                            Next
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </a>
-                    @else
-                        <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
-                            Next
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </span>
-                    @endif
-                </div>
-            </section>
-        @endif
-
-        <footer class="pb-1 pt-8 text-center text-xs text-slate-400">
-            Copyright &copy;
-            {{ date('Y') }}
-            DPMPTSP Provinsi Sumatera Utara
-        </footer>
+            <i class="fa-solid fa-plus"></i>
+            Tambah KBLI
+        </a>
     </div>
 
-    @if ($isModalOpen)
-        <div class="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
-            <div class="my-6 w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl">
-                <header class="flex items-start justify-between gap-5 border-b border-slate-100 bg-slate-50/50 p-6">
-                    <div>
-                        <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                            <i class="fa-solid {{ $isEdit ? 'fa-pen-to-square' : 'fa-plus' }}"></i>
-                        </div>
-
-                        <h2 class="m-0 text-xl font-bold text-slate-800">
-                            {{ $isEdit
-                                ? 'Edit Data KBLI'
-                                : 'Tambah Data KBLI'
-                            }}
-                        </h2>
-
-                        <p class="mb-0 mt-1 text-sm text-slate-500">
-                            Isi kode, judul, cakupan, dan pengecualian cakupan KBLI.
-                        </p>
-                    </div>
-
-                    <a
-                        href="{{ $closeModalUrl }}"
-                        class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"
-                    >
-                        <i class="fa-solid fa-xmark"></i>
-                    </a>
-                </header>
-
-                <form
-                    action="{{ $formAction }}"
-                    method="POST"
-                    class="p-6"
-                >
-                    @csrf
-
-                    @if ($isEdit)
-                        @method('PUT')
-                    @endif
-
-                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                        <div>
-                            <label
-                                for="kode_kbli"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Kode KBLI
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                id="kode_kbli"
-                                type="text"
-                                name="kode_kbli"
-                                value="{{ old(
-                                    'kode_kbli',
-                                    $isEdit
-                                        ? $editData->kode_kbli
-                                        : ''
-                                ) }}"
-                                placeholder="Contoh: 01111"
-                                required
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
-
-                            @error('kode_kbli')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        @if ($hasStatusColumn)
-                            <div>
-                                <label
-                                    for="status"
-                                    class="mb-2 block text-sm font-semibold text-slate-700"
-                                >
-                                    Status
-                                    <span class="text-red-500">*</span>
-                                </label>
-
-                                @php
-                                    $selectedStatus = old(
-                                        'status',
-                                        $isEdit
-                                            ? ($editData->status ?? 'Aktif')
-                                            : 'Aktif'
-                                    );
-                                @endphp
-
-                                <select
-                                    id="status"
-                                    name="status"
-                                    required
-                                    class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-                                    <option
-                                        value="Aktif"
-                                        @selected(
-                                            strtolower($selectedStatus)
-                                            === 'aktif'
-                                        )
-                                    >
-                                        Aktif
-                                    </option>
-
-                                    <option
-                                        value="Nonaktif"
-                                        @selected(
-                                            strtolower($selectedStatus)
-                                            === 'nonaktif'
-                                        )
-                                    >
-                                        Nonaktif
-                                    </option>
-                                </select>
-
-                                @error('status')
-                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-                        @endif
-
-                        <div class="md:col-span-2">
-                            <label
-                                for="judul_kbli"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Judul KBLI
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                id="judul_kbli"
-                                type="text"
-                                name="judul_kbli"
-                                value="{{ old(
-                                    'judul_kbli',
-                                    $isEdit
-                                        ? $editData->judul_kbli
-                                        : ''
-                                ) }}"
-                                placeholder="Masukkan judul KBLI"
-                                required
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
-
-                            @error('judul_kbli')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label
-                                for="cakupan"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Cakupan
-                            </label>
-
-                            <textarea
-                                id="cakupan"
-                                name="cakupan"
-                                rows="5"
-                                placeholder="Masukkan cakupan kegiatan KBLI"
-                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >{{ old(
-                                'cakupan',
-                                $isEdit
-                                    ? $editData->cakupan
-                                    : ''
-                            ) }}</textarea>
-
-                            @error('cakupan')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label
-                                for="tidak_cakupan"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Tidak Cakupan
-                            </label>
-
-                            <textarea
-                                id="tidak_cakupan"
-                                name="tidak_cakupan"
-                                rows="5"
-                                placeholder="Masukkan kegiatan yang tidak termasuk dalam cakupan"
-                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >{{ old(
-                                'tidak_cakupan',
-                                $isEdit
-                                    ? $editData->tidak_cakupan
-                                    : ''
-                            ) }}</textarea>
-
-                            @error('tidak_cakupan')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row">
-                        <a
-                            href="{{ $closeModalUrl }}"
-                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                        >
-                            Batal
-                        </a>
-
-                        <button
-                            type="submit"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-                        >
-                            <i class="fa-solid fa-floppy-disk"></i>
-
-                            {{ $isEdit
-                                ? 'Simpan Perubahan'
-                                : 'Tambah KBLI'
-                            }}
-                        </button>
-                    </div>
-                </form>
-            </div>
+    @if (! $tableExists)
+        <div class="alert alert-error">
+            Tabel <strong>data_kbli</strong> belum tersedia di Supabase.
+        </div>
+    @elseif (! $columnsReady)
+        <div class="alert alert-error">
+            Kolom tabel <strong>data_kbli</strong> belum sesuai. Minimal harus ada kolom <strong>Kode</strong> dan <strong>Judul</strong>.
         </div>
     @endif
 
-    <div
-        id="deleteKbliModal"
-        class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
-    >
-        <div class="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-2xl">
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-2xl text-red-600">
-                <i class="fa-regular fa-trash-can"></i>
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-error">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="kbli-stats-grid">
+        @foreach ($stats as $stat)
+            <div class="kbli-stat-card kbli-stat-{{ $stat['color'] }}">
+                <div class="kbli-stat-header">
+                    <div class="kbli-stat-label">
+                        {{ $stat['label'] }}
+                    </div>
+
+                    <div class="kbli-stat-icon">
+                        <i class="fa-solid {{ $stat['icon'] }}"></i>
+                    </div>
+                </div>
+
+                <div class="kbli-stat-value">
+                    {{ number_format($stat['value'], 0, ',', '.') }}
+                </div>
+
+                <div class="kbli-stat-footer">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                    <span>Total Data</span>
+                </div>
             </div>
+        @endforeach
+    </div>
 
-            <h3 class="mb-0 mt-5 text-xl font-bold text-slate-800">
-                Hapus data KBLI?
-            </h3>
+    <form
+        action="{{ route('admin.data-kbli.index') }}"
+        method="GET"
+        class="toolbar"
+    >
+        @if ($hasStatusColumn)
+            <div class="filter-control">
+                <select
+                    name="status"
+                    onchange="this.form.submit()"
+                >
+                    <option value="">Pilih Status</option>
+                    <option value="Aktif" {{ request('status') === 'Aktif' ? 'selected' : '' }}>
+                        Aktif
+                    </option>
+                    <option value="Nonaktif" {{ request('status') === 'Nonaktif' ? 'selected' : '' }}>
+                        Nonaktif
+                    </option>
+                </select>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        @endif
 
-            <p class="mb-0 mt-2 text-sm leading-relaxed text-slate-500">
-                Data KBLI dengan kode
-
-                <strong
-                    id="deleteKbliName"
-                    class="text-slate-700"
-                ></strong>
-
-                akan dihapus. Tindakan ini tidak dapat dibatalkan.
-            </p>
-
-            <form
-                id="deleteKbliForm"
-                action=""
-                method="POST"
-                class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center"
+        <div class="search-control">
+            <input
+                type="text"
+                name="search"
+                value="{{ request('search') }}"
+                placeholder="Cari kode, judul, cakupan..."
             >
-                @csrf
-                @method('DELETE')
 
-                <button
-                    type="button"
-                    id="cancelDeleteKbli"
-                    class="inline-flex h-11 min-w-32 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                >
-                    Batal
-                </button>
+            <button type="submit">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
 
-                <button
-                    type="submit"
-                    class="inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700"
-                >
-                    <i class="fa-regular fa-trash-can"></i>
-                    Hapus
-                </button>
-            </form>
+        <a
+            href="{{ route('admin.data-kbli.index') }}"
+            class="btn-reset"
+        >
+            Reset
+        </a>
+    </form>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>NOMOR</th>
+                        <th>KODE</th>
+                        <th>JUDUL KBLI</th>
+                        <th>CAKUPAN</th>
+                        <th>TIDAK CAKUPAN</th>
+                        <th>STATUS</th>
+                        <th>AKSI</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse ($dataKbli as $item)
+                        @php
+                            $nomor = ($dataKbli->currentPage() - 1) * $dataKbli->perPage() + $loop->iteration;
+                            $status = $item->status ?? 'Aktif';
+                            $statusLower = strtolower(trim($status));
+                        @endphp
+
+                        <tr>
+                            <td>{{ str_pad($nomor, 5, '0', STR_PAD_LEFT) }}</td>
+
+                            <td>
+                                <span class="kode-pill">
+                                    {{ $item->kode_kbli ?? '-' }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <div
+                                    class="judul-title"
+                                    title="{{ $item->judul_kbli }}"
+                                >
+                                    {{ \Illuminate\Support\Str::limit($item->judul_kbli ?? '-', 85) }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div
+                                    class="text-preview"
+                                    title="{{ $item->cakupan }}"
+                                >
+                                    {{ \Illuminate\Support\Str::limit($item->cakupan ?? '-', 120) }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div
+                                    class="text-preview"
+                                    title="{{ $item->tidak_cakupan }}"
+                                >
+                                    {{ \Illuminate\Support\Str::limit($item->tidak_cakupan ?? '-', 120) }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge {{ $statusLower === 'nonaktif' ? 'badge-inactive' : 'badge-active' }}">
+                                    {{ $status }}
+                                </span>
+                            </td>
+
+                            <td>
+                                @if ($hasIdColumn && $item->id)
+                                    <div class="action-group">
+                                        <a
+                                            href="{{ route('admin.data-kbli.index', array_merge(request()->query(), ['edit' => $item->id])) }}"
+                                            class="action-btn"
+                                            title="Edit"
+                                        >
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </a>
+
+                                        <form
+                                            action="{{ route('admin.data-kbli.destroy', $item->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Yakin ingin menghapus data KBLI ini?')"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="action-btn delete"
+                                                title="Hapus"
+                                            >
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                Belum ada data KBLI.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const deleteModal = document.getElementById(
-                    'deleteKbliModal'
-                );
+    @if ($dataKbli->hasPages())
+        <div class="pagination-wrap">
+            <div class="pagination-info">
+                Menampilkan {{ $dataKbli->firstItem() }} - {{ $dataKbli->lastItem() }}
+                dari {{ $dataKbli->total() }} data KBLI
+            </div>
 
-                const deleteForm = document.getElementById(
-                    'deleteKbliForm'
-                );
+            <div class="pagination">
+                <a
+                    href="{{ $dataKbli->previousPageUrl() ?? '#' }}"
+                    class="page-link {{ $dataKbli->onFirstPage() ? 'disabled' : '' }}"
+                >
+                    <i class="fa-solid fa-chevron-left"></i>&nbsp; PREV
+                </a>
 
-                const deleteName = document.getElementById(
-                    'deleteKbliName'
-                );
+                @php
+                    $currentPage = $dataKbli->currentPage();
+                    $lastPage = $dataKbli->lastPage();
 
-                const cancelDelete = document.getElementById(
-                    'cancelDeleteKbli'
-                );
+                    $pages = collect([
+                        1,
+                        2,
+                        $currentPage - 1,
+                        $currentPage,
+                        $currentPage + 1,
+                        $lastPage - 1,
+                        $lastPage,
+                    ])
+                        ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
+                        ->unique()
+                        ->sort()
+                        ->values();
 
-                const deleteButtons = document.querySelectorAll(
-                    '[data-delete-kbli]'
-                );
+                    $previousPageNumber = null;
+                @endphp
 
-                function openDeleteModal(url, name) {
-                    if (
-                        ! deleteModal
-                        || ! deleteForm
-                        || ! deleteName
-                    ) {
-                        return;
-                    }
+                @foreach ($pages as $page)
+                    @if ($previousPageNumber && $page - $previousPageNumber > 1)
+                        <span class="page-dots">...</span>
+                    @endif
 
-                    deleteForm.action = url;
-                    deleteName.textContent = name || '-';
+                    <a
+                        href="{{ $dataKbli->url($page) }}"
+                        class="page-link {{ $page === $currentPage ? 'active' : '' }}"
+                    >
+                        {{ $page }}
+                    </a>
 
-                    deleteModal.classList.remove('hidden');
-                    deleteModal.classList.add('flex');
+                    @php
+                        $previousPageNumber = $page;
+                    @endphp
+                @endforeach
 
-                    document.body.style.overflow = 'hidden';
-                }
+                <a
+                    href="{{ $dataKbli->nextPageUrl() ?? '#' }}"
+                    class="page-link {{ $dataKbli->hasMorePages() ? '' : 'disabled' }}"
+                >
+                    NEXT &nbsp;<i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    @endif
+</div>
 
-                function closeDeleteModal() {
-                    if (! deleteModal) {
-                        return;
-                    }
+@if ($isModalOpen)
+    <div class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h2>{{ $isEdit ? 'Edit Data KBLI' : 'Tambah Data KBLI' }}</h2>
+                    <p>
+                        Isi kode KBLI, judul, cakupan, dan tidak cakupan.
+                    </p>
+                </div>
 
-                    deleteModal.classList.add('hidden');
-                    deleteModal.classList.remove('flex');
+                <a
+                    href="{{ route('admin.data-kbli.index', request()->except(['mode', 'edit'])) }}"
+                    class="btn-close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+            </div>
 
-                    document.body.style.overflow = '';
-                }
+            <form action="{{ $formAction }}" method="POST">
+                @csrf
 
-                deleteButtons.forEach(function (button) {
-                    button.addEventListener(
-                        'click',
-                        function () {
-                            openDeleteModal(
-                                button.dataset.deleteUrl,
-                                button.dataset.deleteName
-                            );
-                        }
-                    );
-                });
+                @if ($isEdit)
+                    @method('PUT')
+                @endif
 
-                cancelDelete?.addEventListener(
-                    'click',
-                    closeDeleteModal
-                );
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="kode_kbli">Kode KBLI</label>
+                        <input
+                            id="kode_kbli"
+                            type="text"
+                            name="kode_kbli"
+                            value="{{ old('kode_kbli', $isEdit ? $editData->kode_kbli : '') }}"
+                            placeholder="Contoh: 01111"
+                            required
+                        >
+                        @error('kode_kbli')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                deleteModal?.addEventListener(
-                    'click',
-                    function (event) {
-                        if (event.target === deleteModal) {
-                            closeDeleteModal();
-                        }
-                    }
-                );
+                    @if ($hasStatusColumn)
+                        <div class="form-group">
+                            <label for="status">Status</label>
 
-                document.addEventListener(
-                    'keydown',
-                    function (event) {
-                        if (event.key === 'Escape') {
-                            closeDeleteModal();
-                        }
-                    }
-                );
-            });
-        </script>
-    @endpush
+                            @php
+                                $selectedStatus = old('status', $isEdit ? ($editData->status ?? 'Aktif') : 'Aktif');
+                            @endphp
+
+                            <select
+                                id="status"
+                                name="status"
+                                required
+                            >
+                                <option value="Aktif" {{ $selectedStatus === 'Aktif' ? 'selected' : '' }}>
+                                    Aktif
+                                </option>
+                                <option value="Nonaktif" {{ $selectedStatus === 'Nonaktif' ? 'selected' : '' }}>
+                                    Nonaktif
+                                </option>
+                            </select>
+
+                            @error('status')
+                                <div class="error-text">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    @endif
+
+                    <div class="form-group full">
+                        <label for="judul_kbli">Judul KBLI</label>
+                        <input
+                            id="judul_kbli"
+                            type="text"
+                            name="judul_kbli"
+                            value="{{ old('judul_kbli', $isEdit ? $editData->judul_kbli : '') }}"
+                            placeholder="Masukkan judul KBLI"
+                            required
+                        >
+                        @error('judul_kbli')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="cakupan">Cakupan</label>
+                        <textarea
+                            id="cakupan"
+                            name="cakupan"
+                            placeholder="Masukkan cakupan KBLI"
+                        >{{ old('cakupan', $isEdit ? $editData->cakupan : '') }}</textarea>
+
+                        @error('cakupan')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="tidak_cakupan">Tidak Cakupan</label>
+                        <textarea
+                            id="tidak_cakupan"
+                            name="tidak_cakupan"
+                            placeholder="Masukkan pengecualian/tidak cakupan"
+                        >{{ old('tidak_cakupan', $isEdit ? $editData->tidak_cakupan : '') }}</textarea>
+
+                        @error('tidak_cakupan')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a
+                        href="{{ route('admin.data-kbli.index', request()->except(['mode', 'edit'])) }}"
+                        class="btn-secondary"
+                    >
+                        Batal
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        {{ $isEdit ? 'Simpan Perubahan' : 'Tambah KBLI' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif
 @endsection

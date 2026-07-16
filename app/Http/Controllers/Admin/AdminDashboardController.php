@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -14,88 +15,75 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        $wilayah = $this->countWilayah();
-        $kbli = $this->countTable('data_kbli');
-        $hsCode = $this->countHsCode();
-        $pengguna = $this->countTable('users');
-
         $stats = [
             [
-                'key' => 'total',
-                'label' => 'Total Data',
-                'value' => $wilayah + $kbli + $hsCode + $pengguna,
-                'icon' => 'fa-clipboard-list',
-                'color' => 'green',
-                'url' => null,
-            ],
-            [
-                'key' => 'wilayah',
                 'label' => 'Data Wilayah',
-                'value' => $wilayah,
-                'icon' => 'fa-location-dot',
-                'color' => 'purple',
-                'url' => $this->routeLink('admin.data-wilayah.index'),
+                'value' => $this->countWilayah(),
+                'caption_label' => 'Provinsi',
+                'caption_value' => $this->countProvinsi(),
+                'icon' => 'fa-map',
+                'color' => 'green',
             ],
             [
-                'key' => 'kbli',
                 'label' => 'Kode KBLI',
-                'value' => $kbli,
+                'value' => $this->countTable('data_kbli'),
+                'caption_label' => 'Kategori Aktif',
+                'caption_value' => $this->countKbliAktif(),
                 'icon' => 'fa-table-cells-large',
                 'color' => 'blue',
-                'url' => $this->routeLink('admin.data-kbli.index'),
             ],
             [
-                'key' => 'hs',
                 'label' => 'Kode HS',
-                'value' => $hsCode,
-                'icon' => 'fa-link',
-                'color' => 'teal',
-                'url' => $this->routeLink('admin.hs-code.index'),
+                'value' => $this->countHsCode(),
+                'caption_label' => 'Subkelompok',
+                'caption_value' => $this->countHsSubkelompok(),
+                'icon' => 'fa-tags',
+                'color' => 'purple',
             ],
             [
-                'key' => 'pengguna',
                 'label' => 'Pengguna',
-                'value' => $pengguna,
+                'value' => $this->countTable('users'),
+                'caption_label' => 'Admin & Operator',
+                'caption_value' => $this->countAdminOperator(),
                 'icon' => 'fa-users',
-                'color' => 'cyan',
-                'url' => $this->routeLink('admin.pengguna.index'),
+                'color' => 'orange',
             ],
         ];
 
-        $activityData = $this->buildActivities();
-
-        $summaryRows = [
+        $quickActions = [
             [
-                'label' => 'Data Wilayah',
-                'data_terakhir' => $activityData['latestByCategory']['wilayah']['title'] ?? '-',
-                'total' => $wilayah,
-                'url' => $this->routeLink('admin.data-wilayah.index'),
+                'label' => 'Tambah Data Wilayah',
+                'icon' => 'fa-plus',
+                'color' => 'green',
+                'url' => $this->routeLink('admin.data-wilayah.index', ['mode' => 'create']),
             ],
             [
-                'label' => 'Kode KBLI',
-                'data_terakhir' => $activityData['latestByCategory']['kbli']['title'] ?? '-',
-                'total' => $kbli,
-                'url' => $this->routeLink('admin.data-kbli.index'),
+                'label' => 'Tambah Kode KBLI',
+                'icon' => 'fa-plus',
+                'color' => 'blue',
+                'url' => $this->routeLink('admin.data-kbli.index', ['mode' => 'create']),
             ],
             [
-                'label' => 'Kode HS',
-                'data_terakhir' => $activityData['latestByCategory']['hs']['title'] ?? '-',
-                'total' => $hsCode,
-                'url' => $this->routeLink('admin.hs-code.index'),
+                'label' => 'Tambah Kode HS',
+                'icon' => 'fa-plus',
+                'color' => 'purple',
+                'url' => $this->routeLink('admin.hs-code.index', ['mode' => 'create']),
             ],
             [
-                'label' => 'Pengguna',
-                'data_terakhir' => $activityData['latestByCategory']['pengguna']['title'] ?? '-',
-                'total' => $pengguna,
-                'url' => $this->routeLink('admin.pengguna.index'),
+                'label' => 'Tambah Pengguna',
+                'icon' => 'fa-plus',
+                'color' => 'orange',
+                'url' => $this->routeLink('admin.pengguna.index', ['mode' => 'create']),
             ],
         ];
 
-        return view('admin.dashboard', [
-            'stats' => $stats,
-            'summaryRows' => $summaryRows,
-            'activities' => $activityData['recent'],
-        ]);
+        $activities = $this->latestActivities();
+
+        return view('admin.dashboard', compact(
+            'stats',
+            'quickActions',
+            'activities'
+        ));
     }
 
     private function countTable(string $table): int
@@ -104,61 +92,141 @@ class AdminDashboardController extends Controller
             return 0;
         }
 
-        try {
-            return DB::table($table)->count();
-        } catch (Throwable $exception) {
-            report($exception);
-
-            return 0;
-        }
+        return DB::table($table)->count();
     }
 
     private function countWilayah(): int
     {
-        foreach ([
-            'data_wilayah',
-            'kelurahan_desa',
-            'desa_kelurahan',
-        ] as $table) {
-            if (Schema::hasTable($table)) {
-                return $this->countTable($table);
-            }
+        if (Schema::hasTable('data_wilayah')) {
+            return DB::table('data_wilayah')->count();
+        }
+
+        if (Schema::hasTable('kelurahan_desa')) {
+            return DB::table('kelurahan_desa')->count();
         }
 
         return 0;
+    }
+
+    private function countProvinsi(): int
+    {
+        if (Schema::hasTable('provinsi')) {
+            return DB::table('provinsi')->count();
+        }
+
+        if (! Schema::hasTable('data_wilayah')) {
+            return 0;
+        }
+
+        $column = $this->firstExistingColumn('data_wilayah', [
+            'kode_provinsi',
+            'province_code',
+            'provinsi_id',
+            'nama_provinsi',
+            'province_name',
+        ]);
+
+        if (! $column) {
+            return 0;
+        }
+
+        return DB::table('data_wilayah')
+            ->whereNotNull($column)
+            ->distinct()
+            ->count($column);
+    }
+
+    private function countKbliAktif(): int
+    {
+        if (! Schema::hasTable('data_kbli')) {
+            return 0;
+        }
+
+        $statusColumn = $this->firstExistingColumn('data_kbli', [
+            'status',
+            'Status',
+        ]);
+
+        if (! $statusColumn) {
+            return DB::table('data_kbli')->count();
+        }
+
+        return DB::table('data_kbli')
+            ->whereRaw(
+                'LOWER(TRIM(CAST(' . $this->quotedColumn($statusColumn) . ' AS TEXT))) = ?',
+                ['aktif']
+            )
+            ->count();
     }
 
     private function countHsCode(): int
     {
         $table = $this->hsTable();
 
-        return $table ? $this->countTable($table) : 0;
-    }
-
-    private function hsTable(): ?string
-    {
-        foreach ([
-            'hs_codes',
-            'data_hs_code',
-            'hs_code',
-            'hscode',
-        ] as $table) {
-            if (Schema::hasTable($table)) {
-                return $table;
-            }
+        if (! $table) {
+            return 0;
         }
 
-        return null;
+        return DB::table($table)->count();
     }
 
-    private function routeLink(string $routeName): ?string
+    private function countHsSubkelompok(): int
     {
-        return Route::has($routeName)
-            ? route($routeName)
-            : null;
+        $table = $this->hsTable();
+
+        if (! $table) {
+            return 0;
+        }
+
+        $column = $this->firstExistingColumn($table, [
+            'kode_subkelompok',
+            'Kode Subkelompok',
+        ]);
+
+        if (! $column) {
+            return 0;
+        }
+
+        return DB::table($table)
+            ->whereNotNull($column)
+            ->whereRaw('TRIM(CAST(' . $this->quotedColumn($column) . ' AS TEXT)) != ?', [''])
+            ->distinct()
+            ->count($column);
     }
 
-    private function buildActivities(): array
+    private function countAdminOperator(): int
+    {
+        if (! Schema::hasTable('users')) {
+            return 0;
+        }
+
+        $roleColumn = $this->firstExistingColumn('users', [
+            'role',
+            'Role',
+        ]);
+
+        if (! $roleColumn) {
+            return 0;
+        }
+
+        return DB::table('users')
+            ->whereIn(DB::raw('LOWER(TRIM(CAST(' . $this->quotedColumn($roleColumn) . ' AS TEXT)))'), [
+                'admin',
+                'operator',
+            ])
+            ->count();
+    }
+
+    private function routeLink(string $routeName, array $params = []): ?string
+    {
+        if (! Route::has($routeName)) {
+            return null;
+        }
+
+        return route($routeName, $params);
+    }
+
+    private function latestActivities(): Collection
     {
         $activities = collect();
 
@@ -167,27 +235,11 @@ class AdminDashboardController extends Controller
         $this->appendKbliActivities($activities);
         $this->appendHsActivities($activities);
 
-        $activities = $activities
-            ->filter(fn (array $activity) => $activity['time'] !== null)
+        return $activities
+            ->filter(fn ($activity) => $activity['time'] !== null)
             ->sortByDesc('time')
+            ->take(5)
             ->values();
-
-        $latestByCategory = [];
-
-        foreach ([
-            'wilayah',
-            'kbli',
-            'hs',
-            'pengguna',
-        ] as $category) {
-            $latestByCategory[$category] = $activities
-                ->firstWhere('category', $category);
-        }
-
-        return [
-            'recent' => $activities->take(5)->values(),
-            'latestByCategory' => $latestByCategory,
-        ];
     }
 
     private function appendUserActivities(Collection $activities): void
@@ -196,111 +248,166 @@ class AdminDashboardController extends Controller
             return;
         }
 
-        $nameColumn = $this->firstExistingColumn('users', [
-            'name',
-            'nama',
-        ]);
+        $nameColumn = $this->firstExistingColumn('users', ['name']);
+        $emailColumn = $this->firstExistingColumn('users', ['email']);
+        $roleColumn = $this->firstExistingColumn('users', ['role', 'Role']);
+        $createdAtColumn = $this->firstExistingColumn('users', ['created_at']);
+        $updatedAtColumn = $this->firstExistingColumn('users', ['updated_at']);
 
-        $emailColumn = $this->firstExistingColumn('users', [
-            'email',
-        ]);
-
-        $roleColumn = $this->firstExistingColumn('users', [
-            'role',
-        ]);
-
-        $timeColumn = $this->timeColumn('users');
-
-        if (! $timeColumn) {
+        if (! $createdAtColumn && ! $updatedAtColumn) {
             return;
         }
 
-        $rows = DB::table('users')
-            ->select([
-                $this->selectAlias($nameColumn, 'name'),
-                $this->selectAlias($emailColumn, 'email'),
-                $this->selectAlias($roleColumn, 'role'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
+        $query = DB::table('users');
+
+        $selects = [
+            $this->selectAlias($nameColumn, 'name'),
+            $this->selectAlias($emailColumn, 'email'),
+            $this->selectAlias($roleColumn, 'role'),
+            $this->selectAlias($createdAtColumn, 'created_at'),
+            $this->selectAlias($updatedAtColumn, 'updated_at'),
+        ];
+
+        $query->select($selects);
+
+        $this->orderLatest($query, 'users');
+
+        $rows = $query
             ->limit(3)
             ->get();
 
         foreach ($rows as $row) {
-            $name = $row->name ?: ($row->email ?: 'Pengguna');
-            $role = ucfirst(strtolower((string) ($row->role ?: 'user')));
-            $time = $this->parseDate($row->activity_time ?? null);
+            $time = $this->parseDate($row->created_at ?? $row->updated_at ?? null);
+
+            $role = $row->role
+                ? ucfirst((string) $row->role)
+                : 'User';
+
+            $name = $row->name ?: ($row->email ?: '-');
 
             $activities->push([
-                'category' => 'pengguna',
-                'category_label' => 'Pengguna',
-                'title' => $name,
-                'aktivitas' => $name . ' terdaftar sebagai ' . $role . '.',
-                'icon' => 'fa-user',
-                'color' => 'orange',
                 'time' => $time,
                 'waktu' => $this->formatDate($time),
+                'aktivitas' => 'Pengguna ' . $name . ' terdaftar sebagai ' . $role . '.',
             ]);
         }
     }
 
     private function appendWilayahActivities(Collection $activities): void
     {
-        $table = null;
-
-        foreach ([
-            'data_wilayah',
-            'kelurahan_desa',
-            'desa_kelurahan',
-        ] as $candidate) {
-            if (Schema::hasTable($candidate)) {
-                $table = $candidate;
-                break;
-            }
-        }
-
-        if (! $table) {
+        if (Schema::hasTable('data_wilayah')) {
+            $this->appendDataWilayahActivities($activities);
             return;
         }
 
-        $nameColumn = $this->firstExistingColumn($table, [
+        if (Schema::hasTable('kelurahan_desa')) {
+            $this->appendKelurahanDesaActivities($activities);
+        }
+    }
+
+    private function appendDataWilayahActivities(Collection $activities): void
+    {
+        $table = 'data_wilayah';
+
+        $desaColumn = $this->firstExistingColumn($table, [
             'nama_desa',
-            'nama_kelurahan',
-            'nama_kelurahan_desa',
             'village_name',
-            'nama_kecamatan',
-            'nama_kabupaten',
-            'name',
+            'desa_kelurahan',
+            'nama_kelurahan',
         ]);
 
-        $timeColumn = $this->timeColumn($table);
+        $kecamatanColumn = $this->firstExistingColumn($table, [
+            'nama_kecamatan',
+            'district_name',
+        ]);
 
-        if (! $nameColumn || ! $timeColumn) {
+        $kabupatenColumn = $this->firstExistingColumn($table, [
+            'nama_kabupaten',
+            'regency_name',
+            'kabupaten_kota',
+        ]);
+
+        $createdAtColumn = $this->firstExistingColumn($table, ['created_at']);
+        $updatedAtColumn = $this->firstExistingColumn($table, ['updated_at']);
+
+        if (! $desaColumn && ! $kecamatanColumn && ! $kabupatenColumn) {
             return;
         }
 
-        $rows = DB::table($table)
+        $query = DB::table($table)
             ->select([
-                $this->selectAlias($nameColumn, 'nama'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
+                $this->selectAlias($desaColumn, 'nama_desa'),
+                $this->selectAlias($kecamatanColumn, 'nama_kecamatan'),
+                $this->selectAlias($kabupatenColumn, 'nama_kabupaten'),
+                $this->selectAlias($createdAtColumn, 'created_at'),
+                $this->selectAlias($updatedAtColumn, 'updated_at'),
+            ]);
+
+        $this->orderLatest($query, $table);
+
+        $rows = $query
             ->limit(3)
             ->get();
 
         foreach ($rows as $row) {
-            $title = $row->nama ?: 'Data Wilayah';
-            $time = $this->parseDate($row->activity_time ?? null);
+            $time = $this->parseDate($row->created_at ?? $row->updated_at ?? null);
+
+            $details = array_filter([
+                $row->nama_desa ?? null,
+                $row->nama_kecamatan ?? null,
+                $row->nama_kabupaten ?? null,
+            ]);
+
+            $detail = count($details)
+                ? implode(' - ', $details)
+                : 'Data Wilayah';
 
             $activities->push([
-                'category' => 'wilayah',
-                'category_label' => 'Wilayah',
-                'title' => $title,
-                'aktivitas' => 'Data wilayah ' . $title . ' ditambahkan.',
-                'icon' => 'fa-location-dot',
-                'color' => 'green',
                 'time' => $time,
                 'waktu' => $this->formatDate($time),
+                'aktivitas' => 'Menambahkan data wilayah ' . $detail . '.',
+            ]);
+        }
+    }
+
+    private function appendKelurahanDesaActivities(Collection $activities): void
+    {
+        $table = 'kelurahan_desa';
+
+        $nameColumn = $this->firstExistingColumn($table, [
+            'nama_desa',
+            'nama_kelurahan_desa',
+            'nama_kelurahan',
+            'name',
+        ]);
+
+        $createdAtColumn = $this->firstExistingColumn($table, ['created_at']);
+        $updatedAtColumn = $this->firstExistingColumn($table, ['updated_at']);
+
+        if (! $nameColumn) {
+            return;
+        }
+
+        $query = DB::table($table)
+            ->select([
+                $this->selectAlias($nameColumn, 'nama_wilayah'),
+                $this->selectAlias($createdAtColumn, 'created_at'),
+                $this->selectAlias($updatedAtColumn, 'updated_at'),
+            ]);
+
+        $this->orderLatest($query, $table);
+
+        $rows = $query
+            ->limit(3)
+            ->get();
+
+        foreach ($rows as $row) {
+            $time = $this->parseDate($row->created_at ?? $row->updated_at ?? null);
+
+            $activities->push([
+                'time' => $time,
+                'waktu' => $this->formatDate($time),
+                'aktivitas' => 'Menambahkan data wilayah ' . ($row->nama_wilayah ?? '-') . '.',
             ]);
         }
     }
@@ -314,51 +421,52 @@ class AdminDashboardController extends Controller
         }
 
         $kodeColumn = $this->firstExistingColumn($table, [
-            'kode',
             'kode_kbli',
             'Kode',
+            'kode',
         ]);
 
         $judulColumn = $this->firstExistingColumn($table, [
-            'judul',
             'judul_kbli',
-            'nama_kbli',
             'Judul',
+            'judul',
+            'nama_kbli',
         ]);
 
-        $timeColumn = $this->timeColumn($table);
+        $createdAtColumn = $this->firstExistingColumn($table, ['created_at']);
+        $updatedAtColumn = $this->firstExistingColumn($table, ['updated_at']);
 
-        if ((! $kodeColumn && ! $judulColumn) || ! $timeColumn) {
+        if (! $kodeColumn && ! $judulColumn) {
             return;
         }
 
-        $rows = DB::table($table)
+        $query = DB::table($table)
             ->select([
                 $this->selectAlias($kodeColumn, 'kode'),
                 $this->selectAlias($judulColumn, 'judul'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
+                $this->selectAlias($createdAtColumn, 'created_at'),
+                $this->selectAlias($updatedAtColumn, 'updated_at'),
+            ]);
+
+        $this->orderLatest($query, $table);
+
+        $rows = $query
             ->limit(3)
             ->get();
 
         foreach ($rows as $row) {
-            $title = trim(
-                ($row->kode ? $row->kode . ' - ' : '') .
-                ($row->judul ?: 'Data KBLI')
-            );
+            $time = $this->parseDate($row->created_at ?? $row->updated_at ?? null);
 
-            $time = $this->parseDate($row->activity_time ?? null);
+            $kode = $row->kode
+                ? $row->kode . ' - '
+                : '';
+
+            $judul = $row->judul ?: 'Data KBLI';
 
             $activities->push([
-                'category' => 'kbli',
-                'category_label' => 'KBLI',
-                'title' => $title,
-                'aktivitas' => 'Kode KBLI ' . $title . ' ditambahkan.',
-                'icon' => 'fa-table-cells-large',
-                'color' => 'blue',
                 'time' => $time,
                 'waktu' => $this->formatDate($time),
+                'aktivitas' => 'Menambahkan Kode KBLI ' . $kode . $judul . '.',
             ]);
         }
     }
@@ -373,8 +481,9 @@ class AdminDashboardController extends Controller
 
         $kodeColumn = $this->firstExistingColumn($table, [
             'hs_code',
-            'kode_hs',
             'HS Code',
+            'kode_hs',
+            'Kode HS',
             'kode',
         ]);
 
@@ -383,61 +492,74 @@ class AdminDashboardController extends Controller
             'Uraian Barang',
             'uraian',
             'deskripsi',
+            'nama',
         ]);
 
-        $timeColumn = $this->timeColumn($table);
+        $createdAtColumn = $this->firstExistingColumn($table, ['created_at']);
+        $updatedAtColumn = $this->firstExistingColumn($table, ['updated_at']);
 
-        if ((! $kodeColumn && ! $uraianColumn) || ! $timeColumn) {
+        if (! $kodeColumn && ! $uraianColumn) {
             return;
         }
 
-        $rows = DB::table($table)
+        $query = DB::table($table)
             ->select([
                 $this->selectAlias($kodeColumn, 'kode'),
                 $this->selectAlias($uraianColumn, 'uraian'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
+                $this->selectAlias($createdAtColumn, 'created_at'),
+                $this->selectAlias($updatedAtColumn, 'updated_at'),
+            ]);
+
+        $this->orderLatest($query, $table);
+
+        $rows = $query
             ->limit(3)
             ->get();
 
         foreach ($rows as $row) {
-            $title = trim(
-                ($row->kode ? $row->kode . ' - ' : '') .
-                ($row->uraian ?: 'Data HS Code')
-            );
+            $time = $this->parseDate($row->created_at ?? $row->updated_at ?? null);
 
-            $time = $this->parseDate($row->activity_time ?? null);
+            $kode = $row->kode
+                ? $row->kode . ' - '
+                : '';
+
+            $uraian = $row->uraian ?: 'Data HS Code';
 
             $activities->push([
-                'category' => 'hs',
-                'category_label' => 'HS Code',
-                'title' => $title,
-                'aktivitas' => 'Kode HS ' . $title . ' ditambahkan.',
-                'icon' => 'fa-link',
-                'color' => 'purple',
                 'time' => $time,
                 'waktu' => $this->formatDate($time),
+                'aktivitas' => 'Menambahkan Kode HS ' . $kode . $uraian . '.',
             ]);
         }
     }
 
-    private function firstExistingColumn(
-        string $table,
-        array $columns
-    ): ?string {
+    private function hsTable(): ?string
+    {
+        foreach ([
+            'data_hs_code',
+            'hs_codes',
+            'hs_code',
+            'hscode',
+        ] as $table) {
+            if (Schema::hasTable($table)) {
+                return $table;
+            }
+        }
+
+        return null;
+    }
+
+    private function firstExistingColumn(string $table, array $columns): ?string
+    {
         if (! Schema::hasTable($table)) {
             return null;
         }
 
         $existingColumns = Schema::getColumnListing($table);
 
-        foreach ($columns as $candidate) {
+        foreach ($columns as $targetColumn) {
             foreach ($existingColumns as $existingColumn) {
-                if (
-                    strtolower($candidate) ===
-                    strtolower($existingColumn)
-                ) {
+                if (strtolower($existingColumn) === strtolower($targetColumn)) {
                     return $existingColumn;
                 }
             }
@@ -446,33 +568,35 @@ class AdminDashboardController extends Controller
         return null;
     }
 
-    private function timeColumn(string $table): ?string
+    private function selectAlias(?string $column, string $alias)
     {
-        return $this->firstExistingColumn($table, [
-            'updated_at',
-            'created_at',
-        ]);
-    }
-
-    private function selectAlias(
-        ?string $column,
-        string $alias
-    ) {
         if (! $column) {
-            return DB::raw('NULL AS "' . $alias . '"');
+            return DB::raw('NULL as ' . $alias);
         }
 
-        return DB::raw(
-            $this->quotedColumn($column) .
-            ' AS "' .
-            $alias .
-            '"'
-        );
+        return DB::raw($this->quotedColumn($column) . ' as ' . $alias);
     }
 
     private function quotedColumn(string $column): string
     {
         return '"' . str_replace('"', '""', $column) . '"';
+    }
+
+    private function orderLatest(Builder $query, string $table): void
+    {
+        if (Schema::hasColumn($table, 'created_at')) {
+            $query->orderByDesc('created_at');
+            return;
+        }
+
+        if (Schema::hasColumn($table, 'updated_at')) {
+            $query->orderByDesc('updated_at');
+            return;
+        }
+
+        if (Schema::hasColumn($table, 'id')) {
+            $query->orderByDesc('id');
+        }
     }
 
     private function parseDate($value): ?Carbon
@@ -483,15 +607,17 @@ class AdminDashboardController extends Controller
 
         try {
             return Carbon::parse($value);
-        } catch (Throwable $exception) {
+        } catch (Throwable $e) {
             return null;
         }
     }
 
     private function formatDate(?Carbon $date): string
     {
-        return $date
-            ? $date->translatedFormat('d F Y, H:i')
-            : '-';
+        if (! $date) {
+            return '-';
+        }
+
+        return $date->format('d M Y, H:i');
     }
 }

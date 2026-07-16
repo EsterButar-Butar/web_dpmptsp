@@ -20,22 +20,13 @@ class DataKbliController extends Controller
 
         $hasIdColumn = $columns['id'] !== null;
         $hasStatusColumn = $columns['status'] !== null;
-
-        $columnsReady = $tableExists
-            && $columns['kode']
-            && $columns['judul'];
+        $columnsReady = $tableExists && $columns['kode'] && $columns['judul'];
 
         if (! $columnsReady) {
-            $dataKbli = new LengthAwarePaginator(
-                [],
-                0,
-                10,
-                1,
-                [
-                    'path' => $request->url(),
-                    'query' => $request->query(),
-                ]
-            );
+            $dataKbli = new LengthAwarePaginator([], 0, 10, 1, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
 
             return view('admin.data-kbli', [
                 'tableExists' => $tableExists,
@@ -56,25 +47,14 @@ class DataKbliController extends Controller
                 $this->selectAlias($columns['kode'], 'kode_kbli'),
                 $this->selectAlias($columns['judul'], 'judul_kbli'),
                 $this->selectAlias($columns['cakupan'], 'cakupan'),
-                $this->selectAlias(
-                    $columns['tidak_cakupan'],
-                    'tidak_cakupan'
-                ),
+                $this->selectAlias($columns['tidak_cakupan'], 'tidak_cakupan'),
                 $this->selectAlias($columns['status'], 'status'),
-                $this->selectAlias(
-                    $columns['created_at'],
-                    'created_at'
-                ),
-                $this->selectAlias(
-                    $columns['updated_at'],
-                    'updated_at'
-                ),
+                $this->selectAlias($columns['created_at'], 'created_at'),
+                $this->selectAlias($columns['updated_at'], 'updated_at'),
             ]);
 
         if ($request->filled('search')) {
-            $search = '%' . strtolower(
-                trim((string) $request->search)
-            ) . '%';
+            $search = '%' . strtolower(trim($request->search)) . '%';
 
             $searchColumns = array_filter([
                 $columns['kode'],
@@ -84,36 +64,20 @@ class DataKbliController extends Controller
                 $columns['status'],
             ]);
 
-            $query->where(
-                function ($subQuery) use (
-                    $searchColumns,
-                    $search
-                ) {
-                    foreach ($searchColumns as $column) {
-                        $subQuery->orWhereRaw(
-                            'LOWER(CAST('
-                            . $this->quotedColumn($column)
-                            . ' AS TEXT)) LIKE ?',
-                            [$search]
-                        );
-                    }
+            $query->where(function ($q) use ($searchColumns, $search) {
+                foreach ($searchColumns as $column) {
+                    $q->orWhereRaw(
+                        'LOWER(CAST(' . $this->quotedColumn($column) . ' AS TEXT)) LIKE ?',
+                        [$search]
+                    );
                 }
-            );
+            });
         }
 
-        if (
-            $request->filled('status')
-            && $hasStatusColumn
-        ) {
+        if ($request->filled('status') && $hasStatusColumn) {
             $query->whereRaw(
-                'LOWER(TRIM(CAST('
-                . $this->quotedColumn($columns['status'])
-                . ' AS TEXT))) = ?',
-                [
-                    strtolower(
-                        trim((string) $request->status)
-                    ),
-                ]
+                'LOWER(TRIM(' . $this->quotedColumn($columns['status']) . ')) = ?',
+                [strtolower(trim($request->status))]
             );
         }
 
@@ -132,15 +96,8 @@ class DataKbliController extends Controller
         $mode = $request->query('mode');
         $editData = null;
 
-        if (
-            $request->filled('edit')
-            && $hasIdColumn
-        ) {
-            $editData = $this->findRow(
-                $request->edit,
-                $columns
-            );
-
+        if ($request->filled('edit') && $hasIdColumn) {
+            $editData = $this->findRow($request->edit, $columns);
             $mode = 'edit';
         }
 
@@ -158,35 +115,23 @@ class DataKbliController extends Controller
 
     public function store(Request $request)
     {
+        $columns = $this->columnMap();
+
         if (! Schema::hasTable($this->table)) {
             return redirect()
                 ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Tabel data_kbli belum tersedia di Supabase.'
-                );
+                ->with('error', 'Tabel data_kbli belum tersedia di Supabase.');
         }
-
-        $columns = $this->columnMap();
 
         if (! $columns['kode'] || ! $columns['judul']) {
             return redirect()
                 ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Kolom Kode dan Judul belum sesuai.'
-                );
+                ->with('error', 'Kolom Kode/Judul pada tabel data_kbli belum sesuai.');
         }
 
-        $data = $request->validate(
-            $this->rules($columns),
-            $this->messages()
-        );
+        $data = $request->validate($this->rules($columns), $this->messages());
 
-        $this->ensureUniqueKode(
-            $data['kode_kbli'],
-            $columns
-        );
+        $this->ensureUniqueKode($data['kode_kbli'], $columns);
 
         $insert = $this->payload($data, $columns);
 
@@ -202,10 +147,7 @@ class DataKbliController extends Controller
 
         return redirect()
             ->route('admin.data-kbli.index')
-            ->with(
-                'success',
-                'Data KBLI berhasil ditambahkan.'
-            );
+            ->with('success', 'Data KBLI berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
@@ -215,22 +157,12 @@ class DataKbliController extends Controller
         if (! $columns['id']) {
             return redirect()
                 ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Kolom id belum tersedia.'
-                );
+                ->with('error', 'Kolom id belum tersedia, data belum bisa diedit.');
         }
 
-        $data = $request->validate(
-            $this->rules($columns),
-            $this->messages()
-        );
+        $data = $request->validate($this->rules($columns, true), $this->messages());
 
-        $this->ensureUniqueKode(
-            $data['kode_kbli'],
-            $columns,
-            $id
-        );
+        $this->ensureUniqueKode($data['kode_kbli'], $columns, $id);
 
         $update = $this->payload($data, $columns);
 
@@ -244,10 +176,7 @@ class DataKbliController extends Controller
 
         return redirect()
             ->route('admin.data-kbli.index')
-            ->with(
-                'success',
-                'Data KBLI berhasil diperbarui.'
-            );
+            ->with('success', 'Data KBLI berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -257,10 +186,7 @@ class DataKbliController extends Controller
         if (! $columns['id']) {
             return redirect()
                 ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Kolom id belum tersedia.'
-                );
+                ->with('error', 'Kolom id belum tersedia, data belum bisa dihapus.');
         }
 
         DB::table($this->table)
@@ -269,40 +195,20 @@ class DataKbliController extends Controller
 
         return redirect()
             ->route('admin.data-kbli.index')
-            ->with(
-                'success',
-                'Data KBLI berhasil dihapus.'
-            );
+            ->with('success', 'Data KBLI berhasil dihapus.');
     }
 
-    private function rules(array $columns): array
+    private function rules(array $columns, bool $isUpdate = false): array
     {
         $rules = [
-            'kode_kbli' => [
-                'required',
-                'string',
-                'max:30',
-            ],
-            'judul_kbli' => [
-                'required',
-                'string',
-                'max:500',
-            ],
-            'cakupan' => [
-                'nullable',
-                'string',
-            ],
-            'tidak_cakupan' => [
-                'nullable',
-                'string',
-            ],
+            'kode_kbli' => ['required', 'string', 'max:30'],
+            'judul_kbli' => ['required', 'string', 'max:500'],
+            'cakupan' => ['nullable', 'string'],
+            'tidak_cakupan' => ['nullable', 'string'],
         ];
 
         if ($columns['status']) {
-            $rules['status'] = [
-                'required',
-                'in:Aktif,Nonaktif',
-            ];
+            $rules['status'] = ['required', 'in:Aktif,Nonaktif'];
         }
 
         return $rules;
@@ -311,91 +217,61 @@ class DataKbliController extends Controller
     private function messages(): array
     {
         return [
-            'kode_kbli.required' =>
-                'Kode KBLI wajib diisi.',
-            'judul_kbli.required' =>
-                'Judul KBLI wajib diisi.',
-            'status.required' =>
-                'Status wajib dipilih.',
-            'status.in' =>
-                'Status yang dipilih tidak valid.',
+            'kode_kbli.required' => 'Kode KBLI wajib diisi.',
+            'judul_kbli.required' => 'Judul KBLI wajib diisi.',
+            'status.required' => 'Status wajib dipilih.',
         ];
     }
 
-    private function payload(
-        array $data,
-        array $columns
-    ): array {
+    private function payload(array $data, array $columns): array
+    {
         $payload = [];
 
         if ($columns['kode']) {
-            $payload[$columns['kode']] =
-                trim($data['kode_kbli']);
+            $payload[$columns['kode']] = $data['kode_kbli'];
         }
 
         if ($columns['judul']) {
-            $payload[$columns['judul']] =
-                trim($data['judul_kbli']);
+            $payload[$columns['judul']] = $data['judul_kbli'];
         }
 
         if ($columns['cakupan']) {
-            $payload[$columns['cakupan']] =
-                $data['cakupan'] ?? null;
+            $payload[$columns['cakupan']] = $data['cakupan'] ?? null;
         }
 
         if ($columns['tidak_cakupan']) {
-            $payload[$columns['tidak_cakupan']] =
-                $data['tidak_cakupan'] ?? null;
+            $payload[$columns['tidak_cakupan']] = $data['tidak_cakupan'] ?? null;
         }
 
         if ($columns['status']) {
-            $payload[$columns['status']] =
-                $data['status'] ?? 'Aktif';
+            $payload[$columns['status']] = $data['status'] ?? 'Aktif';
         }
 
         return $payload;
     }
 
-    private function ensureUniqueKode(
-        string $kode,
-        array $columns,
-        $ignoreId = null
-    ): void {
+    private function ensureUniqueKode(string $kode, array $columns, $ignoreId = null): void
+    {
         if (! $columns['kode']) {
             return;
         }
 
         $query = DB::table($this->table)
-            ->whereRaw(
-                'LOWER(TRIM(CAST('
-                . $this->quotedColumn($columns['kode'])
-                . ' AS TEXT))) = ?',
-                [strtolower(trim($kode))]
-            );
+            ->where($columns['kode'], $kode);
 
-        if (
-            $ignoreId !== null
-            && $columns['id']
-        ) {
-            $query->where(
-                $columns['id'],
-                '!=',
-                $ignoreId
-            );
+        if ($ignoreId && $columns['id']) {
+            $query->where($columns['id'], '!=', $ignoreId);
         }
 
         if ($query->exists()) {
             throw ValidationException::withMessages([
-                'kode_kbli' =>
-                    'Kode KBLI sudah terdaftar.',
+                'kode_kbli' => 'Kode KBLI sudah terdaftar.',
             ]);
         }
     }
 
-    private function findRow(
-        $id,
-        array $columns
-    ) {
+    private function findRow($id, array $columns)
+    {
         return DB::table($this->table)
             ->select([
                 $this->selectAlias($columns['id'], 'id'),
@@ -403,19 +279,10 @@ class DataKbliController extends Controller
                 $this->selectAlias($columns['kode'], 'kode_kbli'),
                 $this->selectAlias($columns['judul'], 'judul_kbli'),
                 $this->selectAlias($columns['cakupan'], 'cakupan'),
-                $this->selectAlias(
-                    $columns['tidak_cakupan'],
-                    'tidak_cakupan'
-                ),
+                $this->selectAlias($columns['tidak_cakupan'], 'tidak_cakupan'),
                 $this->selectAlias($columns['status'], 'status'),
-                $this->selectAlias(
-                    $columns['created_at'],
-                    'created_at'
-                ),
-                $this->selectAlias(
-                    $columns['updated_at'],
-                    'updated_at'
-                ),
+                $this->selectAlias($columns['created_at'], 'created_at'),
+                $this->selectAlias($columns['updated_at'], 'updated_at'),
             ])
             ->where($columns['id'], $id)
             ->firstOrFail();
@@ -425,39 +292,31 @@ class DataKbliController extends Controller
     {
         $total = DB::table($this->table)->count();
 
-        $aktif = $total;
+        $aktif = 0;
         $nonaktif = 0;
-        $cakupanTerisi = 0;
 
         if ($columns['status']) {
             $aktif = DB::table($this->table)
                 ->whereRaw(
-                    'LOWER(TRIM(CAST('
-                    . $this->quotedColumn($columns['status'])
-                    . ' AS TEXT))) = ?',
+                    'LOWER(TRIM(' . $this->quotedColumn($columns['status']) . ')) = ?',
                     ['aktif']
                 )
                 ->count();
 
             $nonaktif = DB::table($this->table)
                 ->whereRaw(
-                    'LOWER(TRIM(CAST('
-                    . $this->quotedColumn($columns['status'])
-                    . ' AS TEXT))) = ?',
+                    'LOWER(TRIM(' . $this->quotedColumn($columns['status']) . ')) = ?',
                     ['nonaktif']
                 )
                 ->count();
         }
 
+        $cakupanTerisi = 0;
+
         if ($columns['cakupan']) {
             $cakupanTerisi = DB::table($this->table)
                 ->whereNotNull($columns['cakupan'])
-                ->whereRaw(
-                    'TRIM(CAST('
-                    . $this->quotedColumn($columns['cakupan'])
-                    . ' AS TEXT)) != ?',
-                    ['']
-                )
+                ->whereRaw('TRIM(CAST(' . $this->quotedColumn($columns['cakupan']) . ' AS TEXT)) != ?', [''])
                 ->count();
         }
 
@@ -465,13 +324,13 @@ class DataKbliController extends Controller
             [
                 'label' => 'Total KBLI',
                 'value' => $total,
-                'color' => 'green',
+                'color' => 'mint',
                 'icon' => 'fa-table-cells-large',
             ],
             [
                 'label' => 'Aktif',
-                'value' => $aktif,
-                'color' => 'yellow',
+                'value' => $columns['status'] ? $aktif : $total,
+                'color' => 'cream',
                 'icon' => 'fa-circle-check',
             ],
             [
@@ -495,13 +354,13 @@ class DataKbliController extends Controller
             [
                 'label' => 'Total KBLI',
                 'value' => 0,
-                'color' => 'green',
+                'color' => 'mint',
                 'icon' => 'fa-table-cells-large',
             ],
             [
                 'label' => 'Aktif',
                 'value' => 0,
-                'color' => 'yellow',
+                'color' => 'cream',
                 'icon' => 'fa-circle-check',
             ],
             [
@@ -522,63 +381,33 @@ class DataKbliController extends Controller
     private function columnMap(): array
     {
         return [
-            'id' => $this->firstExistingColumn([
-                'id',
-            ]),
-            'no' => $this->firstExistingColumn([
-                'no_urut',
-                'No',
-                'no',
-            ]),
-            'kode' => $this->firstExistingColumn([
-                'kode_kbli',
-                'Kode',
-                'kode',
-            ]),
-            'judul' => $this->firstExistingColumn([
-                'judul_kbli',
-                'Judul',
-                'judul',
-                'nama_kbli',
-            ]),
-            'cakupan' => $this->firstExistingColumn([
-                'Cakupan',
-                'cakupan',
-            ]),
+            'id' => $this->firstExistingColumn(['id']),
+            'no' => $this->firstExistingColumn(['no_urut', 'No', 'no']),
+            'kode' => $this->firstExistingColumn(['kode_kbli', 'Kode', 'kode']),
+            'judul' => $this->firstExistingColumn(['judul_kbli', 'Judul', 'judul', 'nama_kbli']),
+            'cakupan' => $this->firstExistingColumn(['Cakupan', 'cakupan']),
             'tidak_cakupan' => $this->firstExistingColumn([
                 'Tidak Cakupan',
                 'tidak_cakupan',
                 'Tidak_Cakupan',
             ]),
-            'status' => $this->firstExistingColumn([
-                'status',
-                'Status',
-            ]),
-            'created_at' => $this->firstExistingColumn([
-                'created_at',
-            ]),
-            'updated_at' => $this->firstExistingColumn([
-                'updated_at',
-            ]),
+            'status' => $this->firstExistingColumn(['status', 'Status']),
+            'created_at' => $this->firstExistingColumn(['created_at']),
+            'updated_at' => $this->firstExistingColumn(['updated_at']),
         ];
     }
 
-    private function firstExistingColumn(
-        array $columns
-    ): ?string {
+    private function firstExistingColumn(array $columns): ?string
+    {
         if (! Schema::hasTable($this->table)) {
             return null;
         }
 
-        $existingColumns =
-            Schema::getColumnListing($this->table);
+        $existingColumns = Schema::getColumnListing($this->table);
 
         foreach ($columns as $targetColumn) {
             foreach ($existingColumns as $existingColumn) {
-                if (
-                    strtolower($existingColumn)
-                    === strtolower($targetColumn)
-                ) {
+                if (strtolower($existingColumn) === strtolower($targetColumn)) {
                     return $existingColumn;
                 }
             }
@@ -587,29 +416,17 @@ class DataKbliController extends Controller
         return null;
     }
 
-    private function selectAlias(
-        ?string $column,
-        string $alias
-    ) {
+    private function selectAlias(?string $column, string $alias)
+    {
         if (! $column) {
-            return DB::raw(
-                'NULL AS "' . $alias . '"'
-            );
+            return DB::raw('NULL as ' . $alias);
         }
 
-        return DB::raw(
-            $this->quotedColumn($column)
-            . ' AS "'
-            . $alias
-            . '"'
-        );
+        return DB::raw($this->quotedColumn($column) . ' as ' . $alias);
     }
 
-    private function quotedColumn(
-        string $column
-    ): string {
-        return '"'
-            . str_replace('"', '""', $column)
-            . '"';
+    private function quotedColumn(string $column): string
+    {
+        return '"' . str_replace('"', '""', $column) . '"';
     }
 }

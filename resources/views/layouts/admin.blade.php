@@ -2,34 +2,31 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+    <title>@yield('title', 'Admin') | DPMPTSP Sumatera Utara</title>
 
-    <title>
-        @yield('title', 'Admin') | DPMPTSP Sumatera Utara
-    </title>
-
+    {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
     <link
         rel="preconnect"
         href="https://fonts.gstatic.com"
         crossorigin
     >
-
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet"
     >
 
+    {{-- Font Awesome --}}
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
+    {{-- Vite --}}
     @vite([
         'resources/css/app.css',
         'resources/js/app.js'
@@ -37,17 +34,18 @@
 
     <style>
         :root {
-            --sidebar-dark: #075936;
-            --sidebar-main: #08794d;
-            --sidebar-light: #10935e;
-            --yellow: #ffd457;
-            --yellow-dark: #e9b930;
+            --green-dark: #255d3e;
+            --green-main: #2f6b48;
+            --green-soft: #eaf7ef;
+            --green-pale: #f6fbf7;
+            --yellow-main: #f4cf63;
+            --yellow-soft: #fff8e6;
+            --navy: #14213d;
+            --text-dark: #243042;
+            --text-soft: #667085;
+            --border-soft: #e5e7eb;
+            --bg-main: #f8faf8;
             --white: #ffffff;
-            --background: #f7f9fb;
-            --text-dark: #202b3c;
-            --text-muted: #758096;
-            --border: #e6eaf0;
-            --danger: #e05252;
         }
 
         * {
@@ -57,200 +55,88 @@
         html,
         body {
             margin: 0;
-            min-height: 100%;
+            padding: 0;
             font-family: 'Poppins', sans-serif;
+            background: var(--bg-main);
             color: var(--text-dark);
-            background: var(--background);
         }
 
-        body.modal-open {
-            overflow: hidden;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font-family: inherit;
-        }
-
-        .admin-shell {
+        body {
             min-height: 100vh;
+        }
+
+        .admin-wrapper {
             display: flex;
+            min-height: 100vh;
         }
 
         .admin-sidebar {
+            width: 290px;
+            background: var(--white);
+            border-right: 1px solid var(--border-soft);
+            padding: 24px 22px;
             position: fixed;
-            inset: 0 auto 0 0;
-            z-index: 100;
-            width: 300px;
-            display: flex;
-            flex-direction: column;
+            top: 0;
+            left: 0;
+            bottom: 0;
             overflow-y: auto;
-            color: #ffffff;
-            background:
-                radial-gradient(
-                    circle at 20% 0%,
-                    rgba(255, 255, 255, 0.08),
-                    transparent 28%
-                ),
-                linear-gradient(
-                    180deg,
-                    #075735 0%,
-                    #087849 48%,
-                    #0c8d58 100%
-                );
-            box-shadow: 10px 0 30px rgba(5, 66, 40, 0.12);
+            z-index: 20;
         }
 
-        .sidebar-logo {
-            padding: 24px 28px 18px;
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 26px;
         }
 
-        .sidebar-logo img {
-            display: block;
-            width: 220px;
-            max-width: 100%;
-            height: 72px;
+        .admin-logo img {
+            width: 160px;
+            height: auto;
             object-fit: contain;
-            object-position: left center;
+            display: block;
         }
 
-        .sidebar-profile {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-        }
-
-        .profile-toggle {
-            width: 100%;
-            min-height: 82px;
-            padding: 14px 28px;
+        .admin-profile {
             display: flex;
             align-items: center;
             gap: 14px;
-            color: #ffffff;
-            background: transparent;
-            border: 0;
-            cursor: pointer;
-            text-align: left;
+            margin-bottom: 28px;
+            padding: 12px 0 6px;
         }
 
-        .profile-toggle:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .profile-avatar {
-            width: 48px;
-            height: 48px;
-            flex: 0 0 48px;
-            display: grid;
-            place-items: center;
+        .admin-avatar {
+            width: 58px;
+            height: 58px;
             border-radius: 50%;
-            color: #1c6744;
-            background: var(--yellow);
-            border: 2px solid rgba(255, 255, 255, 0.82);
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .profile-copy {
-            min-width: 0;
-            flex: 1;
-        }
-
-        .profile-name {
-            overflow: hidden;
+            background: var(--green-dark);
             color: #ffffff;
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 1.35;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-
-        .profile-role {
-            margin-top: 1px;
-            color: var(--yellow);
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: lowercase;
-        }
-
-        .profile-chevron {
-            color: var(--yellow);
-            font-size: 13px;
-            transition: transform 0.22s ease;
-        }
-
-        .sidebar-profile.open .profile-chevron {
-            transform: rotate(180deg);
-        }
-
-        .profile-dropdown {
-            max-height: 0;
-            overflow: hidden;
-            background: rgba(1, 47, 29, 0.23);
-            transition: max-height 0.25s ease;
-        }
-
-        .sidebar-profile.open .profile-dropdown {
-            max-height: 240px;
-        }
-
-        .profile-dropdown-inner {
-            padding: 6px 18px 12px;
-        }
-
-        .profile-dropdown-link {
-            width: 100%;
             display: flex;
             align-items: center;
-            gap: 13px;
-            padding: 11px 10px;
-            color: #ffffff;
-            background: transparent;
-            border: 0;
-            border-radius: 9px;
-            text-decoration: none;
-            cursor: pointer;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .profile-dropdown-link i {
-            width: 18px;
-            color: var(--yellow);
-            text-align: center;
-        }
-
-        .profile-dropdown-link:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .profile-dropdown-divider {
-            height: 1px;
-            margin: 8px 0;
-            background: rgba(255, 255, 255, 0.16);
-        }
-
-        .profile-dropdown-link.logout {
-            color: #ffaaaa;
-        }
-
-        .profile-dropdown-link.logout i {
-            color: #ff8f8f;
-        }
-
-        .sidebar-content {
-            padding: 0 17px 28px;
-        }
-
-        .sidebar-section-title {
-            margin: 18px 12px 10px;
-            color: var(--yellow);
-            font-size: 12px;
+            justify-content: center;
+            font-size: 24px;
             font-weight: 700;
-            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .admin-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #101828;
+            line-height: 1.3;
+            margin-bottom: 2px;
+        }
+
+        .admin-role {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-soft);
+        }
+
+        .menu-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--navy);
+            margin: 22px 0 12px;
         }
 
         .sidebar-menu {
@@ -260,172 +146,200 @@
         }
 
         .sidebar-menu li {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
 
         .sidebar-link {
-            min-height: 50px;
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 12px 15px;
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition:
-                background 0.18s ease,
-                color 0.18s ease,
-                transform 0.18s ease;
+            color: var(--navy);
+            padding: 14px 14px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
 
         .sidebar-link i {
-            width: 21px;
-            color: rgba(255, 255, 255, 0.76);
+            width: 22px;
             text-align: center;
-            font-size: 17px;
+            font-size: 18px;
         }
 
         .sidebar-link:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.09);
-            transform: translateX(2px);
+            background: var(--green-pale);
+            color: var(--green-dark);
         }
 
         .sidebar-link.active {
-            color: #176541;
-            background: var(--yellow);
-            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.11);
-        }
-
-        .sidebar-link.active i {
-            color: #176541;
+            background: #e5f1e8;
+            color: var(--green-dark);
         }
 
         .admin-main {
-            width: calc(100% - 300px);
+            margin-left: 290px;
+            width: calc(100% - 290px);
             min-height: 100vh;
-            margin-left: 300px;
-            background: var(--background);
+            background: var(--bg-main);
         }
 
-        .mobile-sidebar-button {
-            display: none;
-            position: fixed;
-            top: 14px;
-            left: 14px;
-            z-index: 120;
-            width: 44px;
-            height: 44px;
-            place-items: center;
-            border: 0;
-            border-radius: 12px;
-            color: #ffffff;
-            background: #08794d;
-            box-shadow: 0 8px 22px rgba(5, 80, 47, 0.2);
+        @media (max-width: 992px) {
+            .admin-wrapper {
+                flex-direction: column;
+            }
+
+            .admin-sidebar {
+                position: relative;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-soft);
+            }
+
+            .admin-main {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        .logout-sidebar-area {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-sidebar-button {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
             cursor: pointer;
+            text-align: left;
+            color: #dc2626 !important;
         }
 
-        .sidebar-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 90;
-            background: rgba(15, 23, 42, 0.46);
+        .logout-sidebar-button i,
+        .logout-sidebar-button span {
+            color: #dc2626 !important;
         }
 
-        .logout-modal[hidden] {
+        .logout-sidebar-button:hover {
+            background: #fee2e2 !important;
+            color: #b91c1c !important;
+        }
+
+        .logout-sidebar-button:hover i,
+        .logout-sidebar-button:hover span {
+            color: #b91c1c !important;
+        }
+
+        /* POPUP LOGOUT */
+        .logout-confirm-modal[hidden] {
             display: none !important;
         }
 
-        .logout-modal {
+        .logout-confirm-modal {
             position: fixed;
             inset: 0;
-            z-index: 1000;
-            display: grid;
-            place-items: center;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 24px;
         }
 
-        .logout-modal-backdrop {
+        .logout-confirm-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(15, 23, 42, 0.52);
+            background: rgba(15, 23, 42, 0.45);
             backdrop-filter: blur(3px);
         }
 
-        .logout-modal-card {
+        .logout-confirm-card {
             position: relative;
-            width: min(420px, 100%);
-            padding: 30px 28px 27px;
-            border-radius: 22px;
+            width: min(430px, 100%);
             background: #ffffff;
+            border-radius: 24px;
+            padding: 30px 28px;
             text-align: center;
-            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.25);
-            animation: modalAppear 0.2s ease-out;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
+            animation: logoutPopupIn 0.18s ease-out;
         }
 
-        .logout-modal-icon {
-            width: 68px;
-            height: 68px;
+        .logout-confirm-icon {
+            width: 72px;
+            height: 72px;
             margin: 0 auto 18px;
-            display: grid;
-            place-items: center;
-            border-radius: 20px;
-            color: #dc2626;
+            border-radius: 22px;
             background: #fee2e2;
-            font-size: 26px;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
         }
 
-        .logout-modal-card h3 {
+        .logout-confirm-card h3 {
             margin: 0;
-            color: #202b3c;
-            font-size: 21px;
+            color: #14213d;
+            font-size: 22px;
             font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
-        .logout-modal-card p {
-            margin: 10px auto 0;
-            max-width: 340px;
-            color: #758096;
-            font-size: 13px;
+        .logout-confirm-card p {
+            margin: 12px 0 0;
+            color: #667085;
+            font-size: 14px;
             line-height: 1.7;
         }
 
-        .logout-modal-actions {
-            margin-top: 25px;
+        .logout-confirm-actions {
+            margin-top: 26px;
             display: flex;
             justify-content: center;
             gap: 12px;
         }
 
-        .logout-modal-actions button {
-            min-width: 128px;
-            height: 44px;
-            border-radius: 12px;
-            font-size: 13px;
+        .logout-cancel-button,
+        .logout-submit-button {
+            min-width: 130px;
+            height: 46px;
+            border-radius: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
         }
 
-        .logout-cancel {
-            color: #475467;
-            background: #ffffff;
+        .logout-cancel-button {
             border: 1px solid #d9dee8;
+            background: #ffffff;
+            color: #344054;
         }
 
-        .logout-confirm {
-            color: #ffffff;
+        .logout-cancel-button:hover {
+            background: #f8fafc;
+        }
+
+        .logout-submit-button {
+            border: none;
             background: #dc2626;
-            border: 1px solid #dc2626;
+            color: #ffffff;
+            box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
         }
 
-        .logout-confirm:hover {
+        .logout-submit-button:hover {
             background: #b91c1c;
         }
 
-        @keyframes modalAppear {
+        @keyframes logoutPopupIn {
             from {
                 opacity: 0;
                 transform: translateY(10px) scale(0.97);
@@ -436,164 +350,115 @@
                 transform: translateY(0) scale(1);
             }
         }
-
-        @media (max-width: 1024px) {
-            .admin-sidebar {
-                width: 280px;
-                transform: translateX(-100%);
-                transition: transform 0.25s ease;
-            }
-
-            .admin-sidebar.open {
-                transform: translateX(0);
-            }
-
-            .admin-main {
-                width: 100%;
-                margin-left: 0;
-            }
-
-            .mobile-sidebar-button {
-                display: grid;
-            }
-
-            .sidebar-backdrop.show {
-                display: block;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .admin-sidebar {
-                width: min(285px, 88vw);
-            }
-
-            .logout-modal-actions {
-                flex-direction: column-reverse;
-            }
-
-            .logout-modal-actions button {
-                width: 100%;
-            }
-        }
     </style>
-
-    @stack('styles')
 </head>
 
 <body>
-    <button
-        type="button"
-        id="mobileSidebarButton"
-        class="mobile-sidebar-button"
-        aria-label="Buka menu"
-    >
-        <i class="fa-solid fa-bars"></i>
-    </button>
-
-    <div
-        id="sidebarBackdrop"
-        class="sidebar-backdrop"
-    ></div>
-
-    <div class="admin-shell">
-        <aside
-            id="adminSidebar"
-            class="admin-sidebar"
-        >
-            <div class="sidebar-logo">
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <div class="admin-logo">
                 <img
                     src="{{ asset('images/logo-dpmptsp.png') }}"
-                    alt="Logo DPMPTSP Sumatera Utara"
+                    alt="Logo DPMPTSP"
                 >
             </div>
 
-            <div
-                id="adminProfile"
-                class="sidebar-profile"
-            >
-                <button
-                    type="button"
-                    id="adminProfileToggle"
-                    class="profile-toggle"
-                >
-                    <span class="profile-avatar">
-                        @php
-                            $adminName = auth()->user()->name ?? 'Admin';
+            <div class="admin-profile">
+                <div class="admin-avatar">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                </div>
 
-                            $initials = collect(
-                                preg_split('/\s+/', trim($adminName))
-                            )
-                                ->filter()
-                                ->take(2)
-                                ->map(fn ($word) => strtoupper(
-                                    mb_substr($word, 0, 1)
-                                ))
-                                ->implode('');
-                        @endphp
-
-                        {{ $initials ?: 'AD' }}
-                    </span>
-
-                    <span class="profile-copy">
-                        <span class="profile-name">
-                            {{ $adminName }}
-                        </span>
-
-                        <span class="profile-role">
-                            {{ auth()->user()->role ?? 'admin' }}
-                        </span>
-                    </span>
-
-                    <i class="fa-solid fa-chevron-down profile-chevron"></i>
-                </button>
-
-                <div class="profile-dropdown">
-                    <div class="profile-dropdown-inner">
-                        <a
-                            href="{{ Route::has('profile.edit') ? route('profile.edit') : '#' }}"
-                            class="profile-dropdown-link"
-                        >
-                            <i class="fa-regular fa-user"></i>
-                            <span>Profile</span>
-                        </a>
-
-                        <a
-                            href="{{ Route::has('profile.edit') ? route('profile.edit') : '#' }}"
-                            class="profile-dropdown-link"
-                        >
-                            <i class="fa-solid fa-gear"></i>
-                            <span>Settings</span>
-                        </a>
-
-                        <div class="profile-dropdown-divider"></div>
-
-                        <button
-                            type="button"
-                            id="openLogoutModal"
-                            class="profile-dropdown-link logout"
-                        >
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                            <span>Logout</span>
-                        </button>
+                <div>
+                    <div class="admin-name">
+                        {{ auth()->user()->name ?? 'Admin' }}
+                    </div>
+                    <div class="admin-role">
+                        {{ ucfirst(auth()->user()->role ?? 'admin') }}
                     </div>
                 </div>
             </div>
 
-            <nav class="sidebar-content">
-                <div class="sidebar-section-title">
-                    Menu Admin
-                </div>
+            <div class="menu-title">Menu Utama</div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a
+                        href="{{ route('home') }}"
+                        class="sidebar-link"
+                    >
+                        <i class="fa-solid fa-house"></i>
+                        <span>Beranda</span>
+                    </a>
+                </li>
 
-                <ul class="sidebar-menu">
-                    <li>
-                        <a
-                            href="{{ route('admin.dashboard') }}"
-                            class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                <li>
+                    <a
+                        href="{{ route('about') }}"
+                        class="sidebar-link"
+                    >
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Tentang</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="menu-title">Menu Admin</div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a
+                        href="{{ route('admin.dashboard') }}"
+                        class="sidebar-link {{ request()->is('admin/dashboard*') ? 'active' : '' }}"
+                    >
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                        href="{{ route('admin.pengguna.index') }}"
+                        class="sidebar-link {{ request()->is('admin/pengguna*') ? 'active' : '' }}"
+                    >
+                        <i class="fa-solid fa-users"></i>
+                        <span>Pengguna</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                        href="{{ route('admin.data-wilayah.index') }}"
+                        class="sidebar-link {{ request()->is('admin/data-wilayah*') ? 'active' : '' }}"
+                    >
+                        <i class="fa-solid fa-map"></i>
+                        <span>Data Wilayah</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                        href="{{ route('admin.data-kbli.index') }}"
+                        class="sidebar-link {{ request()->is('admin/data-kbli*') ? 'active' : '' }}"
+                    >
+                        <i class="fa-solid fa-table-cells"></i>
+                        <span>Kode KBLI</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a
+                        href="{{ route('admin.hs-code.index') }}"
+                        class="sidebar-link {{ request()->is('admin/hs-code*') ? 'active' : '' }}"
+                    >
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>Kode HS</span>
+                    </a>
+                    <div class="logout-sidebar-area">
+                        <form
+                            id="logoutForm"
+                            action="{{ route('logout') }}"
+                            method="POST"
+                            class="logout-form"
                         >
-                            <i class="fa-solid fa-table-cells-large"></i>
-                            <span>Dashboard Admin</span>
-                        </a>
-                    </li>
+                            @csrf
 
                             <button
                                 type="button"
@@ -607,193 +472,85 @@
                     </div>
                 </li>
             </ul>
-                    <li>
-                        <a
-                            href="{{ route('admin.pengguna.index') }}"
-                            class="sidebar-link {{ request()->routeIs('admin.pengguna.*') ? 'active' : '' }}"
-                        >
-                            <i class="fa-solid fa-users"></i>
-                            <span>Data Pengguna</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a
-                            href="{{ route('admin.data-wilayah.index') }}"
-                            class="sidebar-link {{ request()->routeIs('admin.data-wilayah.*') ? 'active' : '' }}"
-                        >
-                            <i class="fa-solid fa-location-dot"></i>
-                            <span>Data Wilayah</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a
-                            href="{{ route('admin.data-kbli.index') }}"
-                            class="sidebar-link {{ request()->routeIs('admin.data-kbli.*') ? 'active' : '' }}"
-                        >
-                            <i class="fa-solid fa-table-cells"></i>
-                            <span>Data KBLI</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a
-                            href="{{ route('admin.hs-code.index') }}"
-                            class="sidebar-link {{ request()->routeIs('admin.hs-code.*') ? 'active' : '' }}"
-                        >
-                            <i class="fa-solid fa-link"></i>
-                            <span>Data HS Code</span>
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="sidebar-section-title">
-                    Menu Utama
-                </div>
-
-                <ul class="sidebar-menu">
-                    <li>
-                        <a
-                            href="{{ route('home') }}"
-                            class="sidebar-link"
-                        >
-                            <i class="fa-solid fa-house"></i>
-                            <span>Beranda</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
         </aside>
 
         <main class="admin-main">
             @yield('content')
         </main>
     </div>
-
-    <form
-        id="logoutForm"
-        action="{{ route('logout') }}"
-        method="POST"
-        hidden
-    >
-        @csrf
-    </form>
-
     <div
-        id="logoutModal"
-        class="logout-modal"
-        hidden
-    >
-        <div
-            class="logout-modal-backdrop"
-            data-close-logout
-        ></div>
+    id="logoutConfirmModal"
+    class="logout-confirm-modal"
+    hidden
+>
+    <div
+        class="logout-confirm-backdrop"
+        data-close-logout
+    ></div>
 
-        <div class="logout-modal-card">
-            <div class="logout-modal-icon">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </div>
+    <div class="logout-confirm-card">
+        <div class="logout-confirm-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
 
-            <h3>Keluar dari akun?</h3>
+        <h3>Keluar dari akun?</h3>
 
-            <p>
-                Anda akan keluar dari halaman admin dan perlu login
-                kembali untuk mengakses dashboard.
-            </p>
+        <p>
+            Kamu akan keluar dari halaman admin dan perlu login kembali untuk mengakses dashboard.
+        </p>
 
-            <div class="logout-modal-actions">
-                <button
-                    type="button"
-                    class="logout-cancel"
-                    data-close-logout
-                >
-                    Batal
-                </button>
+        <div class="logout-confirm-actions">
+            <button
+                type="button"
+                class="logout-cancel-button"
+                data-close-logout
+            >
+                Batal
+            </button>
 
-                <button
-                    type="button"
-                    id="confirmLogout"
-                    class="logout-confirm"
-                >
-                    Ya, Keluar
-                </button>
-            </div>
+            <button
+                type="button"
+                id="confirmLogoutButton"
+                class="logout-submit-button"
+            >
+                Ya, Keluar
+            </button>
         </div>
     </div>
+</div>
 
-    @stack('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const openButton = document.getElementById('openLogoutModal');
+        const modal = document.getElementById('logoutConfirmModal');
+        const confirmButton = document.getElementById('confirmLogoutButton');
+        const logoutForm = document.getElementById('logoutForm');
+        const closeButtons = document.querySelectorAll('[data-close-logout]');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const profile = document.getElementById('adminProfile');
-            const profileToggle = document.getElementById('adminProfileToggle');
+        if (!openButton || !modal || !confirmButton || !logoutForm) {
+            return;
+        }
 
-            const sidebar = document.getElementById('adminSidebar');
-            const sidebarButton = document.getElementById('mobileSidebarButton');
-            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        openButton.addEventListener('click', function () {
+            modal.hidden = false;
+        });
 
-            const logoutButton = document.getElementById('openLogoutModal');
-            const logoutModal = document.getElementById('logoutModal');
-            const confirmLogout = document.getElementById('confirmLogout');
-            const logoutForm = document.getElementById('logoutForm');
-            const closeLogoutButtons = document.querySelectorAll(
-                '[data-close-logout]'
-            );
+        confirmButton.addEventListener('click', function () {
+            logoutForm.submit();
+        });
 
-            if (profile && profileToggle) {
-                profileToggle.addEventListener('click', function () {
-                    profile.classList.toggle('open');
-                });
-            }
-
-            function closeSidebar() {
-                sidebar?.classList.remove('open');
-                sidebarBackdrop?.classList.remove('show');
-            }
-
-            sidebarButton?.addEventListener('click', function () {
-                sidebar?.classList.toggle('open');
-                sidebarBackdrop?.classList.toggle('show');
-            });
-
-            sidebarBackdrop?.addEventListener('click', closeSidebar);
-
-            function openLogoutModal() {
-                if (! logoutModal) {
-                    return;
-                }
-
-                logoutModal.hidden = false;
-                document.body.classList.add('modal-open');
-            }
-
-            function closeLogoutModal() {
-                if (! logoutModal) {
-                    return;
-                }
-
-                logoutModal.hidden = true;
-                document.body.classList.remove('modal-open');
-            }
-
-            logoutButton?.addEventListener('click', openLogoutModal);
-
-            closeLogoutButtons.forEach(function (button) {
-                button.addEventListener('click', closeLogoutModal);
-            });
-
-            confirmLogout?.addEventListener('click', function () {
-                logoutForm?.submit();
-            });
-
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') {
-                    closeLogoutModal();
-                    closeSidebar();
-                }
+        closeButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                modal.hidden = true;
             });
         });
-    </script>
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                modal.hidden = true;
+            }
+        });
+    });
+</script>
 </body>
 </html>
