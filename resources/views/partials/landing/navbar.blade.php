@@ -46,7 +46,7 @@
 </nav>
 
         {{-- LOGIN --}}
-       <div class="navbar-action">
+    <div class="navbar-action">
 
     @auth
 
