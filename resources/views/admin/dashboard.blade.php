@@ -3,511 +3,811 @@
 @section('title', 'Dashboard Admin')
 
 @section('content')
-<style>
-    :root {
-        --green-dark: #255d3e;
-        --green-main: #2f6b48;
-        --green-soft: #eaf7ef;
-        --green-pale: #f8fcf9;
-        --blue-soft: #eef5ff;
-        --purple-soft: #f4efff;
-        --orange-soft: #fff3e8;
-        --text-dark: #243042;
-        --text-muted: #667085;
-        --border: #e1e7ef;
-        --white: #ffffff;
-        --navy: #14213d;
-    }
+    @php
+        /*
+        |--------------------------------------------------------------------------
+        | Mapping tampilan kartu
+        |--------------------------------------------------------------------------
+        |
+        | Mapping dibuat statis supaya class Tailwind tetap terbaca oleh Vite.
+        |
+        */
+        $statStyles = [
+            'green' => [
+                'corner' => 'bg-emerald-50',
+                'icon' => 'bg-emerald-600',
+            ],
+            'purple' => [
+                'corner' => 'bg-indigo-50',
+                'icon' => 'bg-indigo-600',
+            ],
+            'blue' => [
+                'corner' => 'bg-sky-50',
+                'icon' => 'bg-sky-600',
+            ],
+            'teal' => [
+                'corner' => 'bg-emerald-50',
+                'icon' => 'bg-emerald-600',
+            ],
+            'cyan' => [
+                'corner' => 'bg-cyan-50',
+                'icon' => 'bg-cyan-600',
+            ],
+            'orange' => [
+                'corner' => 'bg-orange-50',
+                'icon' => 'bg-orange-500',
+            ],
+        ];
+    @endphp
 
-    .dashboard-page {
-        min-height: 100vh;
-        background: #f8faf8;
-        font-family: 'Poppins', sans-serif;
-        color: var(--text-dark);
-        padding: 0;
-    }
+    <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8">
 
-    .dashboard-topbar {
-        min-height: 82px;
-        padding: 22px 30px;
-        background: #ffffff;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-    }
+        {{-- ========================================================= --}}
+        {{-- HERO DASHBOARD --}}
+        {{-- ========================================================= --}}
 
-    .sidebar-toggle {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
-        border: 1px solid var(--border);
-        background: #ffffff;
-        color: var(--navy);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-    }
-
-    .topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-    }
-
-    .welcome-text {
-        font-size: 14px;
-        font-weight: 400;
-        color: var(--text-muted);
-    }
-
-    .admin-dropdown {
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-        height: 48px;
-        padding: 0 16px;
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        background: #ffffff;
-        color: var(--text-dark);
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .dashboard-content {
-        padding: 30px;
-    }
-
-    .dashboard-heading {
-        margin-bottom: 24px;
-    }
-
-    .dashboard-heading h1 {
-        margin: 0;
-        color: var(--navy);
-        font-size: 30px;
-        line-height: 1.25;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-
-    .dashboard-heading p {
-        margin: 8px 0 0;
-        color: var(--text-muted);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 1.7;
-    }
-
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 18px;
-        margin-bottom: 24px;
-    }
-
-    .summary-card {
-        background: #ffffff;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 22px;
-        min-height: 210px;
-        box-shadow: 0 14px 30px rgba(31, 41, 55, 0.045);
-    }
-
-    .summary-main {
-        display: flex;
-        align-items: flex-start;
-        gap: 18px;
-        margin-bottom: 26px;
-    }
-
-    .summary-icon {
-        width: 72px;
-        height: 72px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 30px;
-        flex-shrink: 0;
-    }
-
-    .summary-card.green .summary-icon {
-        background: var(--green-soft);
-        color: var(--green-dark);
-    }
-
-    .summary-card.blue .summary-icon {
-        background: var(--blue-soft);
-        color: #2563eb;
-    }
-
-    .summary-card.purple .summary-icon {
-        background: var(--purple-soft);
-        color: #7c3aed;
-    }
-
-    .summary-card.orange .summary-icon {
-        background: var(--orange-soft);
-        color: #d45b1f;
-    }
-
-    .summary-label {
-        margin-top: 8px;
-        color: var(--text-dark);
-        font-size: 15px;
-        font-weight: 600;
-        line-height: 1.4;
-    }
-
-    .summary-value {
-        margin-top: 8px;
-        color: var(--navy);
-        font-size: 30px;
-        font-weight: 700;
-        line-height: 1;
-        letter-spacing: -0.02em;
-    }
-
-    .summary-subtitle {
-        margin-top: 8px;
-        color: var(--text-muted);
-        font-size: 13px;
-        font-weight: 400;
-    }
-
-    .summary-footer {
-        border-top: 1px solid #edf2f7;
-        padding-top: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-    }
-
-    .summary-footer-label {
-        color: var(--text-muted);
-        font-size: 13px;
-        font-weight: 400;
-    }
-
-    .summary-footer-value {
-        color: var(--navy);
-        font-size: 14px;
-        font-weight: 700;
-    }
-
-    .dashboard-lower-grid {
-        display: grid;
-        grid-template-columns: 0.95fr 1.45fr;
-        gap: 22px;
-    }
-
-    .panel-card {
-        background: #ffffff;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 24px;
-        box-shadow: 0 14px 30px rgba(31, 41, 55, 0.045);
-    }
-
-    .panel-title {
-        margin: 0 0 22px;
-        color: var(--navy);
-        font-size: 20px;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-    }
-
-    .quick-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-    }
-
-    .quick-card {
-        min-height: 132px;
-        border-radius: 16px;
-        text-decoration: none;
-        padding: 22px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        text-align: center;
-        transition: 0.2s ease;
-    }
-
-    .quick-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .quick-card.disabled {
-        opacity: 0.55;
-        pointer-events: none;
-    }
-
-    .quick-card.green {
-        background: linear-gradient(135deg, #ecfbf4 0%, #f8fdfa 100%);
-        color: var(--green-dark);
-    }
-
-    .quick-card.blue {
-        background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 100%);
-        color: #2563eb;
-    }
-
-    .quick-card.purple {
-        background: linear-gradient(135deg, #f4efff 0%, #fbf9ff 100%);
-        color: #7c3aed;
-    }
-
-    .quick-card.orange {
-        background: linear-gradient(135deg, #fff3e8 0%, #fffaf6 100%);
-        color: #d45b1f;
-    }
-
-    .quick-icon {
-        font-size: 26px;
-        line-height: 1;
-    }
-
-    .quick-label {
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1.5;
-    }
-
-    .activity-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .activity-table th {
-        padding: 0 0 14px;
-        text-align: left;
-        color: var(--text-dark);
-        font-size: 13px;
-        font-weight: 600;
-        border-bottom: 1px solid #edf2f7;
-    }
-
-    .activity-table td {
-        padding: 16px 0;
-        color: var(--text-muted);
-        font-size: 13px;
-        font-weight: 400;
-        line-height: 1.6;
-        border-bottom: 1px solid #edf2f7;
-        vertical-align: top;
-    }
-
-    .activity-table td:first-child {
-        width: 165px;
-        color: var(--text-dark);
-        font-weight: 500;
-        white-space: nowrap;
-    }
-
-    .empty-activity {
-        padding: 30px 0;
-        color: var(--text-muted);
-        font-size: 14px;
-        text-align: center;
-    }
-
-    .activity-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 20px;
-        color: #2563eb;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .dashboard-footer {
-        margin-top: 36px;
-        padding-top: 24px;
-        border-top: 1px solid var(--border);
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 13px;
-        font-weight: 400;
-    }
-
-    @media (max-width: 1280px) {
-        .summary-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .dashboard-lower-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .dashboard-topbar {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .dashboard-content {
-            padding: 20px;
-        }
-
-        .summary-grid,
-        .quick-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .topbar-right {
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .activity-table td:first-child {
-            width: auto;
-            white-space: normal;
-        }
-    }
-</style>
-
-<div class="dashboard-page">
-    <div class="dashboard-topbar">
-        <button
-            type="button"
-            class="sidebar-toggle"
+        <section
+            class="
+                relative
+                flex
+                flex-col
+                items-center
+                justify-between
+                gap-6
+                overflow-hidden
+                rounded-2xl
+                bg-gradient-to-r
+                from-[#145239]
+                via-[#0F8A5F]
+                to-[#1E5D41]
+                p-8
+                pb-16
+                shadow-xl
+                md:flex-row
+                md:p-10
+                md:pb-24
+            "
         >
-            <i class="fa-solid fa-bars"></i>
-        </button>
+            {{-- Ornamen background --}}
+            <div
+                class="
+                    absolute
+                    right-0
+                    top-0
+                    h-64
+                    w-64
+                    animate-pulse
+                    rounded-full
+                    bg-emerald-400
+                    opacity-20
+                    blur-3xl
+                    mix-blend-overlay
+                "
+            ></div>
 
-        <div class="topbar-right">
-            <div class="welcome-text">
-                Selamat datang, {{ auth()->user()->name ?? 'Admin' }}
-            </div>
+            <div
+                class="
+                    absolute
+                    bottom-0
+                    right-32
+                    h-48
+                    w-48
+                    rounded-full
+                    bg-yellow-400
+                    opacity-20
+                    blur-3xl
+                    mix-blend-overlay
+                "
+            ></div>
 
-            <div class="admin-dropdown">
-                <i class="fa-regular fa-user"></i>
-                <span>{{ ucfirst(auth()->user()->role ?? 'Admin') }}</span>
-                <i class="fa-solid fa-chevron-down"></i>
-            </div>
-        </div>
-    </div>
+            <div
+                class="
+                    absolute
+                    left-1/2
+                    top-10
+                    h-72
+                    w-72
+                    rounded-full
+                    bg-emerald-500
+                    opacity-10
+                    blur-3xl
+                    mix-blend-overlay
+                "
+            ></div>
 
-    <div class="dashboard-content">
-        <div class="dashboard-heading">
-            <h1>Dashboard Admin</h1>
-            <p>
-                Monitoring dan pengelolaan data utama sistem Sumatera Investment.
-            </p>
-        </div>
+            <div
+                class="
+                    absolute
+                    inset-0
+                    bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]
+                    opacity-10
+                "
+            ></div>
 
-        <div class="summary-grid">
-            @foreach ($stats as $stat)
-                <div class="summary-card {{ $stat['color'] }}">
-                    <div class="summary-main">
-                        <div class="summary-icon">
-                            <i class="fa-solid {{ $stat['icon'] }}"></i>
-                        </div>
-
-                        <div>
-                            <div class="summary-label">
-                                {{ $stat['label'] }}
-                            </div>
-
-                            <div class="summary-value">
-                                {{ number_format($stat['value'], 0, ',', '.') }}
-                            </div>
-
-                            <div class="summary-subtitle">
-                                Total Data
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="summary-footer">
-                        <div class="summary-footer-label">
-                            {{ $stat['caption_label'] }}
-                        </div>
-
-                        <div class="summary-footer-value">
-                            {{ number_format($stat['caption_value'], 0, ',', '.') }}
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        <div class="dashboard-lower-grid">
-            <div class="panel-card">
-                <h2 class="panel-title">Akses Cepat</h2>
-
-                <div class="quick-grid">
-                    @foreach ($quickActions as $action)
-                        <a
-                            href="{{ $action['url'] ?? '#' }}"
-                            class="quick-card {{ $action['color'] }} {{ $action['url'] ? '' : 'disabled' }}"
-                            title="{{ $action['url'] ? $action['label'] : 'Halaman belum tersedia' }}"
-                        >
-                            <div class="quick-icon">
-                                <i class="fa-solid {{ $action['icon'] }}"></i>
-                            </div>
-
-                            <div class="quick-label">
-                                {{ $action['label'] }}
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="panel-card">
-                <h2 class="panel-title">Aktivitas Terbaru</h2>
-
-                @if ($activities->count())
-                    <table class="activity-table">
-                        <thead>
-                            <tr>
-                                <th>Waktu</th>
-                                <th>Aktivitas</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach ($activities as $activity)
-                                <tr>
-                                    <td>{{ $activity['waktu'] }}</td>
-                                    <td>{{ $activity['aktivitas'] }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @else
-                    <div class="empty-activity">
-                        Belum ada aktivitas terbaru yang bisa ditampilkan.
-                    </div>
-                @endif
-
-                <a
-                    href="#"
-                    class="activity-link"
+            {{-- Konten kiri --}}
+            <div class="relative z-10 flex-1 text-white">
+                <div
+                    class="
+                        mb-4
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-full
+                        border
+                        border-emerald-700/50
+                        bg-emerald-800/50
+                        px-3
+                        py-1
+                        text-xs
+                        font-bold
+                        text-emerald-100
+                        backdrop-blur-sm
+                    "
                 >
-                    Lihat semua aktivitas
-                    <i class="fa-solid fa-arrow-right"></i>
-                </a>
-            </div>
-        </div>
+                    <svg
+                        class="h-4 w-4 text-[#FFD54F]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                        />
+                    </svg>
 
-        <div class="dashboard-footer">
-            Copyright © DPMPTSP Provinsi Sumatera Utara {{ date('Y') }}
-        </div>
+                    Dashboard Utama
+                </div>
+
+                <h1
+                    class="
+                        mb-3
+                        text-3xl
+                        font-extrabold
+                        tracking-tight
+                        md:text-4xl
+                    "
+                >
+                    Selamat Datang,
+                    <span class="text-[#FFD54F]">
+                        Admin
+                    </span>
+                </h1>
+
+                <p
+                    class="
+                        max-w-xl
+                        text-sm
+                        font-medium
+                        leading-relaxed
+                        text-emerald-100/90
+                    "
+                >
+                    Kelola dan pantau data pengguna, wilayah, KBLI,
+                    serta HS Code DPMPTSP Provinsi Sumatera Utara.
+                </p>
+            </div>
+
+            {{-- Tanggal kanan --}}
+            <div
+                class="
+                    relative
+                    z-10
+                    mt-4
+                    flex
+                    items-center
+                    md:mt-0
+                "
+            >
+                <div
+                    class="
+                        flex
+                        flex-col
+                        items-end
+                        justify-center
+                    "
+                >
+                    <span
+                        class="
+                            text-2xl
+                            font-black
+                            tracking-tight
+                            text-white
+                            drop-shadow-md
+                            md:text-3xl
+                        "
+                    >
+                        {{ now()->translatedFormat('d F Y') }}
+                    </span>
+
+                    <span
+                        class="
+                            mt-1
+                            text-xs
+                            font-semibold
+                            uppercase
+                            tracking-wider
+                            text-[#FFD54F]
+                        "
+                    >
+                        Tanggal Hari Ini
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        {{-- ========================================================= --}}
+        {{-- KARTU STATISTIK --}}
+        {{-- ========================================================= --}}
+
+        <section
+            class="
+                relative
+                z-20
+                !-mt-12
+                grid
+                grid-cols-2
+                gap-4
+                px-2
+                sm:grid-cols-3
+                md:!-mt-16
+                md:px-4
+                lg:grid-cols-5
+            "
+        >
+            @foreach ($stats as $stat)
+                @php
+                    $style = $statStyles[$stat['color']]
+                        ?? $statStyles['green'];
+                @endphp
+
+                <article
+                    class="
+                        group
+                        relative
+                        overflow-hidden
+                        rounded-xl
+                        border
+                        border-emerald-100
+                        bg-white
+                        p-4
+                        shadow-sm
+                        transition-all
+                        duration-300
+                        hover:-translate-y-1
+                        hover:shadow-md
+                    "
+                >
+                    {{-- Hiasan sudut kanan --}}
+                    <div
+                        class="
+                            absolute
+                            -mr-8
+                            -mt-8
+                            right-0
+                            top-0
+                            h-16
+                            w-16
+                            rounded-bl-full
+                            transition-transform
+                            duration-500
+                            group-hover:scale-150
+                            {{ $style['corner'] }}
+                        "
+                    ></div>
+
+                    <p
+                        class="
+                            relative
+                            z-10
+                            mb-2
+                            text-center
+                            text-xs
+                            font-bold
+                            text-slate-600
+                        "
+                    >
+                        {{ $stat['label'] }}
+                    </p>
+
+                    <div
+                        class="
+                            relative
+                            z-10
+                            flex
+                            items-center
+                            justify-center
+                            gap-3
+                        "
+                    >
+                        <div
+                            class="
+                                rounded-lg
+                                p-2
+                                text-white
+                                shadow-sm
+                                {{ $style['icon'] }}
+                            "
+                        >
+                            <i
+                                class="
+                                    fa-solid
+                                    {{ $stat['icon'] }}
+                                    flex
+                                    h-5
+                                    w-5
+                                    items-center
+                                    justify-center
+                                    text-base
+                                "
+                            ></i>
+                        </div>
+
+                        <span
+                            class="
+                                text-2xl
+                                font-black
+                                text-slate-800
+                                xl:text-3xl
+                            "
+                        >
+                            {{ number_format($stat['value'], 0, ',', '.') }}
+                        </span>
+                    </div>
+                </article>
+            @endforeach
+        </section>
+
+        {{-- ========================================================= --}}
+        {{-- KONTEN UTAMA --}}
+        {{-- ========================================================= --}}
+
+        <section
+            class="
+                mt-6
+                grid
+                grid-cols-1
+                gap-6
+                lg:grid-cols-3
+            "
+        >
+            {{-- Ringkasan data --}}
+            <div class="space-y-6 lg:col-span-2">
+                <article
+                    class="
+                        overflow-hidden
+                        rounded-2xl
+                        border
+                        border-slate-100
+                        bg-white
+                        shadow-sm
+                    "
+                >
+                    <header
+                        class="
+                            border-b
+                            border-slate-100
+                            bg-slate-50/50
+                            p-5
+                        "
+                    >
+                        <h2 class="text-lg font-bold text-slate-800">
+                            Ringkasan Data
+                        </h2>
+                    </header>
+
+                    <div class="overflow-x-auto">
+                        <table
+                            class="
+                                w-full
+                                border-collapse
+                                text-left
+                            "
+                        >
+                            <thead>
+                                <tr
+                                    class="
+                                        border-b
+                                        border-slate-200
+                                        bg-slate-50
+                                        text-xs
+                                        font-semibold
+                                        uppercase
+                                        text-slate-500
+                                    "
+                                >
+                                    <th class="px-5 py-3">
+                                        Jenis Data
+                                    </th>
+
+                                    <th class="px-5 py-3">
+                                        Data Terakhir
+                                    </th>
+
+                                    <th class="px-5 py-3 text-center">
+                                        Total Data
+                                    </th>
+
+                                    <th class="px-5 py-3 text-center">
+                                        Riwayat
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody
+                                class="
+                                    divide-y
+                                    divide-slate-100
+                                    text-sm
+                                "
+                            >
+                                @forelse ($summaryRows as $row)
+                                    <tr
+                                        class="
+                                            transition-colors
+                                            hover:bg-slate-50/50
+                                        "
+                                    >
+                                        <td
+                                            class="
+                                                px-5
+                                                py-3.5
+                                                font-medium
+                                                text-slate-700
+                                            "
+                                        >
+                                            {{ $row['label'] }}
+                                        </td>
+
+                                        <td
+                                            class="
+                                                max-w-[280px]
+                                                px-5
+                                                py-3.5
+                                                text-slate-500
+                                            "
+                                        >
+                                            <span
+                                                class="
+                                                    block
+                                                    truncate
+                                                "
+                                                title="{{ $row['data_terakhir'] }}"
+                                            >
+                                                {{ $row['data_terakhir'] ?: '-' }}
+                                            </span>
+                                        </td>
+
+                                        <td
+                                            class="
+                                                px-5
+                                                py-3.5
+                                                text-center
+                                                font-semibold
+                                                text-slate-600
+                                            "
+                                        >
+                                            {{ number_format(
+                                                $row['total'],
+                                                0,
+                                                ',',
+                                                '.'
+                                            ) }}
+                                        </td>
+
+                                        <td
+                                            class="
+                                                px-5
+                                                py-3.5
+                                                text-center
+                                            "
+                                        >
+                                            @if (
+                                                $row['total'] > 0 &&
+                                                ! empty($row['url'])
+                                            )
+                                                <a
+                                                    href="{{ $row['url'] }}"
+                                                    class="
+                                                        inline-flex
+                                                        items-center
+                                                        rounded-full
+                                                        border
+                                                        border-emerald-200
+                                                        bg-emerald-50
+                                                        px-2.5
+                                                        py-1
+                                                        text-xs
+                                                        font-medium
+                                                        text-emerald-700
+                                                        shadow-sm
+                                                        transition
+                                                        hover:bg-emerald-100
+                                                    "
+                                                >
+                                                    Lihat
+                                                </a>
+                                            @else
+                                                <span
+                                                    class="
+                                                        inline-flex
+                                                        items-center
+                                                        rounded-full
+                                                        border
+                                                        border-slate-200
+                                                        bg-slate-100
+                                                        px-2.5
+                                                        py-1
+                                                        text-xs
+                                                        font-medium
+                                                        text-slate-500
+                                                        shadow-sm
+                                                    "
+                                                >
+                                                    Kosong
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td
+                                            colspan="4"
+                                            class="
+                                                px-5
+                                                py-10
+                                                text-center
+                                                text-sm
+                                                text-slate-500
+                                            "
+                                        >
+                                            Belum ada data yang dapat ditampilkan.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </div>
+
+            {{-- Aktivitas terbaru --}}
+            <div class="space-y-6">
+                <article
+                    class="
+                        sticky
+                        top-6
+                        overflow-hidden
+                        rounded-2xl
+                        border
+                        border-slate-100
+                        bg-white
+                        shadow-sm
+                    "
+                >
+                    <header
+                        class="
+                            flex
+                            items-center
+                            justify-between
+                            border-b
+                            border-slate-100
+                            bg-slate-50/50
+                            p-5
+                        "
+                    >
+                        <h2 class="text-lg font-bold text-slate-800">
+                            Aktivitas Terbaru
+                        </h2>
+
+                        <span class="relative flex h-3 w-3">
+                            <span
+                                class="
+                                    absolute
+                                    inline-flex
+                                    h-full
+                                    w-full
+                                    animate-ping
+                                    rounded-full
+                                    bg-emerald-400
+                                    opacity-75
+                                "
+                            ></span>
+
+                            <span
+                                class="
+                                    relative
+                                    inline-flex
+                                    h-3
+                                    w-3
+                                    rounded-full
+                                    bg-emerald-500
+                                "
+                            ></span>
+                        </span>
+                    </header>
+
+                    <div class="space-y-5 p-5">
+                        @forelse ($activities->take(5) as $activity)
+                            @php
+                                $activityClass = match (
+                                    $activity['color'] ?? 'green'
+                                ) {
+                                    'blue' =>
+                                        'bg-sky-100 text-sky-600',
+
+                                    'purple' =>
+                                        'bg-purple-100 text-purple-600',
+
+                                    'orange' =>
+                                        'bg-orange-100 text-orange-600',
+
+                                    'red' =>
+                                        'bg-red-100 text-red-600',
+
+                                    default =>
+                                        'bg-emerald-100 text-emerald-600',
+                                };
+                            @endphp
+
+                            <div
+                                class="
+                                    group
+                                    flex
+                                    cursor-default
+                                    items-start
+                                    gap-4
+                                "
+                            >
+                                <div
+                                    class="
+                                        mt-0.5
+                                        flex
+                                        h-9
+                                        w-9
+                                        flex-shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-full
+                                        transition-transform
+                                        group-hover:scale-110
+                                        {{ $activityClass }}
+                                    "
+                                >
+                                    <i
+                                        class="
+                                            fa-solid
+                                            {{ $activity['icon'] }}
+                                            text-sm
+                                        "
+                                    ></i>
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <p
+                                        class="
+                                            m-0
+                                            text-sm
+                                            font-medium
+                                            leading-snug
+                                            text-slate-700
+                                        "
+                                    >
+                                        {{ $activity['aktivitas'] }}
+                                    </p>
+
+                                    <p
+                                        class="
+                                            mb-0
+                                            mt-1.5
+                                            text-xs
+                                            text-slate-400
+                                        "
+                                    >
+                                        {{ $activity['waktu'] }}
+
+                                        <span>&bull;</span>
+
+                                        {{ $activity['category_label'] }}
+                                    </p>
+                                </div>
+                            </div>
+                        @empty
+                            <div
+                                class="
+                                    py-6
+                                    text-center
+                                    text-sm
+                                    text-slate-500
+                                "
+                            >
+                                <svg
+                                    class="
+                                        mx-auto
+                                        mb-2
+                                        h-12
+                                        w-12
+                                        text-slate-300
+                                    "
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                    />
+                                </svg>
+
+                                Belum ada aktivitas terbaru saat ini.
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <footer
+                        class="
+                            border-t
+                            border-slate-100
+                            bg-slate-50/50
+                            p-4
+                            text-sm
+                        "
+                    >
+                        <a
+                            href="{{ route('admin.dashboard') }}"
+                            class="
+                                group
+                                flex
+                                items-center
+                                gap-1
+                                font-medium
+                                text-emerald-600
+                                hover:text-emerald-700
+                            "
+                        >
+                            Lihat Semua Aktivitas
+
+                            <svg
+                                class="
+                                    h-4
+                                    w-4
+                                    transform
+                                    transition-transform
+                                    group-hover:translate-x-1
+                                "
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                />
+                            </svg>
+                        </a>
+                    </footer>
+                </article>
+            </div>
+        </section>
+
+        <footer
+            class="
+                pb-1
+                pt-8
+                text-center
+                text-xs
+                text-slate-400
+            "
+        >
+            Copyright &copy;
+            {{ date('Y') }}
+            DPMPTSP Provinsi Sumatera Utara
+        </footer>
     </div>
-</div>
 @endsection
