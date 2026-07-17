@@ -155,9 +155,15 @@
         .profile-copy {
             min-width: 0;
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
         }
 
         .profile-name {
+            display: block;
+            max-width: 100%;
             overflow: hidden;
             color: #ffffff;
             font-size: 15px;
@@ -168,10 +174,12 @@
         }
 
         .profile-role {
-            margin-top: 1px;
+            display: block;
+            margin-top: 3px;
             color: var(--yellow);
             font-size: 12px;
             font-weight: 500;
+            line-height: 1.25;
             text-transform: lowercase;
         }
 
@@ -550,16 +558,18 @@
                 <div class="profile-dropdown">
                     <div class="profile-dropdown-inner">
                         <a
-                            href="{{ Route::has('profile.edit') ? route('profile.edit') : '#' }}"
-                            class="profile-dropdown-link"
+                            href="{{ route('admin.profile.index') }}"
+                            class="profile-dropdown-link
+                                {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}"
                         >
                             <i class="fa-regular fa-user"></i>
                             <span>Profile</span>
                         </a>
 
                         <a
-                            href="{{ Route::has('profile.edit') ? route('profile.edit') : '#' }}"
-                            class="profile-dropdown-link"
+                            href="{{ route('admin.settings.index') }}"
+                            class="profile-dropdown-link
+                                {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
                         >
                             <i class="fa-solid fa-gear"></i>
                             <span>Settings</span>
@@ -577,7 +587,6 @@
                         </button>
                     </div>
                 </div>
-            </div>
 
             <nav class="sidebar-content">
                 <div class="sidebar-section-title">

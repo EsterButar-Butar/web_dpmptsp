@@ -237,160 +237,172 @@
         </section>
 
         <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <form
-                action="{{ route('admin.hs-code.index') }}"
-                method="GET"
-                class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[160px_180px_190px_160px_minmax(260px,1fr)_auto]"
+    <form
+        action="{{ route('admin.hs-code.index') }}"
+        method="GET"
+        class="flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-center 2xl:flex-nowrap"
+    >
+        {{-- Filter Kategori --}}
+        <div class="relative w-full xl:w-[210px] xl:flex-none">
+            <select
+                name="kategori"
+                class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
+                    px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
+                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             >
-                <div class="relative">
-                    <select
-                        name="kategori"
-                        onchange="this.form.submit()"
-                        class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                <option value="">Semua Kategori</option>
+
+                @foreach ($kategoriOptions ?? [] as $option)
+                    <option
+                        value="{{ $option }}"
+                        @selected(request('kategori') == $option)
                     >
-                        <option value="">
-                            Semua Kategori
-                        </option>
+                        {{ $option }}
+                    </option>
+                @endforeach
+            </select>
 
-                        @foreach ($kategoriOptions ?? [] as $option)
-                            <option
-                                value="{{ $option }}"
-                                @selected(
-                                    request('kategori') == $option
-                                )
-                            >
-                                {{ $option }}
-                            </option>
-                        @endforeach
-                    </select>
+            <i
+                class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                    -translate-y-1/2 text-xs text-emerald-600"
+            ></i>
+        </div>
 
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
-                </div>
+        {{-- Filter Kelompok --}}
+        <div class="relative w-full xl:w-[230px] xl:flex-none">
+            <select
+                name="kelompok"
+                class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
+                    px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
+                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            >
+                <option value="">Semua Kelompok</option>
 
-                <div class="relative">
-                    <select
-                        name="kelompok"
-                        onchange="this.form.submit()"
-                        class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                @foreach ($kelompokOptions ?? [] as $option)
+                    <option
+                        value="{{ $option }}"
+                        @selected(request('kelompok') == $option)
                     >
-                        <option value="">
-                            Semua Kelompok
-                        </option>
+                        {{ $option }}
+                    </option>
+                @endforeach
+            </select>
 
-                        @foreach ($kelompokOptions ?? [] as $option)
-                            <option
-                                value="{{ $option }}"
-                                @selected(
-                                    request('kelompok') == $option
-                                )
-                            >
-                                {{ $option }}
-                            </option>
-                        @endforeach
-                    </select>
+            <i
+                class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                    -translate-y-1/2 text-xs text-emerald-600"
+            ></i>
+        </div>
 
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
-                </div>
+        {{-- Filter Subkelompok --}}
+        <div class="relative w-full xl:w-[250px] xl:flex-none">
+            <select
+                name="subkelompok"
+                class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
+                    px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
+                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            >
+                <option value="">Semua Subkelompok</option>
 
-                <div class="relative">
-                    <select
-                        name="subkelompok"
-                        onchange="this.form.submit()"
-                        class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                @foreach ($subkelompokOptions ?? [] as $option)
+                    <option
+                        value="{{ $option }}"
+                        @selected(request('subkelompok') == $option)
                     >
-                        <option value="">
-                            Semua Subkelompok
-                        </option>
+                        {{ $option }}
+                    </option>
+                @endforeach
+            </select>
 
-                        @foreach ($subkelompokOptions ?? [] as $option)
-                            <option
-                                value="{{ $option }}"
-                                @selected(
-                                    request('subkelompok') == $option
-                                )
-                            >
-                                {{ $option }}
-                            </option>
-                        @endforeach
-                    </select>
+            <i
+                class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                    -translate-y-1/2 text-xs text-emerald-600"
+            ></i>
+        </div>
 
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
-                </div>
+        {{-- Filter Status --}}
+        @if ($hasStatusColumn)
+            <div class="relative w-full xl:w-[180px] xl:flex-none">
+                <select
+                    name="status"
+                    class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white
+                        px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
+                        focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                >
+                    <option value="">Semua Status</option>
 
-                @if ($hasStatusColumn)
-                    <div class="relative">
-                        <select
-                            name="status"
-                            class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                        >
-                            <option value="">
-                                Semua Status
-                            </option>
-
-                            <option
-                                value="Aktif"
-                                @selected(
-                                    strtolower(
-                                        request('status', '')
-                                    ) === 'aktif'
-                                )
-                            >
-                                Aktif
-                            </option>
-
-                            <option
-                                value="Nonaktif"
-                                @selected(
-                                    strtolower(
-                                        request('status', '')
-                                    ) === 'nonaktif'
-                                )
-                            >
-                                Nonaktif
-                            </option>
-                        </select>
-
-                        <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
-                    </div>
-                @endif
-
-                <div class="relative">
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Cari kode, kelompok, atau uraian..."
-                        class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    <option
+                        value="Aktif"
+                        @selected(strtolower(request('status', '')) === 'aktif')
                     >
+                        Aktif
+                    </option>
 
-                    <button
-                        type="submit"
-                        aria-label="Cari HS Code"
-                        class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100"
+                    <option
+                        value="Nonaktif"
+                        @selected(strtolower(request('status', '')) === 'nonaktif')
                     >
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
+                        Nonaktif
+                    </option>
+                </select>
 
-                <div class="flex gap-2">
-                    <button
-                        type="submit"
-                        class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                    >
-                        <i class="fa-solid fa-filter"></i>
-                        Terapkan
-                    </button>
+                <i
+                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                        -translate-y-1/2 text-xs text-emerald-600"
+                ></i>
+            </div>
+        @endif
 
-                    <a
-                        href="{{ route('admin.hs-code.index') }}"
-                        title="Reset filter"
-                        class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600"
-                    >
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                </div>
-            </form>
-        </section>
+        {{-- Pencarian --}}
+        <div class="relative min-w-0 flex-1 xl:min-w-[280px]">
+            <input
+                type="text"
+                name="search"
+                value="{{ request('search') }}"
+                placeholder="Cari kode, kelompok, atau uraian..."
+                class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12
+                    text-sm text-slate-700 outline-none transition placeholder:text-slate-400
+                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            >
+
+            <button
+                type="submit"
+                aria-label="Cari HS Code"
+                title="Cari"
+                class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2
+                    items-center justify-center rounded-lg bg-emerald-50 text-sm
+                    text-emerald-600 transition hover:bg-emerald-100"
+            >
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+
+        {{-- Tombol Aksi --}}
+        <div class="flex w-full flex-none gap-2 xl:w-auto">
+            <button
+                type="submit"
+                class="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap
+                    rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm
+                    transition hover:bg-emerald-700 focus:outline-none focus:ring-2
+                    focus:ring-emerald-200 xl:flex-none"
+            >
+                <i class="fa-solid fa-filter"></i>
+                <span>Terapkan</span>
+            </button>
+
+            <a
+                href="{{ route('admin.hs-code.index') }}"
+                title="Reset filter"
+                aria-label="Reset filter"
+                class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl
+                    border border-slate-200 bg-white text-slate-500 transition
+                    hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
+            >
+                <i class="fa-solid fa-rotate-left"></i>
+            </a>
+        </div>
+    </form>
+</section>
 
         <section
             id="adminHsTableCard"

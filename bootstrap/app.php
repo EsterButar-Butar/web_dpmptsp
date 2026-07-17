@@ -13,21 +13,12 @@ return Application::configure(
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
-
     ->withMiddleware(function (Middleware $middleware): void {
-
         $middleware->alias([
-
             'role' => RoleMiddleware::class,
-
         ]);
-
     })
-
     ->withExceptions(function (Exceptions $exceptions): void {
-
         //
-
     })
-
     ->create();
