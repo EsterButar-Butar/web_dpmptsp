@@ -242,8 +242,20 @@ class SsController extends Controller
     public function empty()
     {
         ShiftShare::truncate();
-        OperatorController::logActivity('Analisis SS', 'dihapus', "Menghapus semua data perhitungan SS.");
-        return back()->with('success', 'Semua data Shift Share berhasil dihapus secara permanen!');
+        OperatorController::logActivity('Analisis Shift Share', 'dihapus', "Menghapus semua data perhitungan Shift Share");
+        return back()->with('success', 'Semua data perhitungan Shift Share berhasil dihapus secara permanen!');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!empty($ids)) {
+            $count = count($ids);
+            ShiftShare::whereIn('id', $ids)->delete();
+            OperatorController::logActivity('Analisis Shift Share', 'dihapus', "Menghapus {$count} data perhitungan Shift Share secara massal");
+            return back()->with('success', "{$count} data perhitungan Shift Share berhasil dihapus secara massal!");
+        }
+        return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
     }
 
 

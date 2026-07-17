@@ -1,4 +1,4 @@
-@extends('layouts.operator')
+@extends('partials.layouts.operator')
 
 @section('content')
 <div>
@@ -183,9 +183,13 @@
 
             <div class="overflow-x-auto border-t border-slate-200">
                 <table id="lqTable" class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50">
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">NO</th>
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-12 text-center">
+                                <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Tingkat Wilayah</th>
                             <th class="px-4 py-4 font-semibold whitespace-nowrap">KAB/KOTA</th>
                             <th class="px-4 py-4 font-semibold whitespace-nowrap">PROVINSI</th>
                             <th class="px-4 py-4 font-semibold min-w-[200px]">SEKTOR</th>
@@ -200,7 +204,11 @@
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
                         @forelse($lqData as $index => $data)
                             <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                    <input type="checkbox" class="row-checkbox rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" value="{{ $data['id'] }}">
+                                </td>
                                 <td class="px-4 py-4">{{ ($lqData->currentPage() - 1) * $lqData->perPage() + $loop->iteration }}</td>
+                                <td class="px-4 py-4">{{ $data['tingkat_wilayah'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['sektor'] }}</td>
@@ -260,18 +268,30 @@
                 {{ $lqData->links('pagination::tailwind') }}
             </div>
 
-            <div class="mt-8 border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <button type="button" onclick="exportToExcel()" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+            <div class="mt-8 border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-end gap-3 w-full">
+                <form id="bulkDeleteForm" action="{{ route('operator.lq.bulkDestroy') }}" method="POST" onsubmit="return confirmBulkDelete(event, this);" class="w-full sm:w-auto">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="ids" id="selectedIds">
+                    <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Hapus Terpilih
+                    </button>
+                </form>
+
+                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh Hasil Analisis (Excel)
                 </button>
 
-                <form action="{{ route('operator.lq.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);">
+                <form action="{{ route('operator.lq.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>

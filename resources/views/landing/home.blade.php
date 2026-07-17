@@ -6,6 +6,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    @vite([
+        'resources/css/home.css',
+        'resources/css/navbar.css',
+        'resources/css/about.css',
         'resources/js/navbar.js',
         'resources/js/home.js',
         'resources/js/about.js',

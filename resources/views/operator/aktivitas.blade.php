@@ -1,4 +1,4 @@
-@extends('layouts.operator')
+@extends('partials.layouts.operator')
 
 @section('title', 'Log Aktivitas Sistem')
 

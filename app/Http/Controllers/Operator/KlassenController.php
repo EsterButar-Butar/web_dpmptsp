@@ -276,8 +276,20 @@ class KlassenController extends Controller
     public function empty()
     {
         Klassen::truncate();
-        OperatorController::logActivity('Tipologi Klassen', 'dihapus', "Menghapus semua data Tipologi Klassen.");
-        return back()->with('success', 'Semua data Tipologi Klassen berhasil dihapus secara permanen!');
+        OperatorController::logActivity('Analisis Tipologi Klassen', 'dihapus', "Menghapus semua data perhitungan Tipologi Klassen");
+        return back()->with('success', 'Semua data perhitungan Tipologi Klassen berhasil dihapus secara permanen!');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!empty($ids)) {
+            $count = count($ids);
+            Klassen::whereIn('id', $ids)->delete();
+            OperatorController::logActivity('Analisis Tipologi Klassen', 'dihapus', "Menghapus {$count} data perhitungan Tipologi Klassen secara massal");
+            return back()->with('success', "{$count} data perhitungan Tipologi Klassen berhasil dihapus secara massal!");
+        }
+        return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
     }
 
     public function import(Request $request)

@@ -36,7 +36,7 @@ Route::get(
         AnalysisController::class,
         'index',
     ]
-)->name('analysis.index');
+)->name('analysis');
 
 
 
@@ -47,7 +47,7 @@ Route::get(
         ComparisonController::class,
         'index',
     ]
-)->name('comparison.index');
+)->name('comparison');
 
 
 

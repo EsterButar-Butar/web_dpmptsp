@@ -207,6 +207,18 @@ class LqController extends Controller
         return back()->with('success', 'Semua data perhitungan LQ berhasil dihapus secara permanen!');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!empty($ids)) {
+            $count = count($ids);
+            LQ::whereIn('id', $ids)->delete();
+            OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus {$count} data perhitungan LQ secara massal");
+            return back()->with('success', "{$count} data perhitungan LQ berhasil dihapus secara massal!");
+        }
+        return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
+    }
+
 
     public function import(Request $request)
     {

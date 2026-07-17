@@ -18,7 +18,7 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     </title>
 
 
-    {{-- Google Fonts --}
+    {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
     <link

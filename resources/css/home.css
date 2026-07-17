@@ -83,9 +83,9 @@ section{
 
 .hero-content h1{
 
-    font-size:88px;
+    font-size:64px;
 
-    line-height:1.05;
+    line-height:1.15;
 
     font-weight:800;
 
@@ -95,6 +95,13 @@ section{
 
     letter-spacing:-2px;
 
+}
+
+.hero-content p{
+    color: #555;
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 35px;
 }
 
 .hero-image{
@@ -112,7 +119,7 @@ section{
 
     width:100%;
 
-    max-width:720px;
+    max-width:650px;
 
     border-radius:35px;
 
@@ -120,20 +127,6 @@ section{
 
     box-shadow:0 35px 80px rgba(0,0,0,.18);
 
-}
-
-.hero-image img{
-    width:100%;
-
-    max-width:750px;   /* BESARKAN */
-
-    height:500px;
-
-    object-fit:cover;
-
-    border-radius:28px;
-
-    box-shadow:0 20px 45px rgba(0,0,0,.15);
 }
 .hero-stats{
 

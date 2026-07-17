@@ -1,4 +1,4 @@
-@extends('layouts.operator')
+@extends('partials.layouts.operator')
 
 @section('content')
 <div>
@@ -203,9 +203,12 @@
 
             <div class="overflow-x-auto rounded-lg border border-slate-200">
                 <table class="w-full text-left" id="ssTable">
-                    <thead class="op-table-header">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
                         <tr>
-                            <th class="px-4 py-4 whitespace-nowrap">No</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-12 text-center">
+                                <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
                             <th class="px-4 py-4 whitespace-nowrap">Daerah Analisis</th>
                             <th class="px-4 py-4 whitespace-nowrap">Daerah Pembanding</th>
                             <th class="px-4 py-4 whitespace-nowrap">Sektor</th>
@@ -225,6 +228,9 @@
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
                         @forelse($ssData as $index => $data)
                             <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                    <input type="checkbox" class="row-checkbox rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" value="{{ $data['id'] }}">
+                                </td>
                                 <td class="px-4 py-4">{{ ($ssData->currentPage() - 1) * $ssData->perPage() + $loop->iteration }}</td>
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
@@ -282,7 +288,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="13" class="px-4 py-8 text-center text-slate-500">
+                                <td colspan="16" class="px-4 py-8 text-center text-slate-500">
                                     <div class="flex flex-col items-center justify-center">
                                         <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />

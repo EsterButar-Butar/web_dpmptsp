@@ -245,8 +245,20 @@ class TipologiController extends Controller
     public function empty()
     {
         Tipologi::truncate();
-        OperatorController::logActivity('Tipologi Sektor', 'dihapus', "Menghapus semua data Tipologi.");
-        return back()->with('success', 'Semua data Tipologi berhasil dihapus secara permanen!');
+        OperatorController::logActivity('Analisis Tipologi Sektor', 'dihapus', "Menghapus semua data perhitungan Tipologi Sektor");
+        return back()->with('success', 'Semua data perhitungan Tipologi Sektor berhasil dihapus secara permanen!');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!empty($ids)) {
+            $count = count($ids);
+            Tipologi::whereIn('id', $ids)->delete();
+            OperatorController::logActivity('Analisis Tipologi Sektor', 'dihapus', "Menghapus {$count} data perhitungan Tipologi Sektor secara massal");
+            return back()->with('success', "{$count} data perhitungan Tipologi Sektor berhasil dihapus secara massal!");
+        }
+        return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
     }
 
     public function import(Request $request)
