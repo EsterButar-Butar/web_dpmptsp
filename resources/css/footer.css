@@ -47,6 +47,7 @@ footer{
     margin-bottom:12px;
 
     transition:.3s;
+text-decoration: none !important;
 
 }
 
