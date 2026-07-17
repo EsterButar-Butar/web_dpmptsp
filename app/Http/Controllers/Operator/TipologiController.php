@@ -43,7 +43,20 @@ class TipologiController extends Controller
 
     public function index(Request $request)
     {
-        $rawDbData = Tipologi::with('sektor')->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+        $query = Tipologi::with('sektor');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('daerah_analisis', 'like', "%{$search}%")
+                  ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                  ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                      $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
         $tipologiData = collect($this->mapDbToView($rawDbData));
 
         $editItem = null;

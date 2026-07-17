@@ -176,9 +176,19 @@
     <!-- Table Container -->
     <div class="op-card">
         <div class="op-card-header">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-slate-800">Hasil Analisis LQ</h2>
-                <p class="text-slate-600 mt-1">Data Analisis LQ Tersimpan</p>
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Hasil Analisis LQ</h2>
+                    <p class="text-slate-600 mt-1">Data Analisis LQ Tersimpan</p>
+                </div>
+                <form action="{{ route('operator.lq.index') }}" method="GET" class="relative w-full md:w-72">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah atau Sektor..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:border-[#D8A62A] focus:ring-1 focus:ring-[#D8A62A] outline-none transition-all shadow-sm">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </form>
             </div>
 
             <div class="overflow-x-auto border-t border-slate-200">
