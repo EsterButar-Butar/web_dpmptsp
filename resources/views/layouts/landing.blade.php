@@ -45,6 +45,7 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         'resources/css/app.css',
         'resources/css/comparison.css',
         'resources/js/app.js'
+        'resources/css/footer.css',
     ])
 
 

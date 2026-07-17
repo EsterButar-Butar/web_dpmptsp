@@ -139,18 +139,26 @@
     position:absolute;
 
     left:50%;
-    bottom:-10px;
 
-    transform:translateX(-50%) scaleX(0);
+    bottom:-8px;
 
-    width:55%;
+    width:0;
+
     height:3px;
 
     background:#D8A62A;
 
-    border-radius:999px;
+    border-radius:50px;
 
-    transition:.3s ease;
+    transform:translateX(-50%);
+
+    transition:.35s;
+
+}
+
+.nav-link.active::after{
+
+    width:55%;
 
 }
 
@@ -161,10 +169,10 @@
 }
 
 /* Saat active tidak ada garis */
-.nav-link.active::after{
+/* .nav-link.active::after{
 
     width:0;
-}
+} */
 
 .nav-link.active{
 
@@ -203,6 +211,7 @@
     font-weight:600;
 
     transition:.3s;
+     text-decoration: none !important;
 
 }
 
