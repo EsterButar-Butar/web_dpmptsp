@@ -69,31 +69,30 @@
 
                 <div class="social">
 
-                    <a href="#">
+    <a href="https://www.facebook.com/dpmptspsumut"
+       target="_blank"
+       rel="noopener noreferrer">
 
-                        <i class="fab fa-facebook-f"></i>
+        <i class="fab fa-facebook-f"></i>
 
-                    </a>
+    </a>
 
-                    <a href="#">
+    <a href="https://www.instagram.com/dpmptsp_sumut/"
+       target="_blank"
+       rel="noopener noreferrer">
 
-                        <i class="fab fa-instagram"></i>
+        <i class="fab fa-instagram"></i>
 
-                    </a>
+    </a>
 
-                    <a href="#">
+    <a href="https://www.youtube.com/@dpmpptsp_sumut6300"
+        target="_blank"
+        rel="noopener noreferrer">
+        <i class="fab fa-youtube"></i>
 
-                        <i class="fab fa-youtube"></i>
+    </a>
 
-                    </a>
-
-                    <a href="#">
-
-                        <i class="fab fa-linkedin-in"></i>
-
-                    </a>
-
-                </div>
+</div>
 
             </div>
 
