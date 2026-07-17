@@ -209,17 +209,16 @@
             <form
                 action="{{ route('admin.data-wilayah.index') }}"
                 method="GET"
-                class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[220px_220px_180px_minmax(260px,1fr)_auto]"
+                class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12"
             >
-                <div class="relative">
+                {{-- Kabupaten/Kota --}}
+                <div class="relative min-w-0 xl:col-span-2">
                     <select
                         name="kode_kabupaten"
                         id="filterKabupaten"
-                        class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                     >
-                        <option value="">
-                            Semua Kab/Kota
-                        </option>
+                        <option value="">Semua Kab/Kota</option>
 
                         @foreach ($kabupatenOptions as $option)
                             <option
@@ -237,15 +236,14 @@
                     <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                <div class="relative">
+                {{-- Kecamatan --}}
+                <div class="relative min-w-0 xl:col-span-2">
                     <select
                         name="kode_kecamatan"
                         id="filterKecamatan"
-                        class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                     >
-                        <option value="">
-                            Semua Kecamatan
-                        </option>
+                        <option value="">Semua Kecamatan</option>
 
                         @foreach ($kecamatanOptions as $option)
                             <option
@@ -263,31 +261,24 @@
                     <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                <div class="relative">
+                {{-- Status --}}
+                <div class="relative min-w-0 xl:col-span-2">
                     <select
                         name="status"
-                        class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                     >
-                        <option value="">
-                            Semua Status
-                        </option>
+                        <option value="">Semua Status</option>
 
                         <option
                             value="Aktif"
-                            @selected(
-                                strtolower(request('status', ''))
-                                === 'aktif'
-                            )
+                            @selected(strtolower(request('status', '')) === 'aktif')
                         >
                             Aktif
                         </option>
 
                         <option
                             value="Nonaktif"
-                            @selected(
-                                strtolower(request('status', ''))
-                                === 'nonaktif'
-                            )
+                            @selected(strtolower(request('status', '')) === 'nonaktif')
                         >
                             Nonaktif
                         </option>
@@ -296,13 +287,14 @@
                     <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                <div class="relative">
+                {{-- Pencarian --}}
+                <div class="relative min-w-0 xl:col-span-3">
                     <input
                         type="text"
                         name="search"
                         value="{{ request('search') }}"
                         placeholder="Cari nama atau kode wilayah..."
-                        class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                        class="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                     >
 
                     <button
@@ -314,13 +306,14 @@
                     </button>
                 </div>
 
-                <div class="flex gap-2">
+                {{-- Tombol --}}
+                <div class="flex min-w-0 gap-2 md:col-span-2 xl:col-span-3">
                     <button
                         type="submit"
-                        class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                        class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
                     >
                         <i class="fa-solid fa-filter"></i>
-                        Terapkan
+                        <span class="truncate">Terapkan</span>
                     </button>
 
                     <a

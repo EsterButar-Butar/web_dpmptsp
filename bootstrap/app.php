@@ -13,21 +13,12 @@ return Application::configure(
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
-
     ->withMiddleware(function (Middleware $middleware): void {
-
         $middleware->alias([
-
             'role' => RoleMiddleware::class,
-
         ]);
-
     })
-
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->reportable(function (\Throwable $e) {
-            file_put_contents('D:\Magang\web_dpmptsp\error_trace.log', get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-        });
+        //
     })
-
     ->create();
