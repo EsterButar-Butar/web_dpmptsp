@@ -1,64 +1,111 @@
-<footer class="footer">
+<footer>
 
-    <div class="container footer-container">
+        <div class="footer-content">
 
+            <div>
 
-        <div class="footer-brand">
+                <h2>
 
-            <img
-                src="{{ asset('images/logo-dpmptsp.png') }}"
-                alt="Logo DPMPTSP Provinsi Sumatera Utara"
-                class="footer-logo"
-            >
-
-
-            <div class="footer-brand-text">
-
-                <strong>
                     DPMPTSP
-                </strong>
 
-                <span>
-                    PROVINSI SUMATERA UTARA
-                </span>
+                </h2>
+
+                <p>
+
+                    Dashboard Analisis Potensi Investasi
+                    berbasis GIS, PDRB,
+                    Location Quotient,
+                    Shift Share,
+                    Tipologi Klassen,
+                    dan Tipologi Sektor.
+
+                </p>
+
+            </div>
+
+
+
+            <div>
+
+                <h3>
+
+                    Menu
+
+                </h3>
+
+                <a href="{{ route('home') }}">
+
+                    Beranda
+
+                </a>
+
+                <a href="{{ route('home') }}#tentang">
+    Tentang
+</a>
+
+                <a href="#">
+
+                    Dashboard
+
+                </a>
+
+                <a href="#">
+
+                    Peta
+
+                </a>
+
+            </div>
+
+
+
+            <div>
+
+                <h3>
+
+                    Media Sosial
+
+                </h3>
+
+                <div class="social">
+
+                    <a href="#">
+
+                        <i class="fab fa-facebook-f"></i>
+
+                    </a>
+
+                    <a href="#">
+
+                        <i class="fab fa-instagram"></i>
+
+                    </a>
+
+                    <a href="#">
+
+                        <i class="fab fa-youtube"></i>
+
+                    </a>
+
+                    <a href="#">
+
+                        <i class="fab fa-linkedin-in"></i>
+
+                    </a>
+
+                </div>
 
             </div>
 
         </div>
 
+        <hr>
 
-        <div class="footer-center">
+        <p class="copyright">
 
-            <p>
-                © {{ date('Y') }} DPMPTSP Provinsi Sumatera Utara.
-                All rights reserved.
-            </p>
+            © {{ date('Y') }} DPMPTSP Provinsi Sumatera Utara.
+            All Rights Reserved.
 
-            <span>
-                Data Investasi Akurat, Analisis Tepat,
-                Keputusan Hebat.
-            </span>
+        </p>
 
-        </div>
-
-
-        <div class="footer-social">
-
-            <a href="#" aria-label="Facebook">
-                <i class="fa-brands fa-facebook-f"></i>
-            </a>
-
-            <a href="#" aria-label="Instagram">
-                <i class="fa-brands fa-instagram"></i>
-            </a>
-
-            <a href="#" aria-label="YouTube">
-                <i class="fa-brands fa-youtube"></i>
-            </a>
-
-        </div>
-
-
-    </div>
-
-</footer>
+    </footer>

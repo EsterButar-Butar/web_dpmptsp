@@ -138,17 +138,27 @@
 
     position:absolute;
 
-    left:0;
-    bottom:-5px;
+    left:50%;
 
-    width:0%;
-    height:2px;
+    bottom:-8px;
 
-    background:#D4A017;
+    width:0;
 
-    border-radius:999px;
+    height:3px;
 
-    transition:.3s ease;
+    background:#D8A62A;
+
+    border-radius:50px;
+
+    transform:translateX(-50%);
+
+    transition:.35s;
+
+}
+
+.nav-link.active::after{
+
+    width:55%;
 
 }
 
@@ -159,7 +169,12 @@
     width:100%;
 }
 
-.nav-link:hover,
+/* Saat active tidak ada garis */
+/* .nav-link.active::after{
+
+    width:0;
+} */
+
 .nav-link.active{
 
     color:#D4A017;
@@ -197,6 +212,7 @@
     font-weight:600;
 
     transition:.3s;
+     text-decoration: none !important;
 
 }
 
