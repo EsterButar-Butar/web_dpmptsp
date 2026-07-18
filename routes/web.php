@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Landing\AnalysisController;
 use App\Http\Controllers\Landing\ComparisonController;
 use Illuminate\Support\Facades\Route;
@@ -39,8 +39,6 @@ Route::get(
 )->name('analysis');
 
 
-
-
 Route::get(
     '/perbandingan-sektor',
     [
@@ -48,7 +46,6 @@ Route::get(
         'index',
     ]
 )->name('comparison');
-
 
 
 /*
@@ -60,7 +57,7 @@ Route::get(
 |
 | admin    → admin.dashboard
 | operator → operator.dashboard
-| user     → profile.show
+| user     → user.profile
 |
 */
 
@@ -79,7 +76,7 @@ Route::get('/dashboard', function () {
         ),
 
         'user' => redirect()->route(
-            'profile.show'
+            'user.profile'
         ),
 
         default => abort(
@@ -89,91 +86,16 @@ Route::get('/dashboard', function () {
     };
 
 })
-    ->middleware([
-        'auth',
-        'verified',
-    ])
-    ->name('dashboard');
-
-
-/*
-|--------------------------------------------------------------------------
-| PROFILE ROUTES
-|--------------------------------------------------------------------------
-|
-| Route profil dapat digunakan oleh:
-|
-| - admin
-| - operator
-| - user
-|
-*/
-
-Route::middleware([
+->middleware([
     'auth',
-])->group(function () {
+    'verified',
+])
+->name('dashboard');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Tampilkan Profil
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/profile',
-        [
-            ProfileController::class,
-            'show',
-        ]
-    )->name('profile.show');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Edit Profil
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/profile/edit',
-        [
-            ProfileController::class,
-            'edit',
-        ]
-    )->name('profile.edit');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Profil
-    |--------------------------------------------------------------------------
-    */
-
-    Route::patch(
-        '/profile',
-        [
-            ProfileController::class,
-            'update',
-        ]
-    )->name('profile.update');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Hapus Akun
-    |--------------------------------------------------------------------------
-    */
-
-    Route::delete(
-        '/profile',
-        [
-            ProfileController::class,
-            'destroy',
-        ]
-    )->name('profile.destroy');
-
-});
+Route::get('/about', function () {
+    return view('landing.about');
+})->name('about');
 
 
 /*

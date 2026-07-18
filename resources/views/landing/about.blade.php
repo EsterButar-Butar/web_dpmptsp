@@ -4,6 +4,6 @@
 
 @section('content')
 
-@include('landing.about-section')
+<!-- @include('landing.about-section') -->
 
 @endsection

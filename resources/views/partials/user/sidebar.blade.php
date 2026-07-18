@@ -1,150 +1,61 @@
-<aside class="user-sidebar">
+<aside class="sidebar">
 
-    {{-- LOGO --}}
-    <div class="sidebar-logo">
+    <div class="profile-box">
 
-        <a href="{{ route('home') }}">
+        <img
+            src="{{ asset('images/logo-dpmptsp.png') }}"
+            class="sidebar-logo"
+            alt="Logo DPMPTSP">
 
-            <img
-                src="{{ asset('images/logo-dpmptsp.png') }}"
-                alt="Logo DPMPTSP Sumatera Utara"
-            >
-
-        </a>
-
-    </div>
-
-
-    {{-- USER INFORMATION --}}
-    <div class="sidebar-profile">
-
-        <div class="sidebar-avatar">
-
-            @if (!empty(auth()->user()->avatar))
-
-                <img
-                    src="{{ auth()->user()->avatar }}"
-                    alt="Foto profil"
-                >
-
-            @else
-
-                <div class="sidebar-avatar-default">
-
-                    {{ strtoupper(
-                        substr(auth()->user()->name ?? 'U', 0, 1)
-                    ) }}
-
-                </div>
-
-            @endif
-
+        <div class="avatar">
+            {{ strtoupper(substr(Auth::user()->name,0,1)) }}
         </div>
 
+        <h3>{{ Auth::user()->name }}</h3>
 
-        <h3>
-            {{ \Illuminate\Support\Str::before(
-                auth()->user()->name ?? 'Pengguna',
-                ' '
-            ) }}
-        </h3>
-
-        <span>
-            {{ ucfirst(auth()->user()->role ?? 'User') }}
-        </span>
+        <span>{{ ucfirst(Auth::user()->role) }}</span>
 
     </div>
 
+    <hr>
 
-    {{-- NAVIGATION --}}
-    <nav class="sidebar-navigation">
+    <p class="menu-title">MENU UTAMA</p>
 
-        <p class="sidebar-section-title">
-            Menu Utama
-        </p>
+    {{-- Beranda --}}
+    <a href="{{ route('home') }}">
+        <i class="fa-solid fa-house"></i>
+        Beranda
+    </a>
 
+    {{-- Tentang --}}
+    <a href="{{ route('about') }}">
+        <i class="fa-solid fa-circle-info"></i>
+        Tentang
+    </a>
 
-        {{-- HOME --}}
-        <a
-            href="{{ route('home') }}"
-            class="sidebar-link"
-        >
-            <i class="fa-solid fa-house"></i>
+    {{-- Peta Investasi --}}
+    <a href="{{ route('investment.map') }}">
+        <i class="fa-solid fa-map-location-dot"></i>
+        Peta Investasi
+    </a>
 
-            <span>
-                Beranda
-            </span>
-        </a>
+    <p class="menu-title mt">PENGATURAN</p>
 
+    {{-- Ganti Password --}}
+    <a href="{{ route('user.password.edit') }}"
+       class="{{ request()->routeIs('user.password.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-key"></i>
+        Ganti Kata Sandi
+    </a>
 
-        {{-- ABOUT --}}
-        <a
-            href="{{ route('about') }}"
-            class="sidebar-link"
-        >
-            <i class="fa-solid fa-circle-info"></i>
+    {{-- Logout --}}
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
 
-            <span>
-                Tentang
-            </span>
-        </a>
-
-
-        {{-- PROFILE --}}
-        <a
-            href="{{ route('profile.edit') }}"
-            class="sidebar-link active"
-        >
-            <i class="fa-regular fa-user"></i>
-
-            <span>
-                Profil
-            </span>
-        </a>
-
-
-        {{-- SETTINGS --}}
-        <p class="sidebar-section-title settings-title">
-            Pengaturan
-        </p>
-
-
-        {{-- PASSWORD --}}
-        <a
-            href="{{ route('password.request') }}"
-            class="sidebar-link"
-        >
-            <i class="fa-solid fa-key"></i>
-
-            <span>
-                Ganti Kata Sandi
-            </span>
-        </a>
-
-
-        {{-- LOGOUT --}}
-        <form
-            method="POST"
-            action="{{ route('logout') }}"
-        >
-
-            @csrf
-
-            <button
-                type="submit"
-                class="sidebar-link sidebar-logout"
-            >
-
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-
-                <span>
-                    Keluar
-                </span>
-
-            </button>
-
-        </form>
-
-    </nav>
+        <button class="logout-btn">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Keluar
+        </button>
+    </form>
 
 </aside>
