@@ -114,8 +114,8 @@ class KlassenController extends Controller
         $pdrbTotalProvAwal = $this->parseNumber($item['total_pdrb_pembanding_awal'] ?? 0);
         $pdrbTotalProvAkhir = $this->parseNumber($item['total_pdrb_pembanding_akhir'] ?? 0);
 
-        // Prevent division by zero
-        if ($pdrbSektorKabAwal <= 0 || $pdrbSektorProvAwal <= 0 || $pdrbTotalKabAwal <= 0 || $pdrbTotalProvAwal <= 0 || $pdrbTotalKabAkhir <= 0 || $pdrbTotalProvAkhir <= 0) {
+        // Prevent division by zero for Total PDRB only (which shouldn't be 0 unless the whole city has 0 economy)
+        if ($pdrbTotalKabAwal <= 0 || $pdrbTotalProvAwal <= 0 || $pdrbTotalKabAkhir <= 0 || $pdrbTotalProvAkhir <= 0) {
             return false;
         }
 
@@ -125,8 +125,17 @@ class KlassenController extends Controller
         if ($n == 0) $n = 1; // Mencegah pembagian dengan nol jika tahun sama
 
         // 1. MENGHITUNG LAJU PERTUMBUHAN SEKTOR (Estimasi Rata-rata Tahunan Aritmatika)
-        $ri = ((($pdrbSektorKabAkhir - $pdrbSektorKabAwal) / $pdrbSektorKabAwal) * 100) / $n;
-        $r = ((($pdrbTotalProvAkhir - $pdrbTotalProvAwal) / $pdrbTotalProvAwal) * 100) / $n;
+        if ($pdrbSektorKabAwal > 0) {
+            $ri = ((($pdrbSektorKabAkhir - $pdrbSektorKabAwal) / $pdrbSektorKabAwal) * 100) / $n;
+        } else {
+            $ri = $pdrbSektorKabAkhir > 0 ? (100 / $n) : 0;
+        }
+
+        if ($pdrbSektorProvAwal > 0) {
+            $r = ((($pdrbSektorProvAkhir - $pdrbSektorProvAwal) / $pdrbSektorProvAwal) * 100) / $n;
+        } else {
+            $r = $pdrbSektorProvAkhir > 0 ? (100 / $n) : 0;
+        }
 
         // 2. MENGHITUNG KONTRIBUSI SEKTOR
         $yi = ((($pdrbSektorKabAwal / $pdrbTotalKabAwal) + ($pdrbSektorKabAkhir / $pdrbTotalKabAkhir)) / 2) * 100;
@@ -319,23 +328,25 @@ class KlassenController extends Controller
         $sektorsCache = Sektor::all()->pluck('sektor_id', 'nama_sektor')->mapWithKeys(fn($id, $name) => [strtolower(trim($name)) => $id])->toArray();
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($payload, &$successCount, &$sektorsCache) {
-            foreach ($payload as $item) {
-                $hasProvinsi = isset($item['Provinsi']) || isset($item['Kode Provinsi']) || isset($item['Kode_Provinsi']) || isset($item['Kode Wilayah']) || isset($item['Kode_Wilayah']);
-                if (!$hasProvinsi || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
-                    ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
-                    ! isset($item['Total PDRB Analisis Awal']) || ! isset($item['Total PDRB Analisis Akhir']) ||
-                    ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
-                    ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
+            foreach ($payload as $rawItem) {
+                $item = $this->normalizeKeys($rawItem);
+
+                $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
+                if (!$hasProvinsi || ! isset($item['sektor']) || ! isset($item['tahunawal']) || ! isset($item['tahunakhir']) ||
+                    ! isset($item['pdrbsektoranalisisawal']) || ! isset($item['pdrbsektoranalisisakhir']) ||
+                    ! isset($item['totalpdrbanalisisawal']) || ! isset($item['totalpdrbanalisisakhir']) ||
+                    ! isset($item['pdrbsektorpembandingawal']) || ! isset($item['pdrbsektorpembandingakhir']) ||
+                    ! isset($item['totalpdrbpembandingawal']) || ! isset($item['totalpdrbpembandingakhir'])) {
                     continue;
                 }
 
-                $resolved = $this->resolveRegionNames($item);
+                $resolved = $this->resolveRegionNames($rawItem);
                 $provinsi = $resolved['provinsi'];
                 $kabupaten = $resolved['kabupaten'];
 
                 $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
                 
-                $sektorName = $this->resolveSektorName($item);
+                $sektorName = $this->resolveSektorName($rawItem);
                 $sektorKey = strtolower(trim($sektorName));
                 
                 if (isset($sektorsCache[$sektorKey])) {
@@ -351,16 +362,16 @@ class KlassenController extends Controller
                     'provinsi' => $provinsi,
                     'kabupaten' => $kabupaten,
                     'sektor' => $sektorName,
-                    'tahun_awal' => $item['Tahun Awal'],
-                    'tahun_akhir' => $item['Tahun Akhir'],
-                    'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
-                    'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
-                    'total_pdrb_analisis_awal' => $item['Total PDRB Analisis Awal'] ?? 0,
-                    'total_pdrb_analisis_akhir' => $item['Total PDRB Analisis Akhir'] ?? 0,
-                    'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
-                    'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
-                    'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
-                    'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
+                    'tahun_awal' => $item['tahunawal'],
+                    'tahun_akhir' => $item['tahunakhir'],
+                    'pdrb_sektor_analisis_awal' => $item['pdrbsektoranalisisawal'] ?? 0,
+                    'pdrb_sektor_analisis_akhir' => $item['pdrbsektoranalisisakhir'] ?? 0,
+                    'total_pdrb_analisis_awal' => $item['totalpdrbanalisisawal'] ?? 0,
+                    'total_pdrb_analisis_akhir' => $item['totalpdrbanalisisakhir'] ?? 0,
+                    'pdrb_sektor_pembanding_awal' => $item['pdrbsektorpembandingawal'] ?? 0,
+                    'pdrb_sektor_pembanding_akhir' => $item['pdrbsektorpembandingakhir'] ?? 0,
+                    'total_pdrb_pembanding_awal' => $item['totalpdrbpembandingawal'] ?? 0,
+                    'total_pdrb_pembanding_akhir' => $item['totalpdrbpembandingakhir'] ?? 0,
                 ];
 
                 $newData = $this->calculateKlassenData($mappedItem);
@@ -403,6 +414,59 @@ class KlassenController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => 'Tidak ada data valid yang dapat diimpor. Pastikan format kolom sesuai dengan Template Master.']);
+    }
+
+    public function syncFromDatabase(Request $request)
+    {
+        $request->validate([
+            'tingkat_wilayah' => 'required|string',
+            'provinsi' => 'required|string',
+            'kabupaten' => 'nullable|string',
+            'sektor' => 'required|string',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
+        ]);
+
+        $daerahAnalisis = $request->tingkat_wilayah === 'Provinsi' ? $request->provinsi : $request->kabupaten;
+        $sektorName = $request->sektor;
+        $tahunAwal = $request->tahun_awal;
+        $tahunAkhir = $request->tahun_akhir;
+
+        $sektorModel = Sektor::where('nama_sektor', $sektorName)->first();
+        if (!$sektorModel) {
+            return response()->json(['success' => false, 'message' => 'Sektor tidak ditemukan di database.']);
+        }
+
+        // Cari data LQ tahun awal
+        $lqAwal = \App\Models\Lq::where('daerah_analisis', $daerahAnalisis)
+            ->where('sektor_id', $sektorModel->sektor_id)
+            ->where('tahun', $tahunAwal)
+            ->first();
+
+        // Cari data LQ tahun akhir
+        $lqAkhir = \App\Models\Lq::where('daerah_analisis', $daerahAnalisis)
+            ->where('sektor_id', $sektorModel->sektor_id)
+            ->where('tahun', $tahunAkhir)
+            ->first();
+
+        if (!$lqAwal || !$lqAkhir) {
+            return response()->json(['success' => false, 'message' => "Data PDRB untuk daerah {$daerahAnalisis} sektor {$sektorName} pada tahun {$tahunAwal} atau {$tahunAkhir} tidak ditemukan di database LQ. Silakan hitung LQ terlebih dahulu."]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'pdrb_sektor_analisis_awal' => $lqAwal->pdrb_sektor_analisis,
+                'pdrb_sektor_analisis_akhir' => $lqAkhir->pdrb_sektor_analisis,
+                'total_pdrb_analisis_awal' => $lqAwal->total_pdrb_analisis,
+                'total_pdrb_analisis_akhir' => $lqAkhir->total_pdrb_analisis,
+                'pdrb_sektor_pembanding_awal' => $lqAwal->pdrb_sektor_pembanding,
+                'pdrb_sektor_pembanding_akhir' => $lqAkhir->pdrb_sektor_pembanding,
+                'total_pdrb_pembanding_awal' => $lqAwal->total_pdrb_pembanding,
+                'total_pdrb_pembanding_akhir' => $lqAkhir->total_pdrb_pembanding,
+            ],
+            'message' => 'Berhasil menarik data dari database!'
+        ]);
     }
 }
 

@@ -99,11 +99,18 @@ class LqController extends Controller
         $xi = $this->parseNumber($request->pdrb_sektor_pembanding);
         $rvi = $this->parseNumber($request->total_pdrb_pembanding);
 
-        if ($rvj == 0 || $rvi == 0 || ($xi / $rvi) == 0) {
-            return null;
+        if ($rvj <= 0 || $rvi <= 0) {
+            return null; // Hanya tolak jika Total PDRB yang 0
         }
 
-        $lq = round(($xij / $rvj) / ($xi / $rvi), 2);
+        $pembagi = $xi / $rvi;
+        
+        if ($pembagi > 0) {
+            $lq = round(($xij / $rvj) / $pembagi, 2);
+        } else {
+            // Jika sektor di tingkat pembanding nilainya 0, tapi di daerah ada nilainya, LQ sangat tinggi secara teoritis
+            $lq = $xij > 0 ? 99.99 : 0; 
+        }
 
         if ($lq > 1) {
             $kategori = 'BASIS';
@@ -247,23 +254,25 @@ class LqController extends Controller
         $sektorsCache = Sektor::all()->pluck('sektor_id', 'nama_sektor')->mapWithKeys(fn($id, $name) => [strtolower(trim($name)) => $id])->toArray();
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($payload, &$successCount, &$sektorsCache) {
-            foreach ($payload as $item) {
-                $hasProvinsi = isset($item['Provinsi']) || isset($item['Kode Provinsi']) || isset($item['Kode_Provinsi']) || isset($item['Kode Wilayah']) || isset($item['Kode_Wilayah']);
+            foreach ($payload as $rawItem) {
+                $item = $this->normalizeKeys($rawItem);
                 
-                $isLqSpecific = isset($item['Tahun']) && isset($item['PDRB Sektor Analisis']);
-                $isMasterFormat = isset($item['Tahun Awal']) && isset($item['PDRB Sektor Analisis Awal']);
+                $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
+                
+                $isLqSpecific = isset($item['tahun']) && isset($item['pdrbsektoranalisis']);
+                $isMasterFormat = isset($item['tahunawal']) && isset($item['pdrbsektoranalisisawal']);
 
-                if (!$hasProvinsi || !isset($item['Sektor']) || (!$isLqSpecific && !$isMasterFormat)) {
+                if (!$hasProvinsi || !isset($item['sektor']) || (!$isLqSpecific && !$isMasterFormat)) {
                     continue;
                 }
 
-                $resolved = $this->resolveRegionNames($item);
+                $resolved = $this->resolveRegionNames($rawItem);
                 $provinsi = $resolved['provinsi'];
                 $kabupaten = $resolved['kabupaten'];
 
                 $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
                 
-                $sektorName = $this->resolveSektorName($item);
+                $sektorName = $this->resolveSektorName($rawItem);
                 $sektorKey = strtolower(trim($sektorName));
                 
                 if (isset($sektorsCache[$sektorKey])) {
@@ -280,11 +289,11 @@ class LqController extends Controller
                         'provinsi' => $provinsi,
                         'kabupaten' => $kabupaten,
                         'sektor' => $sektorName,
-                        'tahun' => $item['Tahun'],
-                        'pdrb_sektor_analisis' => $item['PDRB Sektor Analisis'] ?? 0,
-                        'total_pdrb_analisis' => $item['Total PDRB Analisis'] ?? 0,
-                        'pdrb_sektor_pembanding' => $item['PDRB Sektor Pembanding'] ?? 0,
-                        'total_pdrb_pembanding' => $item['Total PDRB Pembanding'] ?? 0,
+                        'tahun' => $item['tahun'],
+                        'pdrb_sektor_analisis' => $item['pdrbsektoranalisis'] ?? 0,
+                        'total_pdrb_analisis' => $item['totalpdrbanalisis'] ?? 0,
+                        'pdrb_sektor_pembanding' => $item['pdrbsektorpembanding'] ?? 0,
+                        'total_pdrb_pembanding' => $item['totalpdrbpembanding'] ?? 0,
                     ];
                     $requestObj = new Request($mappedItem);
                     $newData = $this->calculateLQData($requestObj);
@@ -314,11 +323,11 @@ class LqController extends Controller
                         'provinsi' => $provinsi,
                         'kabupaten' => $kabupaten,
                         'sektor' => $sektorName,
-                        'tahun' => $item['Tahun Awal'],
-                        'pdrb_sektor_analisis' => $item['PDRB Sektor Analisis Awal'] ?? 0,
-                        'total_pdrb_analisis' => $item['Total PDRB Analisis Awal'] ?? 0,
-                        'pdrb_sektor_pembanding' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
-                        'total_pdrb_pembanding' => $item['Total PDRB Pembanding Awal'] ?? 0,
+                        'tahun' => $item['tahunawal'],
+                        'pdrb_sektor_analisis' => $item['pdrbsektoranalisisawal'] ?? 0,
+                        'total_pdrb_analisis' => $item['totalpdrbanalisisawal'] ?? 0,
+                        'pdrb_sektor_pembanding' => $item['pdrbsektorpembandingawal'] ?? 0,
+                        'total_pdrb_pembanding' => $item['totalpdrbpembandingawal'] ?? 0,
                     ];
                     $requestObjAwal = new Request($mappedItemAwal);
                     $newDataAwal = $this->calculateLQData($requestObjAwal);
@@ -348,11 +357,11 @@ class LqController extends Controller
                         'provinsi' => $provinsi,
                         'kabupaten' => $kabupaten,
                         'sektor' => $sektorName,
-                        'tahun' => $item['Tahun Akhir'],
-                        'pdrb_sektor_analisis' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
-                        'total_pdrb_analisis' => $item['Total PDRB Analisis Akhir'] ?? 0,
-                        'pdrb_sektor_pembanding' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
-                        'total_pdrb_pembanding' => $item['Total PDRB Pembanding Akhir'] ?? 0,
+                        'tahun' => $item['tahunakhir'],
+                        'pdrb_sektor_analisis' => $item['pdrbsektoranalisisakhir'] ?? 0,
+                        'total_pdrb_analisis' => $item['totalpdrbanalisisakhir'] ?? 0,
+                        'pdrb_sektor_pembanding' => $item['pdrbsektorpembandingakhir'] ?? 0,
+                        'total_pdrb_pembanding' => $item['totalpdrbpembandingakhir'] ?? 0,
                     ];
                     $requestObjAkhir = new Request($mappedItemAkhir);
                     $newDataAkhir = $this->calculateLQData($requestObjAkhir);

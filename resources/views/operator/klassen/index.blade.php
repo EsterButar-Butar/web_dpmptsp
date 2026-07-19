@@ -30,6 +30,12 @@
                     <p class="text-slate-600 mt-1">Masukkan Data Analisis Klassen</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
+                    <button type="button" onclick="document.getElementById('syncModal').style.display='flex'" class="flex items-center gap-2 bg-[#D8A62A] hover:bg-[#B88A1A] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Tarik Data Database
+                    </button>
                     <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -385,7 +391,219 @@
 
     <x-import-modal action="{{ route('operator.klassen.import') }}" type="klassen" />
 
+    <!-- Sync Modal -->
+    <div id="syncModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" style="display: none;" x-data="{
+        sync_tingkat_wilayah: 'Kabupaten/Kota',
+        sync_provinsi: 'Sumatera Utara',
+        get syncListKabupaten() {
+            return window.daftarWilayah[this.sync_provinsi] || [];
+        }
+    }">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden relative">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-bold text-slate-800">Tarik Data dari Database</h3>
+                <button type="button" onclick="document.getElementById('syncModal').style.display='none'" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <div class="space-y-2">
+                    <label class="op-label">Tingkat Wilayah</label>
+                    <div class="relative">
+                        <select id="sync_tingkat_wilayah" x-model="sync_tingkat_wilayah" class="op-input op-input-icon op-select">
+                            <option value="Kabupaten/Kota">Kabupaten/Kota</option>
+                            <option value="Provinsi">Provinsi</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="op-label">Provinsi</label>
+                    <div class="relative">
+                        <input list="sync-provinsi-list" id="sync_provinsi" x-model="sync_provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
+                        <datalist id="sync-provinsi-list">
+                            <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
+                                <option :value="prov"></option>
+                            </template>
+                        </datalist>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2" x-show="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                    <label class="op-label">Kabupaten / Kota</label>
+                    <div class="relative">
+                        <input list="sync-kabupaten-list" id="sync_kabupaten" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
+                        <datalist id="sync-kabupaten-list">
+                            <template x-for="kab in syncListKabupaten" :key="kab">
+                                <option :value="kab"></option>
+                            </template>
+                        </datalist>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="op-label">Sektor</label>
+                    <div class="relative">
+                        <input list="sync-sektor-list" id="sync_sektor" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
+                        <datalist id="sync-sektor-list">
+                            <option value="PERTANIAN, KEHUTANAN, DAN PERIKANAN">
+                            <option value="PERTAMBANGAN DAN PENGGALIAN">
+                            <option value="INDUSTRI PENGOLAHAN">
+                            <option value="PENGADAAN LISTRIK DAN GAS">
+                            <option value="KONSTRUKSI">
+                            <option value="PERDAGANGAN BESAR DAN ECERAN">
+                            <option value="TRANSPORTASI DAN PERGUDANGAN">
+                            <option value="INFORMASI DAN KOMUNIKASI">
+                            <option value="JASA KEUANGAN DAN ASURANSI">
+                        </datalist>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="op-label">Tahun Awal</label>
+                        <input type="number" id="sync_tahun_awal" min="1900" max="2100" class="op-input" placeholder="Tahun Awal">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="op-label">Tahun Akhir</label>
+                        <input type="number" id="sync_tahun_akhir" min="1900" max="2100" class="op-input" placeholder="Tahun Akhir">
+                    </div>
+                </div>
+
+                <div id="syncStatus" class="text-sm font-medium mt-2 hidden"></div>
+            </div>
+
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('syncModal').style.display='none'" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors">Batal</button>
+                <button type="button" onclick="processSync()" id="processSyncBtn" class="flex items-center gap-2 bg-[#D8A62A] hover:bg-[#B88A1A] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">Mulai Tarik Data</button>
+            </div>
+        </div>
+    </div>
+
 <script>
+    async function processSync() {
+        const tingkat = document.getElementById('sync_tingkat_wilayah').value;
+        const provinsi = document.getElementById('sync_provinsi').value;
+        const kabupaten = document.getElementById('sync_kabupaten').value;
+        const sektor = document.getElementById('sync_sektor').value;
+        const tahunAwal = document.getElementById('sync_tahun_awal').value;
+        const tahunAkhir = document.getElementById('sync_tahun_akhir').value;
+        const statusEl = document.getElementById('syncStatus');
+        const processBtn = document.getElementById('processSyncBtn');
+
+        if (!provinsi || !sektor || !tahunAwal || !tahunAkhir || (tingkat === 'Kabupaten/Kota' && !kabupaten)) {
+            statusEl.textContent = 'Harap lengkapi semua isian terlebih dahulu!';
+            statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
+            return;
+        }
+
+        processBtn.disabled = true;
+        processBtn.textContent = 'Mencari Data...';
+        statusEl.textContent = 'Mencari data PDRB di database...';
+        statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
+
+        try {
+            const response = await fetch("{{ route('operator.klassen.sync') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    tingkat_wilayah: tingkat,
+                    provinsi: provinsi,
+                    kabupaten: kabupaten,
+                    sektor: sektor,
+                    tahun_awal: tahunAwal,
+                    tahun_akhir: tahunAkhir
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                statusEl.textContent = 'Data ditemukan! Mengisi form otomatis...';
+                
+                // Set the form inputs
+                document.querySelector('select[name="tingkat_wilayah"]').value = tingkat;
+                document.querySelector('select[name="tingkat_wilayah"]').dispatchEvent(new Event('change'));
+                
+                setTimeout(() => {
+                    document.querySelector('input[name="provinsi"]').value = provinsi;
+                    document.querySelector('input[name="provinsi"]').dispatchEvent(new Event('input'));
+                    
+                    if (tingkat === 'Kabupaten/Kota') {
+                        document.querySelector('input[name="kabupaten"]').value = kabupaten;
+                    }
+                    
+                    document.querySelector('input[name="sektor"]').value = sektor;
+                    document.querySelector('input[name="tahun_awal"]').value = tahunAwal;
+                    document.querySelector('input[name="tahun_akhir"]').value = tahunAkhir;
+                    
+                    // Trigger Alpine.js models by dispatching input events
+                    const formatRp = (v) => { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+                    
+                    // Get all alpine inputs and set their values
+                    const alpineInputs = document.querySelectorAll('.grid-cols-2 .space-y-2 input[type="text"]');
+                    
+                    if (alpineInputs.length >= 8) {
+                        alpineInputs[0].value = formatRp(result.data.pdrb_sektor_analisis_awal);
+                        alpineInputs[0].dispatchEvent(new Event('input'));
+                        
+                        alpineInputs[1].value = formatRp(result.data.pdrb_sektor_analisis_akhir);
+                        alpineInputs[1].dispatchEvent(new Event('input'));
+                        
+                        alpineInputs[2].value = formatRp(result.data.total_pdrb_analisis_awal);
+                        alpineInputs[2].dispatchEvent(new Event('input'));
+                        
+                        alpineInputs[3].value = formatRp(result.data.total_pdrb_analisis_akhir);
+                        alpineInputs[3].dispatchEvent(new Event('input'));
+                        
+                        alpineInputs[4].value = formatRp(result.data.pdrb_sektor_pembanding_awal);
+                        alpineInputs[4].dispatchEvent(new Event('input'));
+                        
+                        alpineInputs[5].value = formatRp(result.data.pdrb_sektor_pembanding_akhir);
+                        alpineInputs[5].dispatchEvent(new Event('input'));
+                        
+                        alpineInputs[6].value = formatRp(result.data.total_pdrb_pembanding_awal);
+                        alpineInputs[6].dispatchEvent(new Event('input'));
+                        
+                        alpineInputs[7].value = formatRp(result.data.total_pdrb_pembanding_akhir);
+                        alpineInputs[7].dispatchEvent(new Event('input'));
+                    }
+                    
+                    statusEl.textContent = 'Selesai!';
+                    setTimeout(() => {
+                        document.getElementById('syncModal').style.display='none';
+                        statusEl.className = 'text-sm font-medium mt-2 hidden';
+                        processBtn.disabled = false;
+                        processBtn.textContent = 'Mulai Tarik Data';
+                    }, 1000);
+                }, 100);
+            } else {
+                throw new Error(result.message || 'Gagal mencari data.');
+            }
+        } catch (err) {
+            statusEl.textContent = 'Gagal: ' + err.message;
+            statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
+            processBtn.disabled = false;
+            processBtn.textContent = 'Mulai Tarik Data';
+        }
+    }
     function exportToExcel() {
         var table = document.getElementById("klassenTable");
         var clone = table.cloneNode(true);

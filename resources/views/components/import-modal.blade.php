@@ -66,8 +66,21 @@
             ];
             filename = "Template_Analisis_SS.xlsx";
             colCount = 11;
+        } else if (type === 'tipologi') {
+            wsData = [
+                [
+                    "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun", 
+                    "Nilai LQ", "Nilai SS"
+                ],
+                [
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2022", 
+                    "1.25", "0.80"
+                ]
+            ];
+            filename = "Template_Analisis_Tipologi.xlsx";
+            colCount = 6;
         } else {
-            // Tipologi, Klassen, or Master
+            // Klassen, or Master
             wsData = [
                 [
                     "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun Awal", "Tahun Akhir", 
@@ -81,8 +94,7 @@
                     "15000", "16000", "100000", "110000", "50000", "52000", "200000", "210000"
                 ]
             ];
-            filename = type === 'tipologi' ? "Template_Analisis_Tipologi.xlsx" : 
-                       (type === 'klassen' ? "Template_Analisis_Klassen.xlsx" : "Template_Master_Analisis.xlsx");
+            filename = type === 'klassen' ? "Template_Analisis_Klassen.xlsx" : "Template_Master_Analisis.xlsx";
             colCount = 13;
         }
 
@@ -280,8 +292,9 @@
                     const hasTahunAkhirCol = cleanHeaders.includes('tahunakhir');
                     
                     const hasLqFormatCol = cleanHeaders.includes('pdrbsektoranalisis') || cleanHeaders.includes('totalpdrbanalisis');
+                    const hasTipologiFormatCol = cleanHeaders.includes('nilailq') && cleanHeaders.includes('nilaiss');
                     
-                    if (hasTahunCol && !hasTahunAwalCol && !hasTahunAkhirCol && !hasLqFormatCol) {
+                    if (hasTahunCol && !hasTahunAwalCol && !hasTahunAkhirCol && !hasLqFormatCol && !hasTipologiFormatCol) {
                         statusEl.textContent = 'Mendeteksi format data mentah (transactional)...';
                         
                         // Map the column indices
