@@ -326,7 +326,8 @@
         var rows = clone.rows;
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
-                rows[i].deleteCell(-1);
+                rows[i].deleteCell(-1); // Delete Aksi column
+                rows[i].deleteCell(0);  // Delete Checkbox column
             }
         }
         

@@ -301,10 +301,10 @@
                     @method('DELETE')
                     <input type="hidden" name="ids" id="selectedIds">
                     <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Hapus Terpilih
+                        Hapus Terpilih (<span id="bulkDeleteCount">0</span>)
                     </button>
                 </form>
 
@@ -403,6 +403,7 @@
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
                 rows[i].deleteCell(-1); // Remove Aksi
+                rows[i].deleteCell(0);  // Remove Checkbox
             }
         }
         

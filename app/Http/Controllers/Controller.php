@@ -32,7 +32,7 @@ abstract class Controller
     {
         $normalized = [];
         foreach ($item as $key => $value) {
-            $cleanKey = strtolower(preg_replace('/[\s_-]/', '', $key));
+            $cleanKey = strtolower(preg_replace('/[^a-z0-9]/i', '', $key));
             $normalized[$cleanKey] = $value;
         }
         return $normalized;

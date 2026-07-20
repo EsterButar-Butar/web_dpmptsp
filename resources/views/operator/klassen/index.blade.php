@@ -51,6 +51,37 @@
                 provinsi: '{{ old('provinsi', $editData['provinsi'] ?? '') }}',
                 get listKabupaten() {
                     return window.daftarWilayah[this.provinsi] || [];
+                },
+                years: [
+                    { 
+                        tahun: '{{ old('tahun_awal', $editData['tahun_awal'] ?? '') }}', 
+                        pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_awal', $editData['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_analisis: '{{ old('total_pdrb_analisis_awal', $editData['total_pdrb_analisis_awal'] ?? '') }}'.split('.')[0],
+                        pdrb_sektor_pembanding: '{{ old('pdrb_sektor_pembanding_awal', $editData['pdrb_sektor_pembanding_awal'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_awal', $editData['total_pdrb_pembanding_awal'] ?? '') }}'.split('.')[0],
+                        pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: ''
+                    },
+                    { 
+                        tahun: '{{ old('tahun_akhir', $editData['tahun_akhir'] ?? '') }}', 
+                        pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_akhir', $editData['pdrb_sektor_analisis_akhir'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_analisis: '{{ old('total_pdrb_analisis_akhir', $editData['total_pdrb_analisis_akhir'] ?? '') }}'.split('.')[0],
+                        pdrb_sektor_pembanding: '{{ old('pdrb_sektor_pembanding_akhir', $editData['pdrb_sektor_pembanding_akhir'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_akhir', $editData['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0],
+                        pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: ''
+                    }
+                ],
+                format(v) { 
+                    if (v === undefined || v === null || v === '') return '';
+                    let raw = v.toString().replace(/[^0-9]/g, ''); 
+                    return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); 
+                },
+                addYear() {
+                    this.years.push({ tahun: '', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' });
+                },
+                removeYear(index) {
+                    if (this.years.length > 2) {
+                        this.years.splice(index, 1);
+                    }
                 }
             }">
         @csrf
@@ -59,7 +90,7 @@
         @endif
         
         <!-- Top Inputs Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Tingkat Wilayah</label>
                 <div class="relative">
@@ -96,17 +127,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Tahun Awal -->
-            <div class="space-y-2 col-span-1">
-                <label class="op-label">Tahun Awal</label>
-                <input type="number" name="tahun_awal" value="{{ old('tahun_awal', $editData['tahun_awal'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
-            </div>
-            <!-- Tahun Akhir -->
-            <div class="space-y-2 col-span-1">
-                <label class="op-label">Tahun Akhir</label>
-                <input type="number" name="tahun_akhir" value="{{ old('tahun_akhir', $editData['tahun_akhir'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
-            </div>
-        <!-- Provinsi and Kabupaten (Now merged into the top row grid) -->
+
             <!-- Provinsi -->
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Provinsi</label>
@@ -145,69 +166,60 @@
         </div>
 
         <!-- Data Cards Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mt-4">
-            
-            <!-- Data Analisis Card -->
-            <div class="bg-white rounded-xl border-2 border-sky-400 p-6 shadow-sm">
-                <h3 class="text-base font-bold text-slate-800 mb-1" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Data PDRB Sektor Kabupaten/Kota' : 'Data PDRB Sektor Provinsi'">
-                    Data PDRB Sektor Analisis
-                </h3>
-                <p class="text-xs text-slate-500 mb-5">Masukkan data PDRB sektor dan total PDRB wilayah analisis</p>
+        <template x-for="(year, index) in years" :key="index">
+            <div class="mb-4 border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-[#145239] text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap" x-text="'Data Tahun ' + (index + 1)"></span>
+                        <input type="number" name="tahun[]" x-model="year.tahun" min="1900" max="2100" class="op-input !w-32 !py-1 !text-sm" placeholder="Tahun" required>
+                    </div>
+                    <button type="button" @click="removeYear(index)" x-show="years.length > 2" class="text-red-500 hover:text-red-700 p-1.5 bg-red-100 rounded-md transition-colors" title="Hapus Tahun">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_analisis_awal', $editData['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_analisis_awal" :value="val.replace(/\./g, '')">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Data Analisis -->
+                    <div class="bg-white rounded-lg border border-sky-200 p-4 shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 mb-3" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Analisis (Kab/Kota)' : 'PDRB Analisis (Provinsi)'"></h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-xs font-semibold text-slate-600">Sektor (Rp)</label>
+                                <input type="text" x-model="year.pdrb_sektor_analisis_fmt" @input="year.pdrb_sektor_analisis_fmt = format($event.target.value); year.pdrb_sektor_analisis = year.pdrb_sektor_analisis_fmt.replace(/\./g, '')" x-init="year.pdrb_sektor_analisis_fmt = format(year.pdrb_sektor_analisis)" class="op-input !py-1.5 !text-sm" placeholder="1.000.000" required>
+                                <input type="hidden" name="pdrb_sektor_analisis[]" :value="year.pdrb_sektor_analisis">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-semibold text-slate-600">Total (Rp)</label>
+                                <input type="text" x-model="year.total_pdrb_analisis_fmt" @input="year.total_pdrb_analisis_fmt = format($event.target.value); year.total_pdrb_analisis = year.total_pdrb_analisis_fmt.replace(/\./g, '')" x-init="year.total_pdrb_analisis_fmt = format(year.total_pdrb_analisis)" class="op-input !py-1.5 !text-sm" placeholder="1.000.000" required>
+                                <input type="hidden" name="total_pdrb_analisis[]" :value="year.total_pdrb_analisis">
+                            </div>
+                        </div>
                     </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_analisis_akhir', $editData['pdrb_sektor_analisis_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_analisis_akhir" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_analisis_awal', $editData['total_pdrb_analisis_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_analisis_awal" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_analisis_akhir', $editData['total_pdrb_analisis_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_analisis_akhir" :value="val.replace(/\./g, '')">
+                    <!-- Data Pembanding -->
+                    <div class="bg-white rounded-lg border border-sky-200 p-4 shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 mb-3" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Pembanding (Provinsi)' : 'PDB Pembanding (Nasional)'"></h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-xs font-semibold text-slate-600">Sektor (Rp)</label>
+                                <input type="text" x-model="year.pdrb_sektor_pembanding_fmt" @input="year.pdrb_sektor_pembanding_fmt = format($event.target.value); year.pdrb_sektor_pembanding = year.pdrb_sektor_pembanding_fmt.replace(/\./g, '')" x-init="year.pdrb_sektor_pembanding_fmt = format(year.pdrb_sektor_pembanding)" class="op-input !py-1.5 !text-sm" placeholder="1.000.000" required>
+                                <input type="hidden" name="pdrb_sektor_pembanding[]" :value="year.pdrb_sektor_pembanding">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-semibold text-slate-600">Total (Rp)</label>
+                                <input type="text" x-model="year.total_pdrb_pembanding_fmt" @input="year.total_pdrb_pembanding_fmt = format($event.target.value); year.total_pdrb_pembanding = year.total_pdrb_pembanding_fmt.replace(/\./g, '')" x-init="year.total_pdrb_pembanding_fmt = format(year.total_pdrb_pembanding)" class="op-input !py-1.5 !text-sm" placeholder="1.000.000" required>
+                                <input type="hidden" name="total_pdrb_pembanding[]" :value="year.total_pdrb_pembanding">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Data Pembanding Card -->
-            <div class="bg-white rounded-xl border-2 border-sky-400 p-6 shadow-sm">
-                <h3 class="text-base font-bold text-slate-800 mb-1" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Data PDRB Sektor Provinsi (Pembanding)' : 'Data PDB Sektor Nasional (Pembanding)'">
-                    Data PDRB Sektor Pembanding
-                </h3>
-                <p class="text-xs text-slate-500 mb-5">Masukkan data PDRB sektor dan total PDRB pembanding</p>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_pembanding_awal', $editData['pdrb_sektor_pembanding_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_pembanding_awal" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_pembanding_akhir', $editData['pdrb_sektor_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_pembanding_akhir" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_pembanding_awal', $editData['total_pdrb_pembanding_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_pembanding_awal" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_pembanding_akhir', $editData['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
-                    </div>
-                </div>
-            </div>
+        </template>
+        
+        <div class="flex justify-center mb-6">
+            <button type="button" @click="addYear()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-full text-sm font-bold transition-colors border border-slate-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Tambah Tahun
+            </button>
         </div>
 
         <div class="flex items-center gap-3">
@@ -361,10 +373,10 @@
                     @method('DELETE')
                     <input type="hidden" name="ids" id="selectedIds">
                     <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Hapus Terpilih
+                        Hapus Terpilih (<span id="bulkDeleteCount">0</span>)
                     </button>
                 </form>
 
@@ -538,54 +550,45 @@
             if (result.success) {
                 statusEl.textContent = 'Data ditemukan! Mengisi form otomatis...';
                 
-                // Set the form inputs
-                document.querySelector('select[name="tingkat_wilayah"]').value = tingkat;
-                document.querySelector('select[name="tingkat_wilayah"]').dispatchEvent(new Event('change'));
+                // Get the main Alpine data component on the form
+                const formEl = document.querySelector('form');
+                
+                // We dispatch events to update non-alpine selects
+                const tingkatSelect = document.querySelector('select[name="tingkat_wilayah"]');
+                tingkatSelect.value = tingkat;
+                tingkatSelect.dispatchEvent(new Event('change', { bubbles: true }));
                 
                 setTimeout(() => {
-                    document.querySelector('input[name="provinsi"]').value = provinsi;
-                    document.querySelector('input[name="provinsi"]').dispatchEvent(new Event('input'));
+                    const provinsiInput = document.querySelector('input[name="provinsi"]');
+                    provinsiInput.value = provinsi;
+                    provinsiInput.dispatchEvent(new Event('input', { bubbles: true }));
                     
                     if (tingkat === 'Kabupaten/Kota') {
-                        document.querySelector('input[name="kabupaten"]').value = kabupaten;
+                        const kabInput = document.querySelector('input[name="kabupaten"]');
+                        if (kabInput) kabInput.value = kabupaten;
                     }
                     
-                    document.querySelector('input[name="sektor"]').value = sektor;
-                    document.querySelector('input[name="tahun_awal"]').value = tahunAwal;
-                    document.querySelector('input[name="tahun_akhir"]').value = tahunAkhir;
+                    const sektorInput = document.querySelector('input[name="sektor"]');
+                    if (sektorInput) sektorInput.value = sektor;
                     
-                    // Trigger Alpine.js models by dispatching input events
-                    const formatRp = (v) => { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
-                    
-                    // Get all alpine inputs and set their values
-                    const alpineInputs = document.querySelectorAll('.grid-cols-2 .space-y-2 input[type="text"]');
-                    
-                    if (alpineInputs.length >= 8) {
-                        alpineInputs[0].value = formatRp(result.data.pdrb_sektor_analisis_awal);
-                        alpineInputs[0].dispatchEvent(new Event('input'));
+                    // Access Alpine Component Data safely and set years array
+                    if (formEl.__x) {
+                        const component = formEl.__x.$data;
+                        const newYears = result.data.map(y => ({
+                            tahun: y.tahun,
+                            pdrb_sektor_analisis: y.pdrb_sektor_analisis.toString().split('.')[0],
+                            total_pdrb_analisis: y.total_pdrb_analisis.toString().split('.')[0],
+                            pdrb_sektor_pembanding: y.pdrb_sektor_pembanding.toString().split('.')[0],
+                            total_pdrb_pembanding: y.total_pdrb_pembanding.toString().split('.')[0],
+                            pdrb_sektor_analisis_fmt: component.format(y.pdrb_sektor_analisis.toString().split('.')[0]),
+                            total_pdrb_analisis_fmt: component.format(y.total_pdrb_analisis.toString().split('.')[0]),
+                            pdrb_sektor_pembanding_fmt: component.format(y.pdrb_sektor_pembanding.toString().split('.')[0]),
+                            total_pdrb_pembanding_fmt: component.format(y.total_pdrb_pembanding.toString().split('.')[0])
+                        }));
                         
-                        alpineInputs[1].value = formatRp(result.data.pdrb_sektor_analisis_akhir);
-                        alpineInputs[1].dispatchEvent(new Event('input'));
-                        
-                        alpineInputs[2].value = formatRp(result.data.total_pdrb_analisis_awal);
-                        alpineInputs[2].dispatchEvent(new Event('input'));
-                        
-                        alpineInputs[3].value = formatRp(result.data.total_pdrb_analisis_akhir);
-                        alpineInputs[3].dispatchEvent(new Event('input'));
-                        
-                        alpineInputs[4].value = formatRp(result.data.pdrb_sektor_pembanding_awal);
-                        alpineInputs[4].dispatchEvent(new Event('input'));
-                        
-                        alpineInputs[5].value = formatRp(result.data.pdrb_sektor_pembanding_akhir);
-                        alpineInputs[5].dispatchEvent(new Event('input'));
-                        
-                        alpineInputs[6].value = formatRp(result.data.total_pdrb_pembanding_awal);
-                        alpineInputs[6].dispatchEvent(new Event('input'));
-                        
-                        alpineInputs[7].value = formatRp(result.data.total_pdrb_pembanding_akhir);
-                        alpineInputs[7].dispatchEvent(new Event('input'));
+                        component.years = newYears;
                     }
-                    
+
                     statusEl.textContent = 'Selesai!';
                     setTimeout(() => {
                         document.getElementById('syncModal').style.display='none';
@@ -612,6 +615,7 @@
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
                 rows[i].deleteCell(-1); // Remove Aksi
+                rows[i].deleteCell(0);  // Remove Checkbox
             }
         }
         

@@ -320,40 +320,51 @@
                 {{ $ssData->links('pagination::tailwind') }}
             </div>
 
-            <div class="mt-8 border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <!-- Legend / Keterangan -->
-                <div class="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg w-full md:w-auto">
-                    <h4 class="font-bold text-slate-800 mb-2">Keterangan:</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
-                        <div><span class="font-semibold text-slate-800">Rij</span> : Pertumbuhan PDRB sektor i di kab/kota j</div>
-                        <div><span class="font-semibold text-slate-800">Rin</span> : Pertumbuhan PDRB sektor i provinsi j</div>
-                        <div><span class="font-semibold text-slate-800">Rn</span> : Pertumbuhan PDRB total provinsi</div>
-                        <div><span class="font-semibold text-slate-800">Nij</span> : Komponen pertumbuhan nasional</div>
-                        <div><span class="font-semibold text-slate-800">Mij</span> : Komponen pertumbuhan proporsional</div>
-                        <div><span class="font-semibold text-slate-800">Cij</span> : Komponen keunggulan kompetitif</div>
-                        <div><span class="font-semibold text-slate-800">Dij</span> : Perubahan total (Nij + Mij + Cij)</div>
-                    </div>
+            <!-- Legend / Keterangan -->
+            <div class="mt-8 border-t border-slate-200 pt-6 text-sm text-slate-800 w-full mt-2">
+                <h4 class="font-bold mb-3 text-base">Keterangan :</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-medium max-w-4xl">
+                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Rij</span> <span class="mr-2">:</span> <span>Pertumbuhan PDRB sektor i di daerah analisis (kab/kota atau provinsi)</span></div>
+                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Rin</span> <span class="mr-2">:</span> <span>Pertumbuhan PDRB sektor i di daerah pembanding (provinsi atau nasional)</span></div>
+                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Rn</span> <span class="mr-2">:</span> <span>Pertumbuhan PDRB total daerah pembanding</span></div>
+                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Nij</span> <span class="mr-2">:</span> <span>Komponen pertumbuhan nasional</span></div>
+                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Mij</span> <span class="mr-2">:</span> <span>Komponen pertumbuhan proporsional</span></div>
+                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Cij</span> <span class="mr-2">:</span> <span>Komponen keunggulan kompetitif</span></div>
+                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Dij</span> <span class="mr-2">:</span> <span>Perubahan total (Nij + Mij + Cij)</span></div>
                 </div>
+            </div>
 
-                <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                    <button onclick="exportToExcel()" class="w-full md:w-auto op-btn-primary flex items-center justify-center gap-2">
+            <!-- Export Buttons -->
+            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3 w-full">
+                <form id="bulkDeleteForm" action="{{ route('operator.ss.bulkDestroy') }}" method="POST" onsubmit="return confirmBulkDelete(event, this);" class="w-full sm:w-auto">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="ids" id="selectedIds">
+                    <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Unduh Hasil Analisis (Excel)
+                        Hapus Terpilih (<span id="bulkDeleteCount">0</span>)
                     </button>
+                </form>
 
-                    <form action="{{ route('operator.ss.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full md:w-auto">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="w-full md:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Hapus Semua Data
-                        </button>
-                    </form>
-                </div>
+                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Unduh Hasil Analisis (Excel)
+                </button>
+
+                <form action="{{ route('operator.ss.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Hapus Semua Data
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -369,7 +380,8 @@
         var rows = clone.rows;
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
-                rows[i].deleteCell(-1);
+                rows[i].deleteCell(-1); // Delete Aksi column
+                rows[i].deleteCell(0);  // Delete Checkbox column
             }
         }
         
