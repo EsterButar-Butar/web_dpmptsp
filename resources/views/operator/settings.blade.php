@@ -16,21 +16,9 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="{ tab: 'keamanan' }">
-        <!-- Sidebar Settings -->
-        <div class="col-span-1 space-y-2">
-            <button @click="tab = 'keamanan'" :class="tab === 'keamanan' ? 'bg-white border-emerald-600 text-emerald-700 shadow-sm' : 'hover:bg-white border-transparent hover:border-slate-300 text-slate-600'" class="w-full text-left block px-4 py-3 border-l-4 rounded-r-lg transition-colors font-medium">
-                Keamanan & Password
-            </button>
-            <button @click="tab = 'aktivitas'" :class="tab === 'aktivitas' ? 'bg-white border-emerald-600 text-emerald-700 shadow-sm' : 'hover:bg-white border-transparent hover:border-slate-300 text-slate-600'" class="w-full text-left block px-4 py-3 border-l-4 rounded-r-lg transition-colors font-medium">
-                Log Aktivitas
-            </button>
-        </div>
-
-        <!-- Main Settings Form -->
-        <div class="col-span-1 lg:col-span-2 space-y-6">
-            <!-- TAB KEAMANAN -->
-            <div x-show="tab === 'keamanan'" class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Settings Form (Left) -->
+        <div class="lg:col-span-2 space-y-6">
             <!-- Ubah Password -->
             <form action="{{ route('operator.settings.password') }}" method="POST" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 @csrf
@@ -101,11 +89,11 @@
                     </form>
                 </div>
             </div>
-            </div>
-            </div>
+        </div>
 
-            <!-- TAB AKTIVITAS -->
-            <div x-show="tab === 'aktivitas'" style="display: none;" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <!-- Log Aktivitas Sidebar (Right) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden sticky top-6">
                 <div class="border-b border-slate-100 px-6 py-4 flex justify-between items-center">
                     <h2 class="font-semibold text-slate-800">Riwayat Login & Logout</h2>
                 </div>
