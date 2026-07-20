@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DataKbliController;
 use App\Http\Controllers\Admin\DataHsCodeController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\MoneyCurrencyController;
 
 Route::prefix('admin')
     ->name('admin.')
@@ -118,4 +119,14 @@ Route::prefix('admin')
             '/settings/two-factor',
             [AdminSettingsController::class, 'toggleTwoFactor']
         )->name('settings.2fa');
-    });
+
+        Route::get(
+            '/money-currency',
+            [MoneyCurrencyController::class, 'index']
+        )->name('money-currency.index');
+
+        Route::post(
+            '/money-currency/convert',
+            [MoneyCurrencyController::class, 'convert']
+        )->name('money-currency.convert');
+                    });

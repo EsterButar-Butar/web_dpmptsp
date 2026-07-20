@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'currencyfreaks' => [
+    'api_key' => env('CURRENCYFREAKS_API_KEY'),
+
+    'base_url' => env(
+        'CURRENCYFREAKS_URL',
+        'https://api.currencyfreaks.com/v2.0'
+    ),
+],
+
 ];
