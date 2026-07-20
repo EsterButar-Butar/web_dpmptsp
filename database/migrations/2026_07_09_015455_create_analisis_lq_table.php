@@ -6,18 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Membuat tabel analisis_lq.
+     */
     public function up(): void
     {
         Schema::create('analisis_lq', function (Blueprint $table) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | PRIMARY KEY
+            |--------------------------------------------------------------------------
+            */
+
             $table->id();
 
-            // User/operator yang menjalankan analisis
+            /*
+            |--------------------------------------------------------------------------
+            | RELASI
+            |--------------------------------------------------------------------------
+            */
+
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            // Referensi master
             $table->foreignId('provinsi_id')
                 ->nullable()
                 ->constrained('provinsi')
@@ -35,39 +49,55 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->enum('tingkat_wilayah', [
-                'Kabupaten/Kota',
-                'Provinsi'
-            ]);
+            /*
+            |--------------------------------------------------------------------------
+            | DATA ANALISIS
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('tingkat_wilayah', 30);
 
             $table->string('daerah_analisis', 100);
+
             $table->string('daerah_pembanding', 100);
 
             $table->integer('tahun');
 
+            /*
+            |--------------------------------------------------------------------------
+            | NILAI PDRB
+            |--------------------------------------------------------------------------
+            */
+
             $table->decimal(
                 'pdrb_sektor_analisis',
-                20,
+                25,
                 2
             );
 
             $table->decimal(
                 'total_pdrb_analisis',
-                20,
+                25,
                 2
             );
 
             $table->decimal(
                 'pdrb_sektor_pembanding',
-                20,
+                25,
                 2
             );
 
             $table->decimal(
                 'total_pdrb_pembanding',
-                20,
+                25,
                 2
             );
+
+            /*
+            |--------------------------------------------------------------------------
+            | HASIL LQ
+            |--------------------------------------------------------------------------
+            */
 
             $table->decimal(
                 'nilai_lq',
@@ -75,21 +105,52 @@ return new class extends Migration
                 6
             );
 
-            $table->string('kategori', 50);
+            $table->string(
+                'kategori',
+                50
+            );
 
             $table->text('keterangan')
                 ->nullable();
 
-            $table->timestamps();
+            /*
+            |--------------------------------------------------------------------------
+            | UNIQUE
+            |--------------------------------------------------------------------------
+            */
 
-            $table->index([
-                'kabupaten_id',
+            $table->unique([
+                'user_id',
                 'sektor_id',
                 'tahun'
             ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDEX
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index('user_id');
+            $table->index('provinsi_id');
+            $table->index('kabupaten_id');
+            $table->index('sektor_id');
+            $table->index('tahun');
+            $table->index('tingkat_wilayah');
+
+            /*
+            |--------------------------------------------------------------------------
+            | TIMESTAMP
+            |--------------------------------------------------------------------------
+            */
+
+            $table->timestamps();
         });
     }
 
+    /**
+     * Menghapus tabel analisis_lq.
+     */
     public function down(): void
     {
         Schema::dropIfExists('analisis_lq');
