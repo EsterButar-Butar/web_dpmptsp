@@ -51,7 +51,7 @@
                 <button @click="open = !open" class="w-full px-6 py-4 flex items-center justify-between hover:bg-[#1E5D41]/50 transition-colors focus:outline-none text-left">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-[#FFD54F] overflow-hidden shadow-inner flex-shrink-0 border-2 border-[#E7F2EB]">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()?->name ?? 'Siti') }}&background=FFD54F&color=145239" alt="Profile" class="w-full h-full object-cover">
+                            <img src="{{ Auth::user()?->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()?->name ?? 'Siti') . '&background=FFD54F&color=145239' }}" alt="Profile" class="w-full h-full object-cover">
                         </div>
                         <div class="overflow-hidden">
                             <h3 class="font-semibold text-sm truncate text-white">{{ Auth::user()?->name ?? 'Siti' }}</h3>
