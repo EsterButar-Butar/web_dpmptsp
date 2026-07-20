@@ -36,7 +36,7 @@
             {{-- <h5>Selamat Datang</h5> --}}
 
             <h1>
-                Dashboard Executive for Sumatera Utara Investment
+                Dashboard Executive for Sumatera Investment
             </h1>
 
             <p>
