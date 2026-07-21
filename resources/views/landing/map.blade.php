@@ -165,7 +165,7 @@
 
                         </div>
 
-                        <a
+                        {{-- <a
                             href="#"
                             id="detailButton"
                             class="detail-btn"
@@ -173,7 +173,7 @@
 
                             Lihat Detail Analisis
 
-                        </a>
+                        </a> --}}
 
                     </div>
 
@@ -187,7 +187,7 @@
     {{-- FOOTER --}}
      @include('partials.landing.footer')
       {{-- <button
-        type="button"
+    type="button"
         class="back-to-top"
         id="backToTop"
         aria-label="Kembali ke atas"

@@ -117,11 +117,11 @@ class DataKbliController extends Controller
             );
         }
 
-        if ($columns['id']) {
-            $query->orderBy($columns['id'], 'asc');
-        } elseif ($columns['kode']) {
-            $query->orderBy($columns['kode'], 'asc');
-        }
+if ($columns['id']) {
+    $query->orderBy($columns['id'], 'asc');
+} elseif ($columns['kode']) {
+    $query->orderBy($columns['kode'], 'asc');
+}
 
         $dataKbli = $query
             ->paginate(10)

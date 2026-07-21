@@ -164,13 +164,7 @@
 
                 <p>
 
-                    Menjadi penyelenggara pelayanan
-                    investasi dan perizinan
-                    yang profesional,
-                    transparan,
-                    cepat,
-                    dan akuntabel.
-
+                       "Kolaborasi SUMUT Berkah menuju Sumatera Utara yang Unggul, Maju dan Berkelanjutan"
                 </p>
 
             </div>
@@ -187,14 +181,15 @@
 
                 <ul>
 
-                    <li>Meningkatkan kualitas pelayanan publik.</li>
+                    <li>Meningkatkan Kualitas Sumber Daya Manusia (SDM).</li>
 
-                    <li>Mendorong investasi daerah.</li>
+                    <li>Menjaga Stabilitas Makro Ekonomi Daerah.</li>
 
-                    <li>Transformasi digital pelayanan.</li>
+                    <li>Mengembangkan dan Menata Infrastruktur yang Berkualitas, Estetik dan Ramah Lingkungan.</li>
 
                     <li>Menyediakan data ekonomi yang akurat.</li>
-
+                    
+                    <li>Memperkuat ketahanan sosial, dan budaya untuk membangun masyarakat Sumut yang tangguh.</li>
                 </ul>
 
             </div>

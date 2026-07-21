@@ -26,6 +26,19 @@ abstract class Controller
     }
 
     /**
+     * Normalize keys by removing spaces and underscores, and lowercasing them.
+     */
+    protected function normalizeKeys(array $item)
+    {
+        $normalized = [];
+        foreach ($item as $key => $value) {
+            $cleanKey = strtolower(preg_replace('/[^a-z0-9]/i', '', $key));
+            $normalized[$cleanKey] = $value;
+        }
+        return $normalized;
+    }
+
+    /**
      * Resolve Provinsi and Kabupaten names from import item.
      * Supports both names and regional codes using data_wilayah table.
      * 
@@ -34,8 +47,9 @@ abstract class Controller
      */
     protected function resolveRegionNames(array $item)
     {
-        $provinsiInput = $item['Provinsi'] ?? $item['Kode Provinsi'] ?? $item['Kode_Provinsi'] ?? $item['Kode Wilayah'] ?? $item['Kode_Wilayah'] ?? '';
-        $kabupatenInput = $item['Kabupaten/Kota'] ?? $item['Kode Kabupaten'] ?? $item['Kode_Kabupaten'] ?? $item['Kabupaten'] ?? '-';
+        $norm = $this->normalizeKeys($item);
+        $provinsiInput = $norm['provinsi'] ?? $norm['kodeprovinsi'] ?? $norm['kodewilayah'] ?? '';
+        $kabupatenInput = $norm['kabupatenkota'] ?? $norm['kodekabupaten'] ?? $norm['kabupaten'] ?? '-';
 
         // Bersihkan input jika berupa string
         if (is_string($provinsiInput)) {
@@ -96,7 +110,8 @@ abstract class Controller
      */
     protected function resolveSektorName(array $item)
     {
-        $sektorInput = $item['Sektor'] ?? $item['Sektor ID'] ?? $item['sektor_id'] ?? $item['Kode Sektor'] ?? '';
+        $norm = $this->normalizeKeys($item);
+        $sektorInput = $norm['sektor'] ?? $norm['sektorid'] ?? $norm['kodesektor'] ?? $norm['namasektor'] ?? '';
         
         if (is_string($sektorInput)) {
             $sektorInput = trim($sektorInput);

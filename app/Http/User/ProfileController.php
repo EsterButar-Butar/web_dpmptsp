@@ -48,7 +48,7 @@ class UserProfileController extends Controller
         $request->user()->update($validated);
 
         return redirect()
-            ->route('user.profile.edit')
+            ->route('user.profile')
             ->with('success', 'Profil berhasil diperbarui.');
     }
 }

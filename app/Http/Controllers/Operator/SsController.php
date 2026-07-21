@@ -88,25 +88,36 @@ class SsController extends Controller
     private function calculateSSData($item)
     {
         $pdrbAwal = $this->parseNumber($item['pdrb_sektor_analisis_awal']);
-        $pdrbAkhir = $this->parseNumber($item['pdrb_sektor_analisis_akhir']);
-        $pdbAwal = $this->parseNumber($item['pdrb_sektor_pembanding_awal']);
-        $pdbAkhir = $this->parseNumber($item['pdrb_sektor_pembanding_akhir']);
-        $nasionalAwal = $this->parseNumber($item['total_pdrb_pembanding_awal']);
-        $nasionalAkhir = $this->parseNumber($item['total_pdrb_pembanding_akhir']);
+        $xijAwal = $this->parseNumber($item['pdrb_sektor_analisis_awal']);
+        $xijAkhir = $this->parseNumber($item['pdrb_sektor_analisis_akhir']);
+        $xiAwal = $this->parseNumber($item['pdrb_sektor_pembanding_awal']);
+        $xiAkhir = $this->parseNumber($item['pdrb_sektor_pembanding_akhir']);
+        $pdrbTotalPembandingAwal = $this->parseNumber($item['total_pdrb_pembanding_awal']);
+        $pdrbTotalPembandingAkhir = $this->parseNumber($item['total_pdrb_pembanding_akhir']);
 
-        if ($pdrbAwal == 0 || $pdbAwal == 0 || $nasionalAwal == 0) {
-            return null; // Prevent Division by Zero
+        if ($pdrbTotalPembandingAwal <= 0) {
+            return null; 
         }
 
-        // Rates
-        $rij = ($pdrbAkhir - $pdrbAwal) / $pdrbAwal;
-        $rin = ($pdbAkhir - $pdbAwal) / $pdbAwal;
-        $rn = ($nasionalAkhir - $nasionalAwal) / $nasionalAwal;
+        // KPN (Kinerja Perekonomian Nasional/Provinsi)
+        $rin = ($pdrbTotalPembandingAkhir - $pdrbTotalPembandingAwal) / $pdrbTotalPembandingAwal;
+        $nij = $xijAwal * $rin;
 
-        // Components
-        $nij = $pdrbAwal * $rn;
-        $mij = $pdrbAwal * ($rin - $rn);
-        $cij = $pdrbAwal * ($rij - $rn); // Using rn as per guidebook
+        // KPP (Kinerja Pertumbuhan Proporsional)
+        if ($xiAwal > 0) {
+            $rin_i = ($xiAkhir - $xiAwal) / $xiAwal;
+        } else {
+            $rin_i = $xiAkhir > 0 ? 1 : 0;
+        }
+        $mij = $xijAwal * ($rin_i - $rin);
+
+        // KPPW (Kinerja Pertumbuhan Pangsa Wilayah)
+        if ($xijAwal > 0) {
+            $ri_i = ($xijAkhir - $xijAwal) / $xijAwal;
+        } else {
+            $ri_i = $xijAkhir > 0 ? 1 : 0;
+        }
+        $cij = $xijAwal * ($ri_i - $rin_i);
         $dij = $nij + $mij + $cij;
 
         // Status
@@ -125,15 +136,15 @@ class SsController extends Controller
             'sektor' => $item['sektor'],
             'tahun_awal' => $item['tahun_awal'],
             'tahun_akhir' => $item['tahun_akhir'],
-            'pdrb_sektor_analisis_awal' => $pdrbAwal,
-            'pdrb_sektor_analisis_akhir' => $pdrbAkhir,
-            'pdrb_sektor_pembanding_awal' => $pdbAwal,
-            'pdrb_sektor_pembanding_akhir' => $pdbAkhir,
-            'total_pdrb_pembanding_awal' => $nasionalAwal,
-            'total_pdrb_pembanding_akhir' => $nasionalAkhir,
-            'rij' => round($rij, 4),
-            'rin' => round($rin, 4),
-            'rn' => round($rn, 4),
+            'pdrb_sektor_analisis_awal' => $xijAwal,
+            'pdrb_sektor_analisis_akhir' => $xijAkhir,
+            'pdrb_sektor_pembanding_awal' => $xiAwal,
+            'pdrb_sektor_pembanding_akhir' => $xiAkhir,
+            'total_pdrb_pembanding_awal' => $pdrbTotalPembandingAwal,
+            'total_pdrb_pembanding_akhir' => $pdrbTotalPembandingAkhir,
+            'rij' => round($ri_i, 4),
+            'rin' => round($rin_i, 4),
+            'rn' => round($rin, 4),
             'nij' => round($nij, 2),
             'mij' => round($mij, 2),
             'cij' => round($cij, 2),
@@ -286,22 +297,24 @@ class SsController extends Controller
         $sektorsCache = Sektor::all()->pluck('sektor_id', 'nama_sektor')->mapWithKeys(fn($id, $name) => [strtolower(trim($name)) => $id])->toArray();
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($payload, &$successCount, &$sektorsCache) {
-            foreach ($payload as $item) {
-                $hasProvinsi = isset($item['Provinsi']) || isset($item['Kode Provinsi']) || isset($item['Kode_Provinsi']) || isset($item['Kode Wilayah']) || isset($item['Kode_Wilayah']);
-                if (!$hasProvinsi || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
-                    ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
-                    ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
-                    ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
+            foreach ($payload as $rawItem) {
+                $item = $this->normalizeKeys($rawItem);
+
+                $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
+                if (!$hasProvinsi || ! isset($item['sektor']) || ! isset($item['tahunawal']) || ! isset($item['tahunakhir']) ||
+                    ! isset($item['pdrbsektoranalisisawal']) || ! isset($item['pdrbsektoranalisisakhir']) ||
+                    ! isset($item['pdrbsektorpembandingawal']) || ! isset($item['pdrbsektorpembandingakhir']) ||
+                    ! isset($item['totalpdrbpembandingawal']) || ! isset($item['totalpdrbpembandingakhir'])) {
                     continue;
                 }
 
-                $resolved = $this->resolveRegionNames($item);
+                $resolved = $this->resolveRegionNames($rawItem);
                 $provinsi = $resolved['provinsi'];
                 $kabupaten = $resolved['kabupaten'];
 
                 $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
                 
-                $sektorName = $this->resolveSektorName($item);
+                $sektorName = $this->resolveSektorName($rawItem);
                 $sektorKey = strtolower(trim($sektorName));
                 
                 if (isset($sektorsCache[$sektorKey])) {
@@ -317,14 +330,14 @@ class SsController extends Controller
                     'provinsi' => $provinsi,
                     'kabupaten' => $kabupaten,
                     'sektor' => $sektorName,
-                    'tahun_awal' => $item['Tahun Awal'],
-                    'tahun_akhir' => $item['Tahun Akhir'],
-                    'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
-                    'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
-                    'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
-                    'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
-                    'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
-                    'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
+                    'tahun_awal' => $item['tahunawal'],
+                    'tahun_akhir' => $item['tahunakhir'],
+                    'pdrb_sektor_analisis_awal' => $item['pdrbsektoranalisisawal'] ?? 0,
+                    'pdrb_sektor_analisis_akhir' => $item['pdrbsektoranalisisakhir'] ?? 0,
+                    'pdrb_sektor_pembanding_awal' => $item['pdrbsektorpembandingawal'] ?? 0,
+                    'pdrb_sektor_pembanding_akhir' => $item['pdrbsektorpembandingakhir'] ?? 0,
+                    'total_pdrb_pembanding_awal' => $item['totalpdrbpembandingawal'] ?? 0,
+                    'total_pdrb_pembanding_akhir' => $item['totalpdrbpembandingakhir'] ?? 0,
                 ];
 
                 $newData = $this->calculateSSData($mappedItem);

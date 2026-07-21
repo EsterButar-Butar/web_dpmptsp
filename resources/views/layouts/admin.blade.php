@@ -103,6 +103,24 @@
             box-shadow: 10px 0 30px rgba(5, 66, 40, 0.12);
         }
 
+        /* Custom Scrollbar for Sidebar */
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .sidebar-logo {
             padding: 24px 28px 18px;
         }

@@ -1257,7 +1257,6 @@ NAVBAR BRAND
 
     white-space: nowrap;
 }
-}
 
 
 /* =========================================================
@@ -2306,4 +2305,5 @@ NAVBAR BRAND
 input::-ms-reveal,
 input::-ms-clear {
     display: none !important;
+}
 }

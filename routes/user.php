@@ -1,60 +1,78 @@
 <?php
 
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
-
-
-/*
-|--------------------------------------------------------------------------
-| USER ROUTES
-|--------------------------------------------------------------------------
-|
-| Route hanya dapat diakses oleh:
-|
-| 1. User sudah login
-| 2. Email sudah diverifikasi
-| 3. Role adalah user
-|
-*/
 
 Route::middleware([
     'auth',
     'verified',
     'role:user',
 ])
-    ->prefix('user')
-    ->name('user.')
-    ->group(function () {
+->prefix('user')
+->name('user.')
+->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | USER DASHBOARD
-        |--------------------------------------------------------------------------
-        */
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard User
+    |--------------------------------------------------------------------------
+    */
 
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('dashboard');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | USER PROFILE
-        |--------------------------------------------------------------------------
-        |
-        | GET   /user/profile
-        | PATCH /user/profile
-        |
-        */
-
-        Route::get(
-            '/profile',
-            [UserProfileController::class, 'edit']
-        )->name('profile.edit');
+    Route::get('/dashboard', function () {
+        return view('user.dashboard');
+    })->name('dashboard');
 
 
-        Route::patch(
-            '/profile',
-            [UserProfileController::class, 'update']
-        )->name('profile.update');
-    });
+    /*
+    |--------------------------------------------------------------------------
+    | Profile User
+    |--------------------------------------------------------------------------
+    */
+
+    // Halaman profil
+    Route::get(
+        '/profile',
+        [UserProfileController::class, 'edit']
+    )->name('profile');
+
+    // Halaman edit profil
+    Route::get(
+        '/profile/edit',
+        [UserProfileController::class, 'editProfile']
+    )->name('profile.edit');
+
+    // Update profil
+    Route::patch(
+        '/profile',
+        [UserProfileController::class, 'update']
+    )->name('profile.update');
+
+    // Hapus akun
+    Route::delete(
+        '/profile',
+        [UserProfileController::class, 'destroy']
+    )->name('profile.destroy');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Change Password
+    |--------------------------------------------------------------------------
+    */
+
+    // Halaman ubah password
+    Route::get(
+        '/password',
+        function () {
+            return view('user.edit');
+        }
+    )->name('password.edit');
+
+    // Proses update password
+    Route::put(
+        '/password',
+        [PasswordController::class, 'update']
+    )->name('password.update');
+
+});

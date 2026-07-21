@@ -66,8 +66,39 @@
             ];
             filename = "Template_Analisis_SS.xlsx";
             colCount = 11;
+        } else if (type === 'tipologi') {
+            wsData = [
+                [
+                    "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun", 
+                    "Nilai LQ", "Nilai SS"
+                ],
+                [
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2022", 
+                    "1.25", "0.80"
+                ]
+            ];
+            filename = "Template_Analisis_Tipologi.xlsx";
+            colCount = 6;
+        } else if (type === 'klassen') {
+            wsData = [
+                [
+                    "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun", 
+                    "PDRB Sektor", "Total PDRB", 
+                    "PDRB Sektor Pembanding", "Total PDRB Pembanding"
+                ],
+                [
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2021", 
+                    "15000", "100000", "50000", "200000"
+                ],
+                [
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2022", 
+                    "16000", "110000", "52000", "210000"
+                ]
+            ];
+            filename = "Template_Analisis_Klassen.xlsx";
+            colCount = 8;
         } else {
-            // Tipologi, Klassen, or Master
+            // Master
             wsData = [
                 [
                     "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun Awal", "Tahun Akhir", 
@@ -81,8 +112,7 @@
                     "15000", "16000", "100000", "110000", "50000", "52000", "200000", "210000"
                 ]
             ];
-            filename = type === 'tipologi' ? "Template_Analisis_Tipologi.xlsx" : 
-                       (type === 'klassen' ? "Template_Analisis_Klassen.xlsx" : "Template_Master_Analisis.xlsx");
+            filename = "Template_Master_Analisis.xlsx";
             colCount = 13;
         }
 
@@ -96,6 +126,7 @@
     }
 
     async function processImport() {
+        const type = '{{ $type }}';
         const fileInput = document.getElementById('excelFileInput');
         const statusEl = document.getElementById('importStatus');
         const processBtn = document.getElementById('processBtn');
@@ -122,8 +153,8 @@
                 
                 // Temukan nama sheet secara case-insensitive & mengabaikan spasi/pemisah
                 const findSheetName = (target) => {
-                    const cleanTarget = target.toLowerCase().replace(/[\s_-]/g, '');
-                    return workbook.SheetNames.find(s => s.toLowerCase().replace(/[\s_-]/g, '') === cleanTarget);
+                    const cleanTarget = target.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    return workbook.SheetNames.find(s => s.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanTarget);
                 };
                 
                 const sKab = findSheetName('kabupaten');
@@ -201,17 +232,35 @@
                     
                     // Gabungkan data
                     const combinedRows = {};
+                    const klassenRows = [];
                     
                     rawPdrbKab.forEach(d => {
                         const kid = String(d.kab_id || '').trim();
                         const sid = String(d.sektor_id || '').trim();
                         const th = parseInt(d.tahun);
+                        const provId = kid.split('.')[0];
                         
-                        if (th !== tahunAwal && th !== tahunAkhir) return; // Hanya ambil awal & akhir
+                        let valStr = String(d.nilai || '0').replace(/\./g, '').replace(/,/g, '.');
+                        const nilaiKab = parseFloat(valStr || 0);
+                        
+                        // Populate Klassen specific array (all years)
+                        if (type === 'klassen' && tahunList.includes(th)) {
+                            klassenRows.push({
+                                'Provinsi': provMap[provId] || 'SUMATERA UTARA',
+                                'Kabupaten/Kota': kabMap[kid] || '-',
+                                'Sektor': sektorMap[sid] || '-',
+                                'Tahun': th,
+                                'PDRB Sektor': nilaiKab,
+                                'Total PDRB': totalKab[kid]?.[th] || 0,
+                                'PDRB Sektor Pembanding': 0, // filled later
+                                'Total PDRB Pembanding': totalProv[provId]?.[th] || 0
+                            });
+                        }
+                        
+                        if (th !== tahunAwal && th !== tahunAkhir) return; // Hanya ambil awal & akhir untuk yang lain
                         
                         const key = `${kid}_${sid}`;
                         if (!combinedRows[key]) {
-                            const provId = kid.split('.')[0];
                             combinedRows[key] = {
                                 'Provinsi': provMap[provId] || 'SUMATERA UTARA',
                                 'Kabupaten/Kota': kabMap[kid] || '-',
@@ -229,11 +278,10 @@
                             };
                         }
                         
-                        let valStr = String(d.nilai || '0').replace(/\./g, '').replace(/,/g, '.');
                         if (th === tahunAwal) {
-                            combinedRows[key]['PDRB Sektor Analisis Awal'] = parseFloat(valStr || 0);
+                            combinedRows[key]['PDRB Sektor Analisis Awal'] = nilaiKab;
                         } else if (th === tahunAkhir) {
-                            combinedRows[key]['PDRB Sektor Analisis Akhir'] = parseFloat(valStr || 0);
+                            combinedRows[key]['PDRB Sektor Analisis Akhir'] = nilaiKab;
                         }
                     });
                     
@@ -242,10 +290,22 @@
                         const pid = String(d.provinsi_id || '').trim();
                         const sid = String(d.sektor_id || '').trim();
                         const th = parseInt(d.tahun);
+                        let valStr = String(d.nilai || '0').replace(/\./g, '').replace(/,/g, '.');
+                        const nilaiProv = parseFloat(valStr || 0);
+                        
+                        if (type === 'klassen' && tahunList.includes(th)) {
+                            // Find matching klassenRow
+                            klassenRows.forEach(row => {
+                                const provId = Object.keys(provMap).find(key => provMap[key] === row['Provinsi']) || pid;
+                                const rowSid = Object.keys(sektorMap).find(key => sektorMap[key] === row['Sektor']) || sid;
+                                
+                                if (row.Tahun === th && rowSid === sid && provId === pid) {
+                                    row['PDRB Sektor Pembanding'] = nilaiProv;
+                                }
+                            });
+                        }
                         
                         if (th !== tahunAwal && th !== tahunAkhir) return;
-                        
-                        let valStr = String(d.nilai || '0').replace(/\./g, '').replace(/,/g, '.');
                         
                         // Cari baris combined yang cocok
                         Object.keys(combinedRows).forEach(key => {
@@ -262,7 +322,7 @@
                         });
                     });
                     
-                    jsonData = Object.values(combinedRows);
+                    jsonData = type === 'klassen' ? klassenRows : Object.values(combinedRows);
                 } else {
                     const firstSheet = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheet];
@@ -273,15 +333,16 @@
                     }
                     
                     const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
-                    const cleanHeaders = headers.map(h => h.replace(/[\s_-]/g, ''));
+                    const cleanHeaders = headers.map(h => h.replace(/[^a-z0-9]/g, ''));
                     
                     const hasTahunCol = cleanHeaders.includes('tahun');
                     const hasTahunAwalCol = cleanHeaders.includes('tahunawal');
                     const hasTahunAkhirCol = cleanHeaders.includes('tahunakhir');
                     
                     const hasLqFormatCol = cleanHeaders.includes('pdrbsektoranalisis') || cleanHeaders.includes('totalpdrbanalisis');
+                    const hasTipologiFormatCol = cleanHeaders.includes('nilailq') && cleanHeaders.includes('nilaiss');
                     
-                    if (hasTahunCol && !hasTahunAwalCol && !hasTahunAkhirCol && !hasLqFormatCol) {
+                    if (hasTahunCol && !hasTahunAwalCol && !hasTahunAkhirCol && !hasLqFormatCol && !hasTipologiFormatCol) {
                         statusEl.textContent = 'Mendeteksi format data mentah (transactional)...';
                         
                         // Map the column indices
@@ -293,7 +354,7 @@
                         let nilaiKabIdx = -1;
                         
                         headers.forEach((h, idx) => {
-                            const cleanHeader = h.replace(/[\s_-]/g, '');
+                            const cleanHeader = h.replace(/[^a-z0-9]/g, '');
                             
                             // Find Provinsi Column (Prefer Name over ID)
                             if (provIdx === -1 && (cleanHeader === 'namaprovinsi' || cleanHeader === 'provinsi')) {
@@ -319,7 +380,7 @@
                         // Fallbacks for IDs if names not found
                         if (provIdx === -1) {
                             headers.forEach((h, idx) => {
-                                const cleanHeader = h.replace(/[\s_-]/g, '');
+                                const cleanHeader = h.replace(/[^a-z0-9]/g, '');
                                 if (provIdx === -1 && (cleanHeader.includes('provinsiid') || cleanHeader.includes('kodeprovinsi') || cleanHeader.includes('kodewilayah'))) {
                                     provIdx = idx;
                                 }
@@ -327,7 +388,7 @@
                         }
                         if (kabIdx === -1) {
                             headers.forEach((h, idx) => {
-                                const cleanHeader = h.replace(/[\s_-]/g, '');
+                                const cleanHeader = h.replace(/[^a-z0-9]/g, '');
                                 if (kabIdx === -1 && (cleanHeader.includes('kabid') || cleanHeader.includes('kodekabupaten'))) {
                                     kabIdx = idx;
                                 }
@@ -335,7 +396,7 @@
                         }
                         if (sektorIdx === -1) {
                             headers.forEach((h, idx) => {
-                                const cleanHeader = h.replace(/[\s_-]/g, '');
+                                const cleanHeader = h.replace(/[^a-z0-9]/g, '');
                                 if (sektorIdx === -1 && (cleanHeader.includes('idsektor') || cleanHeader.includes('sektorid') || cleanHeader.includes('kodesektor'))) {
                                     sektorIdx = idx;
                                 }
@@ -344,7 +405,7 @@
                         
                         // Explicit search for Nilai Provinsi and Nilai Kabupaten
                         headers.forEach((h, idx) => {
-                            const cleanHeader = h.replace(/[\s_-]/g, '');
+                            const cleanHeader = h.replace(/[^a-z0-9]/g, '');
                             if (nilaiProvIdx === -1 && (cleanHeader.includes('nilaiprov') || cleanHeader.includes('nilaiprdbprov') || cleanHeader.includes('nilaipdrbprov') || cleanHeader.includes('pdrbprov') || cleanHeader === 'nilaiprovinsi')) {
                                 nilaiProvIdx = idx;
                             }
@@ -516,13 +577,48 @@
                         
                         const years = [...new Set(dataRows.map(r => r.tahun))].filter(y => !isNaN(y)).sort((a, b) => a - b);
                         if (years.length < 2) {
-                            throw new Error("Data PDRB harus memiliki minimal 2 tahun data (tahun awal dan tahun akhir) untuk analisis.");
+                            throw new Error("Data PDRB harus memiliki minimal 2 tahun data untuk analisis.");
                         }
                         
-                        const tahunAwal = years[0];
-                        const tahunAkhir = years[years.length - 1];
-                        
-                        statusEl.textContent = `Menghitung total & mengonversi data (${tahunAwal} ke ${tahunAkhir})...`;
+                        if (type === 'klassen') {
+                            // Output all data rows for Klassen
+                            statusEl.textContent = `Mengonversi ${dataRows.length} baris data tahunan untuk Klassen...`;
+                            
+                            // Calculate Total PDRB per region per year
+                            const totalKab = {};
+                            const totalProv = {};
+                            
+                            dataRows.forEach(r => {
+                                const kabKey = `${r.kabupaten}_${r.tahun}`;
+                                const provKey = `${r.provinsi}_${r.tahun}`;
+                                
+                                if (!totalKab[kabKey]) totalKab[kabKey] = 0;
+                                totalKab[kabKey] += r.nilaiKab;
+                                
+                                if (!totalProv[provKey]) totalProv[provKey] = 0;
+                                totalProv[provKey] += r.nilaiProv;
+                            });
+                            
+                            const klassenArr = [];
+                            dataRows.forEach(r => {
+                                klassenArr.push({
+                                    'Provinsi': r.provinsi || 'Sumatera Utara',
+                                    'Kabupaten/Kota': r.kabupaten || '-',
+                                    'Sektor': r.sektor,
+                                    'Tahun': r.tahun,
+                                    'PDRB Sektor': r.nilaiKab,
+                                    'Total PDRB': totalKab[`${r.kabupaten}_${r.tahun}`] || 0,
+                                    'PDRB Sektor Pembanding': r.nilaiProv,
+                                    'Total PDRB Pembanding': totalProv[`${r.provinsi}_${r.tahun}`] || 0
+                                });
+                            });
+                            
+                            jsonData = klassenArr;
+                        } else {
+                            const tahunAwal = years[0];
+                            const tahunAkhir = years[years.length - 1];
+                            
+                            statusEl.textContent = `Menghitung total & mengonversi data (${tahunAwal} ke ${tahunAkhir})...`;
                         
                         // Calculate Total PDRB per region per year
                         const totalKab = {};
@@ -570,6 +666,7 @@
                         });
                         
                         jsonData = Object.values(combined);
+                        } // Closes else for if (type === 'klassen')
                     } else {
                         jsonData = XLSX.utils.sheet_to_json(worksheet);
                     }

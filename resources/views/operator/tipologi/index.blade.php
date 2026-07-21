@@ -30,6 +30,12 @@
                     <p class="text-slate-600 mt-1">Masukkan Data Tipologi Sektor</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
+                    <button type="button" onclick="document.getElementById('syncModal').style.display='flex'" class="flex items-center gap-2 bg-[#D8A62A] hover:bg-[#B58A20] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Tarik Data Database
+                    </button>
                     <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -90,15 +96,10 @@
                     </div>
                 </div>
             </div>
-            <!-- Tahun Awal -->
+            <!-- Tahun -->
             <div class="space-y-2 col-span-1">
-                <label class="op-label">Tahun Awal</label>
-                <input type="number" name="tahun_awal" value="{{ old('tahun_awal', $editItem['tahun_awal'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
-            </div>
-            <!-- Tahun Akhir -->
-            <div class="space-y-2 col-span-1">
-                <label class="op-label">Tahun Akhir</label>
-                <input type="number" name="tahun_akhir" value="{{ old('tahun_akhir', $editItem['tahun_akhir'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
+                <label class="op-label">Tahun</label>
+                <input type="number" name="tahun" value="{{ old('tahun', $editItem['tahun'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
             </div>
             <!-- Provinsi -->
             <div class="space-y-2 col-span-1">
@@ -135,75 +136,23 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Data Cards Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mt-4">
-            
-            <!-- Data Analisis Card -->
-            <div class="bg-white rounded-xl border-2 border-sky-400 p-6 shadow-sm">
-                <h3 class="text-base font-bold text-slate-800 mb-1" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Data PDRB Sektor Kabupaten/Kota' : 'Data PDRB Sektor Provinsi'">
-                    Data PDRB Sektor Analisis
-                </h3>
-                <p class="text-xs text-slate-500 mb-5">Masukkan data PDRB sektor dan total PDRB wilayah analisis</p>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_analisis_awal', $editItem['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_analisis_awal" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_analisis_akhir', $editItem['pdrb_sektor_analisis_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_analisis_akhir" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_analisis_awal', $editItem['total_pdrb_analisis_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_analisis_awal" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_analisis_akhir', $editItem['total_pdrb_analisis_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_analisis_akhir" :value="val.replace(/\./g, '')">
-                    </div>
-                </div>
+            <!-- Nilai LQ -->
+            <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('nilai_lq', $editItem['nilai_lq'] ?? '') }}' }">
+                <label class="op-label">Nilai LQ (Rasio)</label>
+                <input type="text" x-model="val" class="op-input" placeholder="Contoh: 1.25" required>
+                <input type="hidden" name="nilai_lq" :value="val.replace(/,/g, '.')">
             </div>
 
-            <!-- Data Pembanding Card -->
-            <div class="bg-white rounded-xl border-2 border-sky-400 p-6 shadow-sm">
-                <h3 class="text-base font-bold text-slate-800 mb-1" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Data PDRB Sektor Provinsi (Pembanding)' : 'Data PDB Sektor Nasional (Pembanding)'">
-                    Data PDRB Sektor Pembanding
-                </h3>
-                <p class="text-xs text-slate-500 mb-5">Masukkan data PDRB sektor dan total PDRB pembanding</p>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_pembanding_awal', $editItem['pdrb_sektor_pembanding_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_pembanding_awal" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('pdrb_sektor_pembanding_akhir', $editItem['pdrb_sektor_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">PDRB Sektor Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_pembanding_akhir" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_pembanding_awal', $editItem['total_pdrb_pembanding_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Awal (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_pembanding_awal" :value="val.replace(/\./g, '')">
-                    </div>
-                    <div class="space-y-2" x-data="{ val: '{{ old('total_pdrb_pembanding_akhir', $editItem['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label">Total PDRB Akhir (Rp)</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
-                    </div>
-                </div>
+            <!-- Nilai SS -->
+            <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('nilai_ss', $editItem['nilai_ss'] ?? '') }}' }">
+                <label class="op-label">Nilai SS (Dij)</label>
+                <input type="text" x-model="val" class="op-input" placeholder="Contoh: 0.8" required>
+                <input type="hidden" name="nilai_ss" :value="val.replace(/,/g, '.')">
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 mt-6">
             <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -247,13 +196,10 @@
                             <th class="px-4 py-4 whitespace-nowrap">Daerah Analisis</th>
                             <th class="px-4 py-4 whitespace-nowrap">Provinsi</th>
                             <th class="px-4 py-4 min-w-[200px]">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap">PDRB Sektor Analisis Awal (Rp)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">PDRB Sektor Analisis Akhir (Rp)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Total PDRB Analisis Awal (Rp)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Total PDRB Analisis Akhir (Rp)</th>
+                            <th class="px-4 py-4 whitespace-nowrap">Tahun</th>
                             <th class="px-4 py-4 whitespace-nowrap">Nilai SS (Dij)</th>
                             <th class="px-4 py-4 whitespace-nowrap">Nilai LQ (Rasio Kontribusi)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Tipologi</th>
+                            <th class="px-4 py-4 whitespace-nowrap text-center">Tipologi (Kuadran)</th>
                             <th class="px-4 py-4 whitespace-nowrap">Riwayat</th>
                             <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
                         </tr>
@@ -268,28 +214,29 @@
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['pdrb_sektor_analisis_awal'], 0, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['pdrb_sektor_analisis_akhir'], 0, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['total_pdrb_analisis_awal'], 0, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['total_pdrb_analisis_akhir'], 0, ',', '.') }}</td>
+                                <td class="px-4 py-4">{{ $data['tahun'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_ss'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    @if($data['tipologi'] === 'Sektor Cepat Maju dan Cepat Tumbuh' || $data['tipologi'] === 'Maju dan Tumbuh Cepat')
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                    @if($data['tipologi'] === 'I')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm">
                                             Kuadran I
                                         </span>
-                                    @elseif($data['tipologi'] === 'Sektor Potensial' || $data['tipologi'] === 'Potensial / Berkembang Cepat')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm">
+                                    @elseif($data['tipologi'] === 'II')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-sm">
                                             Kuadran II
                                         </span>
-                                    @elseif($data['tipologi'] === 'Sektor Berkembang' || $data['tipologi'] === 'Berkembang / Maju Tapi Tertekan')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-sm">
+                                    @elseif($data['tipologi'] === 'III')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200 shadow-sm">
                                             Kuadran III
                                         </span>
-                                    @else
+                                    @elseif($data['tipologi'] === 'IV')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200 shadow-sm">
                                             Kuadran IV
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200 shadow-sm">
+                                            {{ $data['tipologi'] }}
                                         </span>
                                     @endif
                                 </td>
@@ -354,10 +301,10 @@
                     @method('DELETE')
                     <input type="hidden" name="ids" id="selectedIds">
                     <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Hapus Terpilih
+                        Hapus Terpilih (<span id="bulkDeleteCount">0</span>)
                     </button>
                 </form>
 
@@ -384,6 +331,69 @@
 
     <x-import-modal action="{{ route('operator.tipologi.import') }}" type="tipologi" />
 
+    <!-- Sync Modal -->
+    <div id="syncModal" class="fixed inset-0 z-[99] hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#D8A62A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Tarik Data Database
+                </h3>
+                <button type="button" onclick="document.getElementById('syncModal').style.display='none'" class="text-slate-400 hover:text-slate-600 transition-colors bg-white rounded-full p-1 hover:bg-slate-100">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form action="{{ route('operator.tipologi.sync') }}" method="POST" class="p-6 space-y-4">
+                @csrf
+                <p class="text-sm text-slate-600 mb-4">Sistem akan secara otomatis menyinkronkan (mengambil) hasil perhitungan LQ dan SS untuk menghasilkan Kuadran Tipologi.</p>
+                <div class="space-y-2">
+                    <label class="op-label">Pilih Daerah Analisis</label>
+                    <div class="relative">
+                        <input list="sync-daerah-list" name="daerah_analisis" class="op-input op-input-icon op-datalist" placeholder="Ketik atau pilih daerah" required>
+                        <datalist id="sync-daerah-list">
+                            <template x-for="kab in Object.keys(window.daftarWilayah).flatMap(p => window.daftarWilayah[p])" :key="kab">
+                                <option :value="kab"></option>
+                            </template>
+                            <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
+                                <option :value="prov"></option>
+                            </template>
+                        </datalist>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
+                                <path d="M7 10l5 5 5-5z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="op-label">Tahun Awal</label>
+                        <input type="number" name="tahun_awal" class="op-input" placeholder="Contoh: 2021" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="op-label">Tahun Akhir</label>
+                        <input type="number" name="tahun_akhir" class="op-input" placeholder="Contoh: 2025" required>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('syncModal').style.display='none'" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex items-center gap-2 bg-[#D8A62A] hover:bg-[#B58A20] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Mulai Sinkronisasi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 <script>
     function exportToExcel() {
         var table = document.getElementById("tipologiTable");
@@ -393,6 +403,7 @@
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
                 rows[i].deleteCell(-1); // Remove Aksi
+                rows[i].deleteCell(0);  // Remove Checkbox
             }
         }
         

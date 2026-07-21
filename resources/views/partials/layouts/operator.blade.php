@@ -7,164 +7,689 @@
 
     <title>{{ config('app.name', 'Laravel') }} - Operator</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="{{ asset('js/data-wilayah.js') }}"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+
     <style>
-        [x-cloak] { display: none !important; }
+        :root {
+            --sidebar-dark: #075936;
+            --sidebar-main: #08794d;
+            --sidebar-light: #10935e;
+            --yellow: #ffd457;
+            --yellow-dark: #e9b930;
+            --white: #ffffff;
+            --background: #f7f9fb;
+            --text-dark: #202b3c;
+            --text-muted: #758096;
+            --border: #e6eaf0;
+            --danger: #e05252;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            background: var(--background);
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+        }
+
+        .admin-shell {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .admin-sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 100;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            color: #ffffff;
+            background:
+                radial-gradient(
+                    circle at 20% 0%,
+                    rgba(255, 255, 255, 0.08),
+                    transparent 28%
+                ),
+                linear-gradient(
+                    180deg,
+                    #075735 0%,
+                    #087849 48%,
+                    #0c8d58 100%
+                );
+            box-shadow: 10px 0 30px rgba(5, 66, 40, 0.12);
+        }
+
+        /* Custom Scrollbar for Sidebar */
+        .admin-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar-logo {
+            padding: 24px 28px 18px;
+        }
+
+        .sidebar-logo img {
+            display: block;
+            width: 220px;
+            max-width: 100%;
+            height: 72px;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .sidebar-profile {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .profile-toggle {
+            width: 100%;
+            min-height: 82px;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #ffffff;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .profile-toggle:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: #1c6744;
+            background: var(--yellow);
+            border: 2px solid rgba(255, 255, 255, 0.82);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .profile-copy {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .profile-name {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.35;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .profile-role {
+            display: block;
+            margin-top: 3px;
+            color: var(--yellow);
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.25;
+            text-transform: lowercase;
+        }
+
+        .profile-chevron {
+            color: var(--yellow);
+            font-size: 13px;
+            transition: transform 0.22s ease;
+        }
+
+        .sidebar-profile.open .profile-chevron {
+            transform: rotate(180deg);
+        }
+
+        .profile-dropdown {
+            max-height: 0;
+            overflow: hidden;
+            background: rgba(1, 47, 29, 0.23);
+            transition: max-height 0.25s ease;
+        }
+
+        .sidebar-profile.open .profile-dropdown {
+            max-height: 240px;
+        }
+
+        .profile-dropdown-inner {
+            padding: 6px 18px 12px;
+        }
+
+        .profile-dropdown-link {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 10px;
+            color: #ffffff;
+            background: transparent;
+            border: 0;
+            border-radius: 9px;
+            text-decoration: none;
+            cursor: pointer;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .profile-dropdown-link i {
+            width: 18px;
+            color: var(--yellow);
+            text-align: center;
+        }
+
+        .profile-dropdown-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .profile-dropdown-divider {
+            height: 1px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .profile-dropdown-link.logout {
+            color: #ffaaaa;
+        }
+
+        .profile-dropdown-link.logout i {
+            color: #ff8f8f;
+        }
+
+        .sidebar-content {
+            padding: 0 17px 28px;
+        }
+
+        .sidebar-section-title {
+            margin: 18px 12px 10px;
+            color: var(--yellow);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-link {
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition:
+                background 0.18s ease,
+                color 0.18s ease,
+                transform 0.18s ease;
+        }
+
+        .sidebar-link i {
+            width: 21px;
+            color: rgba(255, 255, 255, 0.76);
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.09);
+            transform: translateX(2px);
+        }
+
+        .sidebar-link.active {
+            color: #176541;
+            background: var(--yellow);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.11);
+        }
+
+        .sidebar-link.active i {
+            color: #176541;
+        }
+
+        .admin-main {
+            width: calc(100% - 300px);
+            min-height: 100vh;
+            margin-left: 300px;
+            background: var(--background);
+        }
+
+        .mobile-sidebar-button {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 120;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            border: 0;
+            border-radius: 12px;
+            color: #ffffff;
+            background: #08794d;
+            box-shadow: 0 8px 22px rgba(5, 80, 47, 0.2);
+            cursor: pointer;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            background: rgba(15, 23, 42, 0.46);
+        }
+
+        .logout-modal[hidden] {
+            display: none !important;
+        }
+
+        .logout-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .logout-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.52);
+            backdrop-filter: blur(3px);
+        }
+
+        .logout-modal-card {
+            position: relative;
+            width: min(420px, 100%);
+            padding: 30px 28px 27px;
+            border-radius: 22px;
+            background: #ffffff;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.25);
+            animation: modalAppear 0.2s ease-out;
+        }
+
+        .logout-modal-icon {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 18px;
+            display: grid;
+            place-items: center;
+            border-radius: 20px;
+            color: #dc2626;
+            background: #fee2e2;
+            font-size: 26px;
+        }
+
+        .logout-modal-card h3 {
+            margin: 0;
+            color: #202b3c;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .logout-modal-card p {
+            margin: 10px auto 0;
+            max-width: 340px;
+            color: #758096;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .logout-modal-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .logout-modal-actions button {
+            min-width: 128px;
+            height: 44px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .logout-cancel {
+            color: #475467;
+            background: #ffffff;
+            border: 1px solid #d9dee8;
+        }
+
+        .logout-confirm {
+            color: #ffffff;
+            background: #dc2626;
+            border: 1px solid #dc2626;
+        }
+
+        .logout-confirm:hover {
+            background: #b91c1c;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+            }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .mobile-sidebar-button {
+                display: grid;
+            }
+
+            .sidebar-backdrop.show {
+                display: block;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .admin-sidebar {
+                width: min(285px, 88vw);
+            }
+
+            .logout-modal-actions {
+                flex-direction: column-reverse;
+            }
+
+            .logout-modal-actions button {
+                width: 100%;
+            }
+        }
     </style>
+
+    @stack('styles')
 </head>
-<body class="antialiased bg-slate-50 text-slate-900" x-data="{ sidebarOpen: false }">
-    <div class="min-h-screen flex relative overflow-hidden">
-        
-        <!-- Mobile Sidebar Backdrop -->
-        <div x-show="sidebarOpen" 
-             @click="sidebarOpen = false" 
-             class="fixed inset-0 bg-black/50 z-30 md:hidden"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             x-cloak>
-        </div>
-        
-        <!-- Sidebar -->
-        <aside 
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-            class="fixed md:static inset-y-0 left-0 w-64 flex-shrink-0 bg-gradient-to-b from-[#145239] to-[#0F8A5F] text-white min-h-screen shadow-xl transition-transform duration-300 ease-in-out z-40">
-            <!-- Logo Section -->
-            <div class="p-6 pb-2 flex justify-center">
-                <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo DPMPTSP Sumut" class="w-48 h-auto object-contain" onerror="this.src='https://ui-avatars.com/api/?name=DPMPTSP&color=fff&background=145239'">
+<body>
+    <button type="button" id="mobileSidebarButton" class="mobile-sidebar-button" aria-label="Buka menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <div class="admin-shell">
+        <aside id="adminSidebar" class="admin-sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo DPMPTSP Sumatera Utara">
             </div>
 
-            <!-- Profile Section with Dropdown -->
-            <div x-data="{ open: false }" class="border-b border-[#CFE3D5]/20 mb-4 relative">
-                <button @click="open = !open" class="w-full px-6 py-4 flex items-center justify-between hover:bg-[#1E5D41]/50 transition-colors focus:outline-none text-left">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#FFD54F] overflow-hidden shadow-inner flex-shrink-0 border-2 border-[#E7F2EB]">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()?->name ?? 'Siti') }}&background=FFD54F&color=145239" alt="Profile" class="w-full h-full object-cover">
-                        </div>
-                        <div class="overflow-hidden">
-                            <h3 class="font-semibold text-sm truncate text-white">{{ Auth::user()?->name ?? 'Siti' }}</h3>
-                            <p class="text-xs text-[#FFD54F] truncate">{{ Auth::user()?->role ?? 'Operator' }}</p>
-                        </div>
-                    </div>
-                    <svg :class="{'rotate-180': open}" class="w-4 h-4 text-[#FFD54F] transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+            <div id="adminProfile" class="sidebar-profile">
+                <button type="button" id="adminProfileToggle" class="profile-toggle">
+                    <span class="profile-avatar" style="overflow: hidden; padding: 0; display: block;">
+                        <img src="{{ Auth::user()?->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()?->name ?? 'Siti') . '&background=FFD54F&color=145239' }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    </span>
+
+                    <span class="profile-copy">
+                        <span class="profile-name">
+                            {{ Auth::user()?->name ?? 'Siti' }}
+                        </span>
+                        <span class="profile-role">
+                            {{ auth()->user()->role ?? 'operator' }}
+                        </span>
+                    </span>
+
+                    <i class="fa-solid fa-chevron-down profile-chevron"></i>
                 </button>
 
-                <!-- Dropdown Menu -->
-                <div x-show="open" x-transition.opacity.duration.200ms x-cloak class="bg-[#145239] px-4 py-2 space-y-1 shadow-inner border-b border-[#CFE3D5]/20">
-                    <a href="{{ route('operator.profile') }}" class="flex items-center gap-3 px-2 py-2 text-sm font-medium hover:text-white hover:bg-[#1E5D41] rounded-lg transition-colors {{ request()->routeIs('operator.profile') ? 'text-[#145239] bg-[#FFD54F]' : 'text-[#E7F2EB]' }}">
-                        <svg class="w-4 h-4 {{ request()->routeIs('operator.profile') ? 'text-[#145239]' : 'text-[#FFD54F]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        Profile
-                    </a>
-                    <a href="{{ route('operator.settings') }}" class="flex items-center gap-3 px-2 py-2 text-sm font-medium hover:text-white hover:bg-[#1E5D41] rounded-lg transition-colors {{ request()->routeIs('operator.settings') ? 'text-[#145239] bg-[#FFD54F]' : 'text-[#E7F2EB]' }}">
-                        <svg class="w-4 h-4 {{ request()->routeIs('operator.settings') ? 'text-[#145239]' : 'text-[#FFD54F]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        Settings
-                    </a>
-                    
-                    <form method="POST" action="{{ route('logout') }}" class="mt-2 border-t border-[#CFE3D5]/20 pt-2">
-                        @csrf
-                        <button type="submit" class="w-full flex items-center gap-3 px-2 py-2 text-sm font-medium text-red-300 hover:text-red-100 hover:bg-red-900/60 rounded-lg transition-colors">
-                            <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                            Logout
+                <div class="profile-dropdown">
+                    <div class="profile-dropdown-inner">
+                        <a href="{{ route('operator.profile') }}" class="profile-dropdown-link {{ request()->routeIs('operator.profile') ? 'active' : '' }}">
+                            <i class="fa-regular fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+
+                        <a href="{{ route('operator.settings') }}" class="profile-dropdown-link {{ request()->routeIs('operator.settings') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Settings</span>
+                        </a>
+
+                        <div class="profile-dropdown-divider"></div>
+
+                        <button type="button" id="openLogoutModal" class="profile-dropdown-link logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Logout</span>
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
 
-            <!-- Navigation -->
-            <nav class="px-3 space-y-1">
-                <div class="px-3 mb-2 text-xs font-semibold text-[#FFD54F] uppercase tracking-wider">Menu Operator</div>
-                
-                <a href="{{ route('operator.dashboard') }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all {{ request()->routeIs('operator.dashboard') ? 'bg-[#FFD54F] text-[#145239] shadow-sm' : 'text-[#E7F2EB] hover:bg-[#1E5D41] hover:text-white' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('operator.dashboard') ? 'text-[#145239]' : 'text-[#CFE3D5] group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    Dashboard Operator
-                </a>
+            <nav class="sidebar-content">
+                <div class="sidebar-section-title">
+                    Menu Operator
+                </div>
 
-                <a href="{{ route('operator.lq.index') }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all {{ request()->routeIs('operator.lq.index') ? 'bg-[#FFD54F] text-[#145239] shadow-sm' : 'text-[#E7F2EB] hover:bg-[#1E5D41] hover:text-white' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('operator.lq.index') ? 'text-[#145239]' : 'text-[#CFE3D5] group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Analisis LQ
-                </a>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="{{ route('operator.dashboard') }}" class="sidebar-link {{ request()->routeIs('operator.dashboard') ? 'active' : '' }}">
+                            <i class="fa-solid fa-table-cells-large"></i>
+                            <span>Dashboard Operator</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.lq.index') }}" class="sidebar-link {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Analisis LQ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.ss.index') }}" class="sidebar-link {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Analisis SS</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.tipologi.index') }}" class="sidebar-link {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <span>Analisis Tipologi Sektor</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.klassen.index') }}" class="sidebar-link {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-bar"></i>
+                            <span>Analisis Klassen</span>
+                        </a>
+                    </li>
+                </ul>
 
-                <a href="{{ route('operator.ss.index') }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all {{ request()->routeIs('operator.ss.index') ? 'bg-[#FFD54F] text-[#145239] shadow-sm' : 'text-[#E7F2EB] hover:bg-[#1E5D41] hover:text-white' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('operator.ss.index') ? 'text-[#145239]' : 'text-[#CFE3D5] group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                    Analisis SS
-                </a>
+                <div class="sidebar-section-title">
+                    Menu Utama
+                </div>
 
-                <a href="{{ route('operator.tipologi.index') }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all {{ request()->routeIs('operator.tipologi.index') ? 'bg-[#FFD54F] text-[#145239] shadow-sm' : 'text-[#E7F2EB] hover:bg-[#1E5D41] hover:text-white' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('operator.tipologi.index') ? 'text-[#145239]' : 'text-[#CFE3D5] group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                    </svg>
-                    Analisis Tipologi Sektor
-                </a>
-
-                <a href="{{ route('operator.klassen.index') }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all {{ request()->routeIs('operator.klassen.index') ? 'bg-[#FFD54F] text-[#145239] shadow-sm' : 'text-[#E7F2EB] hover:bg-[#1E5D41] hover:text-white' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('operator.klassen.index') ? 'text-[#145239]' : 'text-[#CFE3D5] group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    Analisis Klassen
-                </a>
-
-                <div class="px-3 mt-6 mb-2 text-xs font-semibold text-[#FFD54F] uppercase tracking-wider">Menu Utama</div>
-                
-                <a href="{{ url('/') }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-[#E7F2EB] hover:bg-[#1E5D41] hover:text-white transition-all">
-                    <svg class="w-5 h-5 mr-3 text-[#CFE3D5] group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Beranda
-                </a>
-
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="{{ url('/') }}" class="sidebar-link">
+                            <i class="fa-solid fa-house"></i>
+                            <span>Beranda</span>
+                        </a>
+                    </li>
+                </ul>
             </nav>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 min-h-screen overflow-y-auto relative w-full flex flex-col">
-            <!-- Mobile Top Bar -->
-            <header class="md:hidden flex items-center justify-between bg-[#145239] text-white p-4 shadow-md z-30">
-                <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo" class="h-8 w-auto object-contain" onerror="this.src='https://ui-avatars.com/api/?name=DPMPTSP&color=fff&background=145239'">
-                    <span class="font-bold text-sm">Operator Panel</span>
-                </div>
-                <button @click="sidebarOpen = true" class="p-2 text-white hover:bg-[#1E5D41] rounded-lg focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </header>
-
+        <main class="admin-main">
             <div class="p-4 md:p-6 lg:p-8 w-full space-y-6 flex-1">
                 @yield('content')
             </div>
         </main>
-        
-        
     </div>
+
+    <form id="logoutForm" action="{{ route('logout') }}" method="POST" hidden>
+        @csrf
+    </form>
+
+    <div id="logoutModal" class="logout-modal" hidden>
+        <div class="logout-modal-backdrop" data-close-logout></div>
+        <div class="logout-modal-card">
+            <div class="logout-modal-icon">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+            <h3>Keluar dari akun?</h3>
+            <p>Anda akan keluar dari halaman operator dan perlu login kembali untuk mengakses dashboard.</p>
+            <div class="logout-modal-actions">
+                <button type="button" class="logout-cancel" data-close-logout>Batal</button>
+                <button type="button" id="confirmLogout" class="logout-confirm">Ya, Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    @stack('scripts')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const profile = document.getElementById('adminProfile');
+            const profileToggle = document.getElementById('adminProfileToggle');
+
+            const sidebar = document.getElementById('adminSidebar');
+            const sidebarButton = document.getElementById('mobileSidebarButton');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+            const logoutButton = document.getElementById('openLogoutModal');
+            const logoutModal = document.getElementById('logoutModal');
+            const confirmLogout = document.getElementById('confirmLogout');
+            const logoutForm = document.getElementById('logoutForm');
+            const closeLogoutButtons = document.querySelectorAll(
+                '[data-close-logout]'
+            );
+
+            if (profile && profileToggle) {
+                profileToggle.addEventListener('click', function () {
+                    profile.classList.toggle('open');
+                });
+            }
+
+            function closeSidebar() {
+                sidebar?.classList.remove('open');
+                sidebarBackdrop?.classList.remove('show');
+            }
+
+            sidebarButton?.addEventListener('click', function () {
+                sidebar?.classList.toggle('open');
+                sidebarBackdrop?.classList.toggle('show');
+            });
+
+            sidebarBackdrop?.addEventListener('click', closeSidebar);
+
+            function openLogoutModal() {
+                if (! logoutModal) {
+                    return;
+                }
+
+                logoutModal.hidden = false;
+                document.body.classList.add('modal-open');
+            }
+
+            function closeLogoutModal() {
+                if (! logoutModal) {
+                    return;
+                }
+
+                logoutModal.hidden = true;
+                document.body.classList.remove('modal-open');
+            }
+
+            logoutButton?.addEventListener('click', openLogoutModal);
+
+            closeLogoutButtons.forEach(function (button) {
+                button.addEventListener('click', closeLogoutModal);
+            });
+
+            confirmLogout?.addEventListener('click', function () {
+                logoutForm?.submit();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeLogoutModal();
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -360,5 +885,6 @@
             return false;
         }
     </script>
+
 </body>
 </html>
