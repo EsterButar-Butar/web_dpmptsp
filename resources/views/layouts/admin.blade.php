@@ -643,6 +643,19 @@
                             <span>Data HS Code</span>
                         </a>
                     </li>
+                    <li>
+                        <a
+                            href="{{ route('admin.money-currency.index') }}"
+                            class="sidebar-link
+                                {{ request()->routeIs('admin.money-currency.*')
+                                    ? 'active'
+                                    : '' }}"
+                        >
+                            <i class="fa-solid fa-circle-dollar-to-slot"></i>
+
+                            <span>Konversi Mata Uang</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="sidebar-section-title">
