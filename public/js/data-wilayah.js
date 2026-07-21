@@ -4,8 +4,8 @@ window.daftarWilayah = {
         "Batu Bara", "Asahan", "Binjai", "Dairi", "Deli Serdang", "Gunungsitoli", 
         "Humbang Hasundutan", "Karo", "Labuhan Batu", "Labuhan Batu Selatan", 
         "Labuhan Batu Utara", "Langkat", "Mandailing Natal", "Medan", "Nias", 
-        "Nias Barat", "Nias Selatan", "Nias Utara", "Pematang Siantar", 
-        "Padangsidimpuan", "Padang Lawas", "Padang Lawas Utara", "Pakpak Barat", 
+        "Nias Barat", "Nias Selatan", "Nias Utara", "Pematangsiantar", 
+        "Padangsidimpuan", "Padang Lawas", "Padang Lawas Utara", "Pakpak Bharat", 
         "Samosir", "Serdang Bedagai", "Sibolga", "Simalungun", "Tanjung Balai", 
         "Tapanuli Tengah", "Tapanuli Selatan", "Tapanuli Utara", "Tebing Tinggi", "Toba"
     ],

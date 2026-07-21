@@ -120,13 +120,13 @@ class OperatorController extends Controller
         $perPage = 10;
         $page = $request->get('page', 1);
         
-        $paginatedLogs = new LengthAwarePaginator(
+        $paginatedLogs = (new LengthAwarePaginator(
             $filteredLogs->forPage($page, $perPage),
             $filteredLogs->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
-        );
+        ))->onEachSide(1);
 
         $baseYears = range(date('Y'), 2020);
         $availableYears = collect(array_merge($activityLogs->pluck('created_at')->map(fn($d) => (int)$d->format('Y'))->toArray(), $baseYears))
