@@ -684,34 +684,32 @@
                     throw new Error(`Data Excel kosong atau format tidak sesuai pada file ${file.name}.`);
                 }
                 
-                allJsonData = allJsonData.concat(jsonData);
-            } // End of file loop
-            
-            if (allJsonData.length === 0) {
-                throw new Error('Semua file Excel kosong atau format tidak sesuai.');
-            }
-            
-            statusEl.textContent = 'Menyimpan ' + allJsonData.length + ' baris data ke sistem...';
+                if (fileInput.files.length === 1) {
+                    statusEl.textContent = `Menyimpan ${jsonData.length} baris data ke sistem...`;
+                } else {
+                    statusEl.textContent = `Menyimpan ${jsonData.length} baris data (file ${fIdx + 1}) ke sistem...`;
+                }
 
-            const response = await fetch("{{ $action }}", {
-                method: 'POST',
+                const response = await fetch("{{ $action }}", {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
-                    body: JSON.stringify(allJsonData)
+                    body: JSON.stringify(jsonData)
                 });
 
                 const result = await response.json();
                 
-                if (result.success) {
-                    statusEl.textContent = result.message || 'Berhasil! Memuat ulang halaman...';
-                    statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    throw new Error(result.message || 'Terjadi kesalahan saat menyimpan data.');
+                if (!result.success) {
+                    throw new Error(`Gagal menyimpan data file ${file.name}: ${result.message}`);
                 }
+            } // End of file loop
+            
+            statusEl.textContent = 'Berhasil! Memuat ulang halaman...';
+            statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
+            setTimeout(() => window.location.reload(), 1000);
         } catch (err) {
             statusEl.textContent = 'Gagal: ' + err.message;
             statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
