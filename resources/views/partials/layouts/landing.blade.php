@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -5,6 +6,10 @@
 <link
 rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 />
     <meta charset="UTF-8">
 
@@ -81,6 +86,12 @@ src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     @stack('scripts')
+
+    <div class="summary-icon">
+
+        <i class="{{ $card['icon'] }}"></i>
+
+    </div>
 
 
 </body>

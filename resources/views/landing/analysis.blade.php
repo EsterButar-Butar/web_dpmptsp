@@ -1,205 +1,95 @@
+@php
+    use Illuminate\Support\Str;
+@endphp
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+/>
+
 @vite([
     'resources/css/navbar.css',
     'resources/css/home.css',
     'resources/css/about.css',
     'resources/css/analysis.css',
-
     'resources/js/navbar.js',
     'resources/js/home.js',
     'resources/js/about.js',
     'resources/js/analysis.js',
 ])
 
-
-{{-- NAVBAR --}}
 @include('partials.landing.navbar')
-
 
 <section class="analysis-page">
 
-
     <h1 class="analysis-title">
-        Dashboard Executive of Sumatera Investment
+        Dashboard Analisis Sektoral
     </h1>
 
+    @include('partials.analysis.filters')
 
-    <form 
-        method="GET"
-        action="{{ route('analysis') }}"
-        class="filter-box"
-    >
+    @if(!empty($dashboard))
 
-        <select name="provinsi">
-            <option>
-                Sumatera Utara
-            </option>
-        </select>
+        @if(!empty($dashboard['header']))
+            <div class="analysis-header">
 
+                <h2>
 
-        <select name="kabupaten">
-            <option>
-                Deli Serdang
-            </option>
-        </select>
+                    {{ $dashboard['header']['title'] }}
 
+                    pada
 
-        <select name="metode">
+                    <strong>
 
-            <option 
-                value="lq"
-                {{ $metode=='lq' ? 'selected' : '' }}
-            >
-                LQ
-            </option>
+                        {{ Str::title(Str::lower($dashboard['header']['kabupaten'])) }}
 
+                    </strong>
 
-            <option 
-                value="ssa"
-                {{ $metode=='ssa' ? 'selected' : '' }}
-            >
-                SSA
-            </option>
+                    Tahun
 
+                    {{ $dashboard['header']['tahun'] }}
 
-            <option value="tipologi">
-                Tipologi Sektor
-            </option>
+                </h2>
 
+                <p>
 
-            <option value="klassen">
-                Tipologi Klassen
-            </option>
+                    {{ $dashboard['header']['description'] }}
 
+                </p>
 
-        </select>
+            </div>
+        @endif
 
+        @include('partials.analysis.summary')
+        
+        @if(
+            isset($dashboard['charts']['doughnut']) ||
+            isset($dashboard['charts']['bar']) ||
+            isset($dashboard['charts']['scatter'])
+        )
+            @include('partials.analysis.charts')
+        @endif
 
-        <select name="tahun">
+        @if(!empty($dashboard['tabs']))
+            @include('partials.analysis.tabs')
+        @endif
 
-            @for($i=2021;$i<=2025;$i++)
+        @if(!empty($dashboard['table']))
+            @include('partials.analysis.table')
+        @endif
 
-            <option 
-                value="{{ $i }}"
-                {{ $tahun==$i ? 'selected' : '' }}
-            >
-                {{ $i }}
-            </option>
+    @else
 
-            @endfor
-
-        </select>
-
-
-        <button type="submit">
-            Analisis
-        </button>
-
-
-    </form>
-
-
-
-
-    <div class="summary-grid">
-
-        @foreach($summary as $item)
-
-        <div class="summary-card">
-
-            <h3>
-                {{ $item['value'] }}
-            </h3>
-
-            <strong>
-                {{ $item['title'] }}
-            </strong>
-
-            <p>
-                {{ $item['text'] }}
-            </p>
-
-
+        <div class="empty-analysis">
+            Silakan pilih kabupaten dan metode analisis.
         </div>
 
-        @endforeach
-
-    </div>
-
-
-
-
-
-    <div class="chart-box">
-
-        <canvas 
-            id="analysisChart">
-        </canvas>
-
-    </div>
-
+    @endif
 
 </section>
 
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
+@if(!empty($dashboard))
 <script>
-
-const labels =
-@json($sektor);
-
-
-const values =
-@json($nilai);
-
-
-
-new Chart(
-
-    document.getElementById('analysisChart'),
-
-    {
-
-        type:'bar',
-
-
-        data:{
-
-
-            labels:labels,
-
-
-            datasets:[
-
-                {
-
-                    label:'Nilai {{ strtoupper($metode) }} Tahun {{ $tahun }}',
-
-                    data:values
-
-                }
-
-            ]
-
-        },
-
-
-        options:{
-
-
-            responsive:true,
-
-
-            maintainAspectRatio:false
-
-
-        }
-
-    }
-
-);
-
+    window.dashboardCharts = @json($dashboard['charts'] ?? []);
 </script>
+@endif

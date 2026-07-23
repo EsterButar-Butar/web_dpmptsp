@@ -22,19 +22,21 @@ class HasilTipologiKlassen extends Model
         return $this->belongsTo(Sektor::class,'sektor_id');
     }
 
-    public function indikatorProvinsi()
-    {
-        return $this->belongsTo(
-            IndikatorProvinsi::class,
-            'indikator_provinsi_id'
-        );
-    }
-
     public function indikatorKabupaten()
     {
         return $this->belongsTo(
             IndikatorKabupaten::class,
-            'indikator_kabupaten_id'
+            'indikator_kabupaten_id',
+            'id'
+        );
+    }
+
+    public function indikatorProvinsi()
+    {
+        return $this->belongsTo(
+            IndikatorProvinsi::class,
+            'indikator_provinsi_id',
+            'id'
         );
     }
 

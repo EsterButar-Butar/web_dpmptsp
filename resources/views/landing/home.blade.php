@@ -6,16 +6,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Beranda | DPMPTSP Provinsi Sumatera Utara</title>
+
+    @vite([
+        'resources/css/navbar.css',
+        'resources/css/home.css',
+        'resources/css/about.css',
+
         'resources/js/navbar.js',
         'resources/js/home.js',
         'resources/js/about.js',
     ])
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+          rel="stylesheet">
 
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 </head>
 
@@ -52,7 +59,7 @@
                 </a>
 
                 <a href="{{ route('comparison') }}" class="btn1">
-                    Analisis Perbandingan
+                    Analisis Sektor
                 </a>
 
             </div>

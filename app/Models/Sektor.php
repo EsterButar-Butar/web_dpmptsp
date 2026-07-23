@@ -13,6 +13,11 @@ class Sektor extends Model
     public $timestamps=false;
 
     protected $guarded=[];
+    
+    public function getNamaAttribute(): ?string
+    {
+        return $this->attributes['nama_sektor'] ?? null;
+    }
 
     public function pdrbKabupaten()
     {

@@ -281,20 +281,3 @@ class SsaService extends BaseAnalysisService
 
 }
 
-/*
-|--------------------------------------------------------------------------
-| Catatan
-|--------------------------------------------------------------------------
-| Rumus Cij mengikuti Buku Panduan Potensi Unggulan dan Peluang Investasi
-| BKPM/DPMPTSP:
-|
-|     Cij = Yij × (Rij - Rn)
-|
-| Beberapa literatur akademik (mis. Soepono, Tarigan) menggunakan:
-|
-|     Cij = Yij × (Rij - Rin)
-|
-| Implementasi ini sengaja mengikuti pedoman BKPM agar hasil analisis
-| konsisten dengan dokumen acuan proyek.
-|--------------------------------------------------------------------------
-*/
