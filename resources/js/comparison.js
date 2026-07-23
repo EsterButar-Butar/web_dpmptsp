@@ -1,134 +1,148 @@
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+import Chart from "chart.js/auto";
 
+document.addEventListener("DOMContentLoaded", () => {
 
+    const charts = window.comparisonCharts ?? {};
 
-        /*
-        ===========================
-        FILTER EFFECT
-        ===========================
-        */
+    renderChart("growthChart", charts.growth);
+    renderChart("contributionChart", charts.contribution);
+    renderChart("lqChart", charts.lq);
+    renderChart("ssaChart", charts.ssa);
+    /*
+    =====================================
+    FILTER EFFECT
+    =====================================
+    */
 
+    document
+        .querySelectorAll(".comparison-filter select")
+        .forEach(select => {
 
-        const filters =
-            document.querySelectorAll(
-                ".comparison-filter select"
-            );
+            select.addEventListener("change", () => {
 
+                select.classList.add("changed");
 
+                setTimeout(() => {
+                    select.classList.remove("changed");
+                }, 300);
 
-        filters.forEach(
-            filter => {
+            });
 
+        });
 
-                filter.addEventListener(
-                    "change",
-                    () => {
+    /*
+    =====================================
+    SCROLL ANIMATION
+    =====================================
+    */
 
+    const observer = new IntersectionObserver(entries => {
 
-                        filter.classList.add(
-                            "changed"
-                        );
+        entries.forEach(entry => {
 
-
-
-                        setTimeout(
-                            ()=>{
-
-
-                                filter.classList.remove(
-                                    "changed"
-                                );
-
-
-                            },
-                            300
-                        );
-
-
-                    }
-                );
-
-
+            if (entry.isIntersecting) {
+                entry.target.classList.add("show");
             }
-        );
+
+        });
+
+    }, {
+        threshold: 0.2
+    });
+
+    document
+        .querySelectorAll(".summary-card, .chart-card, .table-card")
+        .forEach(el => observer.observe(el));
+
+});
 
 
+/*
+=====================================
+CHART RENDERER
+=====================================
+*/
 
+function renderChart(canvasId, chart) {
 
+    if (!chart) {
+        return;
+    }
 
+    const canvas = document.getElementById(canvasId);
 
+    if (!canvas) {
+        return;
+    }
 
-        /*
-        ===========================
-        SCROLL ANIMATION
-        ===========================
-        */
+    if (canvas.chartInstance) {
+        canvas.chartInstance.destroy();
+    }
 
+    canvas.chartInstance = new Chart(canvas, {
 
-        const elements =
-            document.querySelectorAll(
+        type: chart.type ?? "line",
 
-                ".summary-card, .chart-card, .table-card"
+        data: {
 
-            );
+            labels: chart.labels ?? [],
 
+            datasets: chart.datasets ?? []
 
+        },
 
-        const observer =
-            new IntersectionObserver(
+        options: {
 
-                entries=>{
+            responsive: true,
 
+            maintainAspectRatio: false,
 
-                    entries.forEach(
-                        entry=>{
+            interaction: {
+                mode: "index",
+                intersect: false,
+            },
 
+            plugins: {
 
-                            if(entry.isIntersecting){
-
-
-                                entry.target.classList.add(
-                                    "show"
-                                );
-
-
-                            }
-
-
-                        }
-                    );
-
-
+                legend: {
+                    display: false
                 },
 
-
-                {
-                    threshold:.2
+                title: {
+                    display: false
                 }
 
-
-            );
-
+            },
 
 
-        elements.forEach(
+            scales:
 
-            element=>{
+                chart.type === "pie"
 
+                    ? {}
 
-                observer.observe(
-                    element
-                );
+                    : {
 
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
 
-            }
+                        y: {
 
-        );
+                            beginAtZero: true,
 
+                            ticks: {
+                                precision: 2
+                            }
 
+                        }
 
+                    }
 
-    }
-);
+        }
+
+    });
+
+}

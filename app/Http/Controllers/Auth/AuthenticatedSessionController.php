@@ -12,50 +12,76 @@ use Illuminate\View\View;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Menampilkan halaman login.
      */
     public function create(): View
     {
         return view('auth.login');
     }
 
+
     /**
-     * Handle an incoming authentication request.
+     * Memproses login pengguna.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-    $request->authenticate();
+        // Validasi dan autentikasi login
+        $request->authenticate();
 
-    $request->session()->regenerate();
+        // Membuat ulang session ID untuk keamanan
+        $request->session()->regenerate();
 
-    $user = $request->user();
+        if ($request->user()->isOperator()) {
+            \App\Http\Controllers\Operator\OperatorController::logActivity(
+                'Autentikasi',
+                'Login',
+                'Operator (' . $request->user()->name . ') berhasil login ke sistem.'
+            );
+        }
 
-    if ($user->role == 'admin') {
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT SETELAH LOGIN
+        |--------------------------------------------------------------------------
+        |
+        | Pengguna diarahkan ke dashboard masing-masing berdasarkan rolenya.
+        |
+        */
 
-        return redirect()->route('admin.dashboard');
+        $url = match ($request->user()->role) {
+            'admin' => route('admin.dashboard', absolute: false),
+            'operator' => route('operator.dashboard', absolute: false),
+            default => route('profile.show', absolute: false),
+        };
 
+        return redirect()->intended($url);
     }
 
-    if ($user->role == 'operator') {
-
-        return redirect()->route('operator.dashboard');
-
-    }
-
-    return redirect()->route('profile.edit');
-}
 
     /**
-     * Destroy an authenticated session.
+     * Logout pengguna.
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        if ($user && $user->isOperator()) {
+            \App\Http\Controllers\Operator\OperatorController::logActivity(
+                'Autentikasi',
+                'Logout',
+                'Operator (' . $user->name . ') logout dari sistem.'
+            );
+        }
+
+        // Logout dari guard web
         Auth::guard('web')->logout();
 
+        // Hapus session lama
         $request->session()->invalidate();
 
+        // Membuat CSRF token baru
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Kembali ke halaman utama
+        return redirect()->route('home');
     }
 }

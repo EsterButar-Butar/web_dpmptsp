@@ -40,82 +40,13 @@
 </head>
 
 
-<body class="font-sans text-gray-900 antialiased">
+<body class="font-sans text-gray-900 antialiased bg-white">
 
-    <main
-        class="
-            min-h-screen
-            flex
-            flex-col
-            items-center
-            justify-center
-            px-4
-            py-8
-            bg-gray-100
-        "
-    >
-
-        {{-- Logo --}}
-        <div class="mb-6">
-
-            <a
-                href="{{ route('home') }}"
-                aria-label="Kembali ke halaman utama"
-            >
-
-                <x-application-logo
-                    class="
-                        w-20
-                        h-20
-                        fill-current
-                        text-green-700
-                    "
-                />
-
-            </a>
-
-        </div>
-
-
-        {{-- Authentication Card --}}
-        <div
-            class="
-                w-full
-                max-w-md
-                px-6
-                py-6
-                bg-white
-                shadow-md
-                overflow-hidden
-                rounded-xl
-            "
-        >
-
+    <main class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        <div class="w-full max-w-[480px]">
             {{ $slot }}
-
         </div>
-
-
-        {{-- Back to Home --}}
-        <div class="mt-6">
-
-            <a
-                href="{{ route('home') }}"
-                class="
-                    text-sm
-                    font-medium
-                    text-green-700
-                    hover:text-green-900
-                    transition
-                "
-            >
-                ← Kembali ke Beranda
-            </a>
-
-        </div>
-
     </main>
-
 
     {{-- JavaScript tambahan halaman --}}
     @stack('scripts')
