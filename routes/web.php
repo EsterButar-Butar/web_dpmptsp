@@ -6,7 +6,6 @@ use App\Http\Controllers\Landing\ComparisonController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvestmentMapController;
 
-
 /*
 |--------------------------------------------------------------------------
 | PUBLIC LANDING PAGES
@@ -30,6 +29,13 @@ Route::get('/', function () {
 Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
     ->name('investment.map');
 
+
+/*
+|--------------------------------------------------------------------------
+| ANALISIS
+|--------------------------------------------------------------------------
+*/
+
 Route::get(
     '/analisis',
     [
@@ -37,6 +43,25 @@ Route::get(
         'index',
     ]
 )->name('analysis');
+
+
+/*
+|--------------------------------------------------------------------------
+| AJAX KABUPATEN BERDASARKAN PROVINSI
+|--------------------------------------------------------------------------
+|
+| Digunakan untuk mengambil daftar kabupaten berdasarkan provinsi
+| tanpa melakukan reload halaman.
+|
+*/
+
+Route::get(
+    '/kabupaten/{provinsi}',
+    [
+        AnalysisController::class,
+        'getKabupaten',
+    ]
+)->name('analysis.kabupaten');
 
 
 Route::get(

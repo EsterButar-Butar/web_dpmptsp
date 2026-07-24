@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analisis Investasi</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
+
     @vite([
         'resources/css/navbar.css',
         'resources/css/home.css',
@@ -18,200 +19,214 @@
         'resources/js/analysis.js',
     ])
 </head>
+
 <body>
 
-{{-- NAVBAR --}}
-@include('partials.landing.navbar')
+    {{-- Navbar --}}
+    @include('partials.landing.navbar')
 
+    <section class="analysis-page">
 
-<section class="analysis-page">
+        <h1 class="analysis-title">
+            Dashboard Executive of Sumatera Investment
+        </h1>
 
+        <form
+            method="GET"
+            action="{{ route('analysis') }}"
+            class="filter-box"
+        >
 
-    <h1 class="analysis-title">
-        Dashboard Executive of Sumatera Investment
-    </h1>
-
-
-    <form 
-        method="GET"
-        action="{{ route('analysis') }}"
-        class="filter-box"
-    >
-
-        <select name="provinsi">
-            <option>
-                Sumatera Utara
-            </option>
-        </select>
-
-
-        <select name="kabupaten">
-            <option>
-                Deli Serdang
-            </option>
-        </select>
-
-
-        <select name="metode">
-
-            <option 
-                value="lq"
-                {{ $metode=='lq' ? 'selected' : '' }}
+            {{-- =======================
+                PROVINSI
+            ======================== --}}
+            <select
+                name="provinsi"
+                id="provinsi"
+                onchange="this.form.submit()"
             >
-                LQ
-            </option>
+
+                @foreach($provinsiList as $prov)
+
+                    <option
+                        value="{{ $prov->provinsi_id }}"
+                        {{ ($provinsi ?? '') == $prov->provinsi_id ? 'selected' : '' }}
+                    >
+                        {{ $prov->nama_provinsi }}
+                    </option>
+
+                @endforeach
+
+            </select>
 
 
-            <option 
-                value="ssa"
-                {{ $metode=='ssa' ? 'selected' : '' }}
+            {{-- =======================
+                KABUPATEN
+            ======================== --}}
+            <select
+                name="kabupaten"
+                id="kabupaten"
+                onchange="this.form.submit()"
             >
-                SSA
-            </option>
+
+                @foreach($kabupatenList as $kab)
+
+                    <option
+                        value="{{ $kab->kab_id }}"
+                        {{ ($kabupaten ?? '') == $kab->kab_id ? 'selected' : '' }}
+                    >
+                        {{ $kab->nama_kabupaten }}
+                    </option>
+
+                @endforeach
+
+            </select>
 
 
-            <option value="tipologi">
-                Tipologi Sektor
-            </option>
+            {{-- =======================
+                METODE
+            ======================== --}}
+            <select name="metode">
+
+                <option
+                    value="lq"
+                    {{ ($metode ?? '') == 'lq' ? 'selected' : '' }}
+                >
+                    LQ
+                </option>
+
+                <option
+                    value="ssa"
+                    {{ ($metode ?? '') == 'ssa' ? 'selected' : '' }}
+                >
+                    SSA
+                </option>
+
+                <option
+                    value="tipologi"
+                    {{ ($metode ?? '') == 'tipologi' ? 'selected' : '' }}
+                >
+                    Tipologi Sektor
+                </option>
+
+                <option
+                    value="klassen"
+                    {{ ($metode ?? '') == 'klassen' ? 'selected' : '' }}
+                >
+                    Tipologi Klassen
+                </option>
+
+            </select>
 
 
-            <option value="klassen">
-                Tipologi Klassen
-            </option>
+            {{-- =======================
+                TAHUN
+            ======================== --}}
+            <select name="tahun">
+
+                @for($i = 2021; $i <= 2025; $i++)
+
+                    <option
+                        value="{{ $i }}"
+                        {{ ($tahun ?? '') == $i ? 'selected' : '' }}
+                    >
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
 
 
-        </select>
+            <button type="submit">
+                Analisis
+            </button>
+
+        </form>
 
 
-        <select name="tahun">
+        {{-- =======================
+            SUMMARY
+        ======================== --}}
+        <div class="summary-grid">
 
-            @for($i=2021;$i<=2025;$i++)
+            @foreach($summary as $item)
 
-            <option 
-                value="{{ $i }}"
-                {{ $tahun==$i ? 'selected' : '' }}
-            >
-                {{ $i }}
-            </option>
+                <div class="summary-card">
 
-            @endfor
+                    <h3>
+                        {{ $item['value'] }}
+                    </h3>
 
-        </select>
+                    <strong>
+                        {{ $item['title'] }}
+                    </strong>
 
+                    <p>
+                        {{ $item['text'] }}
+                    </p>
 
-        <button type="submit">
-            Analisis
-        </button>
+                </div>
 
-
-    </form>
-
-
-
-
-    <div class="summary-grid">
-
-        @foreach($summary as $item)
-
-        <div class="summary-card">
-
-            <h3>
-                {{ $item['value'] }}
-            </h3>
-
-            <strong>
-                {{ $item['title'] }}
-            </strong>
-
-            <p>
-                {{ $item['text'] }}
-            </p>
-
+            @endforeach
 
         </div>
 
-        @endforeach
 
-    </div>
+        {{-- =======================
+            CHART
+        ======================== --}}
+        <div class="chart-box">
 
+            <canvas id="analysisChart"></canvas>
 
+        </div>
 
-
-
-    <div class="chart-box">
-
-        <canvas 
-            id="analysisChart">
-        </canvas>
-
-    </div>
+    </section>
 
 
-</section>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <script>
 
+        const labels = @json($sektor);
+        const values = @json($nilai);
 
+        new Chart(
+            document.getElementById('analysisChart'),
+            {
+                type: 'bar',
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                data: {
 
+                    labels: labels,
 
-<script>
+                    datasets: [
 
-const labels =
-@json($sektor);
+                        {
 
+                            label: 'Nilai {{ strtoupper($metode) }} Tahun {{ $tahun }}',
 
-const values =
-@json($nilai);
+                            data: values
 
+                        }
 
+                    ]
 
-new Chart(
+                },
 
-    document.getElementById('analysisChart'),
+                options: {
 
-    {
+                    responsive: true,
 
-        type:'bar',
-
-
-        data:{
-
-
-            labels:labels,
-
-
-            datasets:[
-
-                {
-
-                    label:'Nilai {{ strtoupper($metode) }} Tahun {{ $tahun }}',
-
-                    data:values
+                    maintainAspectRatio: false
 
                 }
 
-            ]
+            }
+        );
 
-        },
-
-
-        options:{
-
-
-            responsive:true,
-
-
-            maintainAspectRatio:false
-
-
-        }
-
-    }
-
-);
-
-</script>
+    </script>
 
 </body>
 </html>
