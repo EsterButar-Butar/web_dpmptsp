@@ -1,5 +1,6 @@
 <?php
 
+// Controller untuk mengelola analisis Tipologi Sektor bagi Operator
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
@@ -20,8 +21,8 @@ class TipologiController extends Controller
                 'tingkat_wilayah' => $item->tingkat_wilayah,
                 'daerah_analisis' => $item->daerah_analisis,
                 'daerah_pembanding' => $item->daerah_pembanding,
-                'provinsi' => $item->daerah_pembanding,
-                'kabupaten' => $item->daerah_analisis,
+                'provinsi' => $item->tingkat_wilayah === 'Provinsi' ? $item->daerah_analisis : $item->daerah_pembanding,
+                'kabupaten' => $item->tingkat_wilayah === 'Provinsi' ? '' : $item->daerah_analisis,
                 'sektor' => $item->sektor->nama_sektor ?? '-',
                 'tahun' => $item->tahun_akhir, // Hanya menggunakan tahun akhir
                 'nilai_ss' => $item->nilai_ss,
@@ -40,10 +41,10 @@ class TipologiController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('daerah_analisis', 'like', "%{$search}%")
-                  ->orWhere('daerah_pembanding', 'like', "%{$search}%")
-                  ->orWhereHas('sektor', function ($qSektor) use ($search) {
-                      $qSektor->where('nama_sektor', 'like', "%{$search}%");
-                  });
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -74,12 +75,13 @@ class TipologiController extends Controller
     // Fungsi bantu untuk parsing string angka dari Excel
     protected function parseExcelNumber($val)
     {
-        if (is_numeric($val)) return (float) $val;
-        
+        if (is_numeric($val))
+            return (float) $val;
+
         $val = trim((string) $val);
         $commaCount = substr_count($val, ',');
         $dotCount = substr_count($val, '.');
-        
+
         if ($dotCount > 0 && $commaCount > 0) {
             $lastComma = strrpos($val, ',');
             $lastDot = strrpos($val, '.');
@@ -101,7 +103,7 @@ class TipologiController extends Controller
             // Format Indonesia: 1,23 (koma sebagai desimal)
             $val = str_replace(',', '.', $val);
         }
-        
+
         $val = preg_replace('/[^0-9\.\-]/', '', $val);
         return (float) $val;
     }
@@ -165,7 +167,7 @@ class TipologiController extends Controller
         ]);
 
         $data = $this->calculateTipologiData($request->all());
-        if (! $data) {
+        if (!$data) {
             return back()->with('error', 'Terjadi kesalahan perhitungan.');
         }
 
@@ -215,7 +217,7 @@ class TipologiController extends Controller
         }
 
         $data = $this->calculateTipologiData($request->all());
-        if (! $data) {
+        if (!$data) {
             return back()->with('error', 'Terjadi kesalahan perhitungan.');
         }
 
@@ -281,7 +283,7 @@ class TipologiController extends Controller
     {
         set_time_limit(300);
         $payload = $request->json()->all();
-        if (! $payload || ! is_array($payload)) {
+        if (!$payload || !is_array($payload)) {
             return response()->json(['success' => false, 'message' => 'Format data tidak valid.']);
         }
 
@@ -300,7 +302,7 @@ class TipologiController extends Controller
                 }
 
                 $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
-                
+
                 // Also accept 'sektor' and 'tahun', 'nilailq', 'nilaiss'
                 if (!$hasProvinsi || !isset($item['sektor']) || !isset($item['tahun']) || !isset($item['nilailq']) || !isset($item['nilaiss'])) {
                     continue;
@@ -311,10 +313,10 @@ class TipologiController extends Controller
                 $kabupaten = $resolved['kabupaten'];
 
                 $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
-                
+
                 $sektorName = $this->resolveSektorName($rawItem);
                 $sektorKey = strtolower(trim($sektorName));
-                
+
                 if (isset($sektorsCache[$sektorKey])) {
                     $sektorId = $sektorsCache[$sektorKey];
                 } else {
@@ -374,19 +376,21 @@ class TipologiController extends Controller
     public function syncFromDatabase(Request $request)
     {
         $request->validate([
-            'daerah_analisis' => 'required|string',
+            'tingkat_wilayah' => 'required|string',
+            'provinsi' => 'required|string',
+            'kabupaten' => 'nullable|string',
             'tahun_awal' => 'required|numeric',
             'tahun_akhir' => 'required|numeric'
         ]);
 
-        $daerah = $request->daerah_analisis;
+        $daerah = $request->tingkat_wilayah === 'Provinsi' ? $request->provinsi : $request->kabupaten;
         $startYear = $request->tahun_awal;
         $endYear = $request->tahun_akhir;
 
         $ssData = \App\Models\ShiftShare::where('daerah_analisis', $daerah)
             ->whereBetween('tahun_akhir', [$startYear, $endYear])
             ->get();
-            
+
         $lqData = \App\Models\LQ::where('daerah_analisis', $daerah)
             ->whereBetween('tahun', [$startYear, $endYear])
             ->get();
@@ -396,14 +400,14 @@ class TipologiController extends Controller
         }
 
         $successCount = 0;
-        
+
         \Illuminate\Support\Facades\DB::transaction(function () use ($ssData, $lqData, &$successCount) {
             foreach ($ssData as $ss) {
                 // Find matching LQ
-                $lq = $lqData->first(function($item) use ($ss) {
+                $lq = $lqData->first(function ($item) use ($ss) {
                     return $item->sektor_id == $ss->sektor_id && $item->tahun == $ss->tahun_akhir;
                 });
-                
+
                 if ($lq) {
                     $item = [
                         'tingkat_wilayah' => $ss->tingkat_wilayah,
@@ -414,7 +418,7 @@ class TipologiController extends Controller
                         'nilai_ss' => $ss->dij,
                         'nilai_lq' => $lq->nilai_lq
                     ];
-                    
+
                     $newData = $this->calculateTipologiData($item);
                     if ($newData) {
                         // Cek apakah sudah ada untuk menghindari duplikat
@@ -422,7 +426,7 @@ class TipologiController extends Controller
                             ->where('sektor_id', $ss->sektor_id)
                             ->where('tahun_akhir', $newData['tahun_akhir'])
                             ->first();
-                            
+
                         if (!$existing) {
                             Tipologi::create([
                                 'user_id' => Auth::id() ?? 1,
@@ -457,6 +461,61 @@ class TipologiController extends Controller
         }
 
         return back()->with('success', 'Sinkronisasi selesai. Tidak ada data baru yang ditambahkan (semua sudah tersinkron atau data tidak cocok).');
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $query = Tipologi::with('sektor');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('daerah_analisis', 'like', "%{$search}%")
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+        $tipologiData = $this->mapDbToView($rawDbData);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('operator.tipologi.pdf', [
+            'tipologiData' => $tipologiData,
+            'search' => $request->search ?? null,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-analisis-tipologi-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function downloadExcel(Request $request)
+    {
+        $query = Tipologi::with('sektor');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('daerah_analisis', 'like', "%{$search}%")
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+        $tipologiData = $this->mapDbToView($rawDbData);
+
+        $html = view('operator.tipologi.excel', [
+            'tipologiData' => $tipologiData,
+            'search' => $request->search ?? null,
+        ])->render();
+
+        return response($html)
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', 'attachment; filename="laporan-analisis-tipologi-' . now()->format('Y-m-d') . '.xls"')
+            ->header('Cache-Control', 'max-age=0');
     }
 }
 

@@ -1,3 +1,4 @@
+{{-- Halaman Indeks Analisis Location Quotient (LQ) untuk Operator --}}
 @extends('partials.layouts.operator')
 
 @section('content')
@@ -97,7 +98,17 @@
                     <!-- Tahun -->
                     <div class="space-y-2 col-span-1">
                         <label class="op-label">Tahun</label>
-                        <input type="number" name="tahun" value="{{ old('tahun', $editItem['tahun'] ?? '') }}" class="op-input" placeholder="Contoh: 2024" required>
+                        <div class="relative">
+                            <select name="tahun" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled {{ old('tahun', $editItem['tahun'] ?? '') == '' ? 'selected' : '' }}>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}" {{ old('tahun', $editItem['tahun'] ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                     <!-- Provinsi -->
                     <div class="space-y-2 col-span-1">
@@ -291,12 +302,19 @@
                     </button>
                 </form>
 
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                <a href="{{ route('operator.lq.excel', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh Hasil Analisis (Excel)
-                </button>
+                </a>
+                
+                <a href="{{ route('operator.lq.pdf', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Unduh PDF
+                </a>
 
                 <form action="{{ route('operator.lq.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                     @csrf
@@ -316,6 +334,7 @@
     </div>
 
     <x-import-modal action="{{ route('operator.lq.import') }}" type="lq" />
+
 
 <script>
     function exportToExcel() {

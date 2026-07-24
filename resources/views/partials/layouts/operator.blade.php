@@ -1,3 +1,4 @@
+{{-- Halaman Layout Utama untuk Operator --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -14,474 +15,10 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="{{ asset('js/data-wilayah.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <style>
-        :root {
-            --sidebar-dark: #075936;
-            --sidebar-main: #08794d;
-            --sidebar-light: #10935e;
-            --yellow: #ffd457;
-            --yellow-dark: #e9b930;
-            --white: #ffffff;
-            --background: #f7f9fb;
-            --text-dark: #202b3c;
-            --text-muted: #758096;
-            --border: #e6eaf0;
-            --danger: #e05252;
-        }
 
-        * {
-            box-sizing: border-box;
-        }
 
-        html,
-        body {
-            margin: 0;
-            min-height: 100%;
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-dark);
-            background: var(--background);
-        }
-
-        body.modal-open {
-            overflow: hidden;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font-family: inherit;
-        }
-
-        .admin-shell {
-            min-height: 100vh;
-            display: flex;
-        }
-
-        .admin-sidebar {
-            position: fixed;
-            inset: 0 auto 0 0;
-            z-index: 100;
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            color: #ffffff;
-            background:
-                radial-gradient(
-                    circle at 20% 0%,
-                    rgba(255, 255, 255, 0.08),
-                    transparent 28%
-                ),
-                linear-gradient(
-                    180deg,
-                    #075735 0%,
-                    #087849 48%,
-                    #0c8d58 100%
-                );
-            box-shadow: 10px 0 30px rgba(5, 66, 40, 0.12);
-        }
-
-        /* Custom Scrollbar for Sidebar */
-        .admin-sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .admin-sidebar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .admin-sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-
-        .admin-sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .sidebar-logo {
-            padding: 24px 28px 18px;
-        }
-
-        .sidebar-logo img {
-            display: block;
-            width: 220px;
-            max-width: 100%;
-            height: 72px;
-            object-fit: contain;
-            object-position: left center;
-        }
-
-        .sidebar-profile {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-        }
-
-        .profile-toggle {
-            width: 100%;
-            min-height: 82px;
-            padding: 14px 28px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: #ffffff;
-            background: transparent;
-            border: 0;
-            cursor: pointer;
-            text-align: left;
-        }
-
-        .profile-toggle:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .profile-avatar {
-            width: 48px;
-            height: 48px;
-            flex: 0 0 48px;
-            display: grid;
-            place-items: center;
-            border-radius: 50%;
-            color: #1c6744;
-            background: var(--yellow);
-            border: 2px solid rgba(255, 255, 255, 0.82);
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .profile-copy {
-            min-width: 0;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: center;
-        }
-
-        .profile-name {
-            display: block;
-            max-width: 100%;
-            overflow: hidden;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 1.35;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-
-        .profile-role {
-            display: block;
-            margin-top: 3px;
-            color: var(--yellow);
-            font-size: 12px;
-            font-weight: 500;
-            line-height: 1.25;
-            text-transform: lowercase;
-        }
-
-        .profile-chevron {
-            color: var(--yellow);
-            font-size: 13px;
-            transition: transform 0.22s ease;
-        }
-
-        .sidebar-profile.open .profile-chevron {
-            transform: rotate(180deg);
-        }
-
-        .profile-dropdown {
-            max-height: 0;
-            overflow: hidden;
-            background: rgba(1, 47, 29, 0.23);
-            transition: max-height 0.25s ease;
-        }
-
-        .sidebar-profile.open .profile-dropdown {
-            max-height: 240px;
-        }
-
-        .profile-dropdown-inner {
-            padding: 6px 18px 12px;
-        }
-
-        .profile-dropdown-link {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 11px 10px;
-            color: #ffffff;
-            background: transparent;
-            border: 0;
-            border-radius: 9px;
-            text-decoration: none;
-            cursor: pointer;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .profile-dropdown-link i {
-            width: 18px;
-            color: var(--yellow);
-            text-align: center;
-        }
-
-        .profile-dropdown-link:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .profile-dropdown-divider {
-            height: 1px;
-            margin: 8px 0;
-            background: rgba(255, 255, 255, 0.16);
-        }
-
-        .profile-dropdown-link.logout {
-            color: #ffaaaa;
-        }
-
-        .profile-dropdown-link.logout i {
-            color: #ff8f8f;
-        }
-
-        .sidebar-content {
-            padding: 0 17px 28px;
-        }
-
-        .sidebar-section-title {
-            margin: 18px 12px 10px;
-            color: var(--yellow);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 5px;
-        }
-
-        .sidebar-link {
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 15px;
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition:
-                background 0.18s ease,
-                color 0.18s ease,
-                transform 0.18s ease;
-        }
-
-        .sidebar-link i {
-            width: 21px;
-            color: rgba(255, 255, 255, 0.76);
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .sidebar-link:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.09);
-            transform: translateX(2px);
-        }
-
-        .sidebar-link.active {
-            color: #176541;
-            background: var(--yellow);
-            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.11);
-        }
-
-        .sidebar-link.active i {
-            color: #176541;
-        }
-
-        .admin-main {
-            width: calc(100% - 300px);
-            min-height: 100vh;
-            margin-left: 300px;
-            background: var(--background);
-        }
-
-        .mobile-sidebar-button {
-            display: none;
-            position: fixed;
-            top: 14px;
-            left: 14px;
-            z-index: 120;
-            width: 44px;
-            height: 44px;
-            place-items: center;
-            border: 0;
-            border-radius: 12px;
-            color: #ffffff;
-            background: #08794d;
-            box-shadow: 0 8px 22px rgba(5, 80, 47, 0.2);
-            cursor: pointer;
-        }
-
-        .sidebar-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 90;
-            background: rgba(15, 23, 42, 0.46);
-        }
-
-        .logout-modal[hidden] {
-            display: none !important;
-        }
-
-        .logout-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            display: grid;
-            place-items: center;
-            padding: 24px;
-        }
-
-        .logout-modal-backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.52);
-            backdrop-filter: blur(3px);
-        }
-
-        .logout-modal-card {
-            position: relative;
-            width: min(420px, 100%);
-            padding: 30px 28px 27px;
-            border-radius: 22px;
-            background: #ffffff;
-            text-align: center;
-            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.25);
-            animation: modalAppear 0.2s ease-out;
-        }
-
-        .logout-modal-icon {
-            width: 68px;
-            height: 68px;
-            margin: 0 auto 18px;
-            display: grid;
-            place-items: center;
-            border-radius: 20px;
-            color: #dc2626;
-            background: #fee2e2;
-            font-size: 26px;
-        }
-
-        .logout-modal-card h3 {
-            margin: 0;
-            color: #202b3c;
-            font-size: 21px;
-            font-weight: 700;
-        }
-
-        .logout-modal-card p {
-            margin: 10px auto 0;
-            max-width: 340px;
-            color: #758096;
-            font-size: 13px;
-            line-height: 1.7;
-        }
-
-        .logout-modal-actions {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .logout-modal-actions button {
-            min-width: 128px;
-            height: 44px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .logout-cancel {
-            color: #475467;
-            background: #ffffff;
-            border: 1px solid #d9dee8;
-        }
-
-        .logout-confirm {
-            color: #ffffff;
-            background: #dc2626;
-            border: 1px solid #dc2626;
-        }
-
-        .logout-confirm:hover {
-            background: #b91c1c;
-        }
-
-        @keyframes modalAppear {
-            from {
-                opacity: 0;
-                transform: translateY(10px) scale(0.97);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .admin-sidebar {
-                width: 280px;
-                transform: translateX(-100%);
-                transition: transform 0.25s ease;
-            }
-
-            .admin-sidebar.open {
-                transform: translateX(0);
-            }
-
-            .admin-main {
-                width: 100%;
-                margin-left: 0;
-            }
-
-            .mobile-sidebar-button {
-                display: grid;
-            }
-
-            .sidebar-backdrop.show {
-                display: block;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .admin-sidebar {
-                width: min(285px, 88vw);
-            }
-
-            .logout-modal-actions {
-                flex-direction: column-reverse;
-            }
-
-            .logout-modal-actions button {
-                width: 100%;
-            }
-        }
-    </style>
 
     @stack('styles')
 </head>
@@ -884,6 +421,182 @@
             });
             return false;
         }
+
+        window.exportToPDF = function (tableId, title, filename) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            // Clone the table
+            const clone = table.cloneNode(true);
+
+            // Remove Checkbox (first col) and Aksi (last col) columns from clone
+            const rows = clone.rows;
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i].cells.length > 0) {
+                    rows[i].deleteCell(-1); // Delete Aksi column
+                    rows[i].deleteCell(0);  // Delete Checkbox column
+                }
+            }
+
+            // Set styling for cloned table to look beautiful in PDF
+            clone.style.width = '100%';
+            clone.style.borderCollapse = 'collapse';
+            clone.style.fontSize = '9px';
+            clone.style.fontFamily = "'Poppins', sans-serif";
+            clone.style.color = '#334155';
+            clone.style.marginTop = '10px';
+
+            // Style headers
+            const ths = clone.querySelectorAll('th');
+            ths.forEach(th => {
+                th.style.backgroundColor = '#075936';
+                th.style.color = '#ffffff';
+                th.style.padding = '8px 6px';
+                th.style.border = '1px solid #cbd5e1';
+                th.style.fontWeight = '600';
+                th.style.fontSize = '9px';
+                th.style.textAlign = 'center';
+                // Hide selectAll checkbox element inside th if present
+                const cb = th.querySelector('input[type="checkbox"]');
+                if (cb) cb.remove();
+            });
+
+            // Style data cells
+            const tds = clone.querySelectorAll('td');
+            tds.forEach(td => {
+                td.style.padding = '6px';
+                td.style.border = '1px solid #cbd5e1';
+                td.style.lineHeight = '1.3';
+                // Hide checkboxes inside td if present
+                const cb = td.querySelector('input[type="checkbox"]');
+                if (cb) cb.remove();
+                
+                // Align center classes
+                if (td.classList.contains('text-center')) {
+                    td.style.textAlign = 'center';
+                }
+            });
+
+            // Create a container to export
+            const element = document.createElement('div');
+            element.style.padding = '15px';
+            element.style.backgroundColor = '#ffffff';
+
+            // Create Cop/Header
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.justifyContent = 'center';
+            header.style.borderBottom = '3px double #075936';
+            header.style.paddingBottom = '12px';
+            header.style.marginBottom = '15px';
+
+            const logo = document.createElement('img');
+            logo.src = '/images/logo-dpmptsp.png';
+            logo.style.height = '50px';
+            logo.style.marginRight = '15px';
+
+            const headerText = document.createElement('div');
+            headerText.style.textAlign = 'center';
+            
+            const title1 = document.createElement('h2');
+            title1.textContent = 'PEMERINTAH PROVINSI SUMATERA UTARA';
+            title1.style.margin = '0';
+            title1.style.fontSize = '14px';
+            title1.style.fontWeight = 'bold';
+            title1.style.color = '#075936';
+
+            const title2 = document.createElement('h3');
+            title2.textContent = 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU';
+            title2.style.margin = '3px 0 0 0';
+            title2.style.fontSize = '11px';
+            title2.style.fontWeight = 'bold';
+            title2.style.color = '#075936';
+
+            headerText.appendChild(title1);
+            headerText.appendChild(title2);
+            
+            header.appendChild(logo);
+            header.appendChild(headerText);
+            element.appendChild(header);
+
+            // Document Title & Metadata
+            const docTitle = document.createElement('h4');
+            docTitle.textContent = title;
+            docTitle.style.textAlign = 'center';
+            docTitle.style.fontSize = '12px';
+            docTitle.style.fontWeight = 'bold';
+            docTitle.style.margin = '0 0 10px 0';
+            docTitle.style.textTransform = 'uppercase';
+            element.appendChild(docTitle);
+
+            const meta = document.createElement('div');
+            meta.style.display = 'flex';
+            meta.style.justifyContent = 'space-between';
+            meta.style.fontSize = '9px';
+            meta.style.color = '#64748b';
+            meta.style.marginBottom = '10px';
+            meta.style.borderBottom = '1px solid #e2e8f0';
+            meta.style.paddingBottom = '4px';
+
+            const dateInfo = document.createElement('span');
+            dateInfo.textContent = 'Tanggal Unduh: ' + new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const operatorInfo = document.createElement('span');
+            const pName = document.querySelector('.profile-name');
+            operatorInfo.textContent = 'Operator: ' + (pName ? pName.textContent.trim() : 'Operator');
+
+            meta.appendChild(dateInfo);
+            meta.appendChild(operatorInfo);
+            element.appendChild(meta);
+
+            // Append Cloned Table
+            element.appendChild(clone);
+
+            // Append Signature/Tanda Tangan at bottom
+            const signature = document.createElement('div');
+            signature.style.marginTop = '30px';
+            signature.style.display = 'flex';
+            signature.style.justifyContent = 'flex-end';
+            signature.style.fontSize = '10px';
+            signature.style.color = '#334155';
+
+            const sigBox = document.createElement('div');
+            sigBox.style.width = '180px';
+            sigBox.style.textAlign = 'center';
+
+            const sigTitle = document.createElement('p');
+            sigTitle.textContent = 'Petugas Operator,';
+            sigTitle.style.margin = '0 0 50px 0';
+
+            const sigName = document.createElement('p');
+            sigName.textContent = (pName ? pName.textContent.trim() : 'Operator');
+            sigName.style.fontWeight = 'bold';
+            sigName.style.margin = '0';
+            sigName.style.textDecoration = 'underline';
+
+            const sigRole = document.createElement('p');
+            sigRole.textContent = 'DPMPTSP Sumatera Utara';
+            sigRole.style.margin = '1px 0 0 0';
+
+            sigBox.appendChild(sigTitle);
+            sigBox.appendChild(sigName);
+            sigBox.appendChild(sigRole);
+            signature.appendChild(sigBox);
+            element.appendChild(signature);
+
+            // Options for html2pdf
+            const opt = {
+                margin:       10,
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            // Run html2pdf
+            html2pdf().set(opt).from(element).save();
+        };
     </script>
 
 </body>

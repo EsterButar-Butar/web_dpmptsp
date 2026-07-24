@@ -27,6 +27,8 @@ Route::middleware([
 
         // Analisis LQ Routes
         Route::get('/analisis-lq', [LqController::class, 'index'])->name('lq.index');
+        Route::get('/analisis-lq/pdf', [LqController::class, 'downloadPdf'])->name('lq.pdf');
+        Route::get('/analisis-lq/excel', [LqController::class, 'downloadExcel'])->name('lq.excel');
         Route::post('/analisis-lq/hitung', [LqController::class, 'store'])->name('lq.store');
         Route::delete('/analisis-lq/empty', [LqController::class, 'empty'])->name('lq.empty');
         Route::delete('/analisis-lq/bulk-delete', [LqController::class, 'bulkDestroy'])->name('lq.bulkDestroy');
@@ -36,14 +38,20 @@ Route::middleware([
 
         // Analisis SS Routes
         Route::get('/analisis-ss', [SsController::class, 'index'])->name('ss.index');
+        Route::get('/analisis-ss/pdf', [SsController::class, 'downloadPdf'])->name('ss.pdf');
+        Route::get('/analisis-ss/excel', [SsController::class, 'downloadExcel'])->name('ss.excel');
         Route::post('/analisis-ss/hitung', [SsController::class, 'store'])->name('ss.store');
         Route::delete('/analisis-ss/empty', [SsController::class, 'empty'])->name('ss.empty');
         Route::delete('/analisis-ss/bulk-delete', [SsController::class, 'bulkDestroy'])->name('ss.bulkDestroy');
         Route::put('/analisis-ss/{id}', [SsController::class, 'update'])->name('ss.update');
         Route::delete('/analisis-ss/{id}', [SsController::class, 'destroy'])->name('ss.destroy');
         Route::post('/analisis-ss/import', [SsController::class, 'import'])->name('ss.import');
+        Route::post('/analisis-ss/sync', [SsController::class, 'syncFromDatabase'])->name('ss.sync');
 
+        // Analisis Tipologi Routes
         Route::get('/analisis-tipologi', [TipologiController::class, 'index'])->name('tipologi.index');
+        Route::get('/analisis-tipologi/pdf', [TipologiController::class, 'downloadPdf'])->name('tipologi.pdf');
+        Route::get('/analisis-tipologi/excel', [TipologiController::class, 'downloadExcel'])->name('tipologi.excel');
         Route::post('/analisis-tipologi/hitung', [TipologiController::class, 'store'])->name('tipologi.store');
         Route::delete('/analisis-tipologi/empty', [TipologiController::class, 'empty'])->name('tipologi.empty');
         Route::delete('/analisis-tipologi/bulk-delete', [TipologiController::class, 'bulkDestroy'])->name('tipologi.bulkDestroy');
@@ -54,6 +62,8 @@ Route::middleware([
 
         // Analisis Klassen Routes
         Route::get('/analisis-klassen', [KlassenController::class, 'index'])->name('klassen.index');
+        Route::get('/analisis-klassen/pdf', [KlassenController::class, 'downloadPdf'])->name('klassen.pdf');
+        Route::get('/analisis-klassen/excel', [KlassenController::class, 'downloadExcel'])->name('klassen.excel');
         Route::post('/analisis-klassen/hitung', [KlassenController::class, 'store'])->name('klassen.store');
         Route::delete('/analisis-klassen/empty', [KlassenController::class, 'empty'])->name('klassen.empty');
         Route::delete('/analisis-klassen/bulk-delete', [KlassenController::class, 'bulkDestroy'])->name('klassen.bulkDestroy');

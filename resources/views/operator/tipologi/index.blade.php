@@ -1,3 +1,4 @@
+{{-- Halaman Indeks Analisis Tipologi Sektor untuk Operator --}}
 @extends('partials.layouts.operator')
 
 @section('content')
@@ -99,7 +100,17 @@
             <!-- Tahun -->
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Tahun</label>
-                <input type="number" name="tahun" value="{{ old('tahun', $editItem['tahun'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
+                <div class="relative">
+                    <select name="tahun" class="op-input op-input-icon op-select" required>
+                        <option value="" disabled {{ old('tahun', $editItem['tahun'] ?? '') == '' ? 'selected' : '' }}>Pilih Tahun</option>
+                        @for($i = 2021; $i <= 2045; $i++)
+                            <option value="{{ $i }}" {{ old('tahun', $editItem['tahun'] ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        @endfor
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                        <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                    </div>
+                </div>
             </div>
             <!-- Provinsi -->
             <div class="space-y-2 col-span-1">
@@ -308,12 +319,19 @@
                     </button>
                 </form>
 
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{{ route('operator.tipologi.excel', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh (Excel)
-                </button>
+                </a>
+
+                <a href="{{ route('operator.tipologi.pdf', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Unduh PDF
+                </a>
 
                 <form action="{{ route('operator.tipologi.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                     @csrf
@@ -332,7 +350,13 @@
     <x-import-modal action="{{ route('operator.tipologi.import') }}" type="tipologi" />
 
     <!-- Sync Modal -->
-    <div id="syncModal" class="fixed inset-0 z-[99] hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity" style="display: none;">
+    <div id="syncModal" class="fixed inset-0 z-[99] hidden items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm px-4 py-8 transition-opacity" style="display: none;" x-data="{
+        sync_tingkat_wilayah: 'Kabupaten/Kota',
+        sync_provinsi: '',
+        get syncListKabupaten() {
+            return window.daftarWilayah[this.sync_provinsi] || [];
+        }
+    }">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -350,33 +374,77 @@
             <form action="{{ route('operator.tipologi.sync') }}" method="POST" class="p-6 space-y-4">
                 @csrf
                 <p class="text-sm text-slate-600 mb-4">Sistem akan secara otomatis menyinkronkan (mengambil) hasil perhitungan LQ dan SS untuk menghasilkan Kuadran Tipologi.</p>
+                
                 <div class="space-y-2">
-                    <label class="op-label">Pilih Daerah Analisis</label>
+                    <label class="op-label">Tingkat Wilayah</label>
                     <div class="relative">
-                        <input list="sync-daerah-list" name="daerah_analisis" class="op-input op-input-icon op-datalist" placeholder="Ketik atau pilih daerah" required>
-                        <datalist id="sync-daerah-list">
-                            <template x-for="kab in Object.keys(window.daftarWilayah).flatMap(p => window.daftarWilayah[p])" :key="kab">
-                                <option :value="kab"></option>
-                            </template>
-                            <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                                <option :value="prov"></option>
-                            </template>
-                        </datalist>
+                        <select name="tingkat_wilayah" x-model="sync_tingkat_wilayah" class="op-input op-input-icon op-select">
+                            <option value="Kabupaten/Kota">Kabupaten/Kota</option>
+                            <option value="Provinsi">Provinsi</option>
+                        </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
-                                <path d="M7 10l5 5 5-5z" />
-                            </svg>
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="op-label">Provinsi</label>
+                    <div class="relative">
+                        <select name="provinsi" x-model="sync_provinsi" class="op-input op-input-icon op-select" required>
+                            <option value="" disabled selected>Pilih Provinsi</option>
+                            <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
+                                <option :value="prov" x-text="prov"></option>
+                            </template>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2" x-show="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                    <label class="op-label">Kabupaten / Kota</label>
+                    <div class="relative">
+                        <select name="kabupaten" class="op-input op-input-icon op-select" :required="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                            <option value="" disabled selected>Pilih Kabupaten/Kota</option>
+                            <template x-for="kab in syncListKabupaten" :key="kab">
+                                <option :value="kab" x-text="kab"></option>
+                            </template>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                         </div>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="op-label">Tahun Awal</label>
-                        <input type="number" name="tahun_awal" class="op-input" placeholder="Contoh: 2021" required>
+                        <div class="relative">
+                            <select name="tahun_awal" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <label class="op-label">Tahun Akhir</label>
-                        <input type="number" name="tahun_akhir" class="op-input" placeholder="Contoh: 2025" required>
+                        <div class="relative">
+                            <select name="tahun_akhir" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -393,6 +461,7 @@
             </form>
         </div>
     </div>
+
 
 <script>
     function exportToExcel() {

@@ -1,5 +1,6 @@
 <?php
 
+// Controller untuk mengelola analisis Klassen Typology bagi Operator
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
@@ -35,8 +36,8 @@ class KlassenController extends Controller
                 'tingkat_wilayah' => $item->tingkat_wilayah,
                 'daerah_analisis' => $item->daerah_analisis,
                 'daerah_pembanding' => $item->daerah_pembanding,
-                'provinsi' => $item->daerah_pembanding,
-                'kabupaten' => $item->daerah_analisis,
+                'provinsi' => $item->tingkat_wilayah === 'Provinsi' ? $item->daerah_analisis : $item->daerah_pembanding,
+                'kabupaten' => $item->tingkat_wilayah === 'Provinsi' ? '' : $item->daerah_analisis,
                 'sektor' => $item->sektor->nama_sektor ?? '-',
                 'tahun_awal' => $item->tahun_awal,
                 'tahun_akhir' => $item->tahun_akhir,
@@ -67,10 +68,10 @@ class KlassenController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('daerah_analisis', 'like', "%{$search}%")
-                  ->orWhere('daerah_pembanding', 'like', "%{$search}%")
-                  ->orWhereHas('sektor', function ($qSektor) use ($search) {
-                      $qSektor->where('nama_sektor', 'like', "%{$search}%");
-                  });
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -103,10 +104,11 @@ class KlassenController extends Controller
     {
         // Sort data by year ascending just to be safe
         usort($yearsData, function ($a, $b) {
-            return (int)$a['tahun'] <=> (int)$b['tahun'];
+            return (int) $a['tahun'] <=> (int) $b['tahun'];
         });
 
-        if (count($yearsData) < 2) return false;
+        if (count($yearsData) < 2)
+            return false;
 
         $sumRi = 0;
         $sumR = 0;
@@ -118,7 +120,7 @@ class KlassenController extends Controller
 
         for ($i = 0; $i < $countContrib; $i++) {
             $curr = $yearsData[$i];
-            
+
             $pdrbSektorKab = $this->parseNumber($curr['pdrb_sektor_analisis'] ?? 0);
             $pdrbTotalKab = $this->parseNumber($curr['total_pdrb_analisis'] ?? 0);
             $pdrbSektorProv = $this->parseNumber($curr['pdrb_sektor_pembanding'] ?? 0);
@@ -236,7 +238,7 @@ class KlassenController extends Controller
         }
 
         $data = $this->calculateKlassenData($yearsData, $request->tingkat_wilayah, $request->provinsi, $request->kabupaten, $request->sektor);
-        if (! $data) {
+        if (!$data) {
             return back()->with('error', 'Terjadi kesalahan perhitungan atau jumlah tahun kurang dari 2.');
         }
 
@@ -301,7 +303,7 @@ class KlassenController extends Controller
         }
 
         $data = $this->calculateKlassenData($yearsData, $request->tingkat_wilayah, $request->provinsi, $request->kabupaten, $request->sektor);
-        if (! $data) {
+        if (!$data) {
             return back()->with('error', 'Terjadi kesalahan perhitungan atau jumlah tahun kurang dari 2.');
         }
 
@@ -369,7 +371,7 @@ class KlassenController extends Controller
     {
         set_time_limit(300);
         $payload = $request->json()->all();
-        if (! $payload || ! is_array($payload)) {
+        if (!$payload || !is_array($payload)) {
             return response()->json(['success' => false, 'message' => 'Format data tidak valid.']);
         }
 
@@ -382,9 +384,11 @@ class KlassenController extends Controller
         foreach ($payload as $rawItem) {
             $item = $this->normalizeKeys($rawItem);
             $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
-            if (!$hasProvinsi || !isset($item['sektor']) || !isset($item['tahun']) || 
+            if (
+                !$hasProvinsi || !isset($item['sektor']) || !isset($item['tahun']) ||
                 !isset($item['pdrbsektor']) || !isset($item['totalpdrb']) ||
-                !isset($item['pdrbsektorpembanding']) || !isset($item['totalpdrbpembanding'])) {
+                !isset($item['pdrbsektorpembanding']) || !isset($item['totalpdrbpembanding'])
+            ) {
                 continue;
             }
 
@@ -392,7 +396,7 @@ class KlassenController extends Controller
             $provinsi = $resolved['provinsi'];
             $kabupaten = $resolved['kabupaten'];
             $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
-            
+
             $sektorName = $this->resolveSektorName($rawItem);
             $groupKey = $tingkat . '_' . $provinsi . '_' . $kabupaten . '_' . $sektorName;
 
@@ -418,7 +422,8 @@ class KlassenController extends Controller
         \Illuminate\Support\Facades\DB::transaction(function () use ($groupedData, &$successCount, &$sektorsCache) {
             foreach ($groupedData as $group) {
                 // Minimum 2 years for YoY
-                if (count($group['years']) < 2) continue;
+                if (count($group['years']) < 2)
+                    continue;
 
                 $newData = $this->calculateKlassenData($group['years'], $group['tingkat_wilayah'], $group['provinsi'], $group['kabupaten'], $group['sektor']);
 
@@ -464,7 +469,7 @@ class KlassenController extends Controller
             session()->flash('success', "Berhasil mengimpor $successCount data baru!");
             return response()->json([
                 'success' => true,
-                'message' => $successCount.' sektor berhasil dihitung.',
+                'message' => $successCount . ' sektor berhasil dihitung.',
             ]);
         }
 
@@ -523,6 +528,61 @@ class KlassenController extends Controller
             'data' => $yearsData,
             'message' => 'Berhasil menarik data tahunan dari database!'
         ]);
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $query = Klassen::with('sektor');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('daerah_analisis', 'like', "%{$search}%")
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+        $klassenData = $this->mapDbToView($rawDbData);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('operator.klassen.pdf', [
+            'klassenData' => $klassenData,
+            'search' => $request->search ?? null,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-analisis-klassen-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function downloadExcel(Request $request)
+    {
+        $query = Klassen::with('sektor');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('daerah_analisis', 'like', "%{$search}%")
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+        $klassenData = $this->mapDbToView($rawDbData);
+
+        $html = view('operator.klassen.excel', [
+            'klassenData' => $klassenData,
+            'search' => $request->search ?? null,
+        ])->render();
+
+        return response($html)
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', 'attachment; filename="laporan-analisis-klassen-' . now()->format('Y-m-d') . '.xls"')
+            ->header('Cache-Control', 'max-age=0');
     }
 }
 

@@ -1,3 +1,4 @@
+{{-- Halaman Indeks Analisis Klassen Typology untuk Operator --}}
 @extends('partials.layouts.operator')
 
 @section('content')
@@ -52,7 +53,8 @@
                 get listKabupaten() {
                     return window.daftarWilayah[this.provinsi] || [];
                 },
-                years: [
+                years: @if($editData)
+                [
                     { 
                         tahun: '{{ old('tahun_awal', $editData['tahun_awal'] ?? '') }}', 
                         pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_awal', $editData['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], 
@@ -69,7 +71,16 @@
                         total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_akhir', $editData['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0],
                         pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: ''
                     }
-                ],
+                ]
+                @else
+                [
+                    { tahun: '2021', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2022', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2023', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2024', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2025', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' }
+                ]
+                @endif,
                 format(v) { 
                     if (v === undefined || v === null || v === '') return '';
                     let raw = v.toString().replace(/[^0-9]/g, ''); 
@@ -171,7 +182,17 @@
                 <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                     <div class="flex items-center gap-3">
                         <span class="bg-[#145239] text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap" x-text="'Data Tahun ' + (index + 1)"></span>
-                        <input type="number" name="tahun[]" x-model="year.tahun" min="1900" max="2100" class="op-input !w-32 !py-1 !text-sm" placeholder="Tahun" required>
+                        <div class="relative">
+                            <select name="tahun[]" x-model="year.tahun" class="op-input op-input-icon op-select !w-32 !py-1 !text-sm" required>
+                                <option value="" disabled>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
+                                <svg class="w-3 h-3 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                     <button type="button" @click="removeYear(index)" x-show="years.length > 2" class="text-red-500 hover:text-red-700 p-1.5 bg-red-100 rounded-md transition-colors" title="Hapus Tahun">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -380,12 +401,19 @@
                     </button>
                 </form>
 
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{{ route('operator.klassen.excel', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh (Excel)
-                </button>
+                </a>
+                
+                <a href="{{ route('operator.klassen.pdf', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Unduh PDF
+                </a>
 
                 <form action="{{ route('operator.klassen.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                     @csrf
@@ -404,9 +432,9 @@
     <x-import-modal action="{{ route('operator.klassen.import') }}" type="klassen" />
 
     <!-- Sync Modal -->
-    <div id="syncModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" style="display: none;" x-data="{
+    <div id="syncModal" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm px-4 py-8" style="display: none;" x-data="{
         sync_tingkat_wilayah: 'Kabupaten/Kota',
-        sync_provinsi: 'Sumatera Utara',
+        sync_provinsi: '',
         get syncListKabupaten() {
             return window.daftarWilayah[this.sync_provinsi] || [];
         }
@@ -436,12 +464,12 @@
                 <div class="space-y-2">
                     <label class="op-label">Provinsi</label>
                     <div class="relative">
-                        <input list="sync-provinsi-list" id="sync_provinsi" x-model="sync_provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
-                        <datalist id="sync-provinsi-list">
+                        <select id="sync_provinsi" x-model="sync_provinsi" class="op-input op-input-icon op-select" required>
+                            <option value="" disabled selected>Pilih Provinsi</option>
                             <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                                <option :value="prov"></option>
+                                <option :value="prov" x-text="prov"></option>
                             </template>
-                        </datalist>
+                        </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                             <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                         </div>
@@ -451,12 +479,12 @@
                 <div class="space-y-2" x-show="sync_tingkat_wilayah === 'Kabupaten/Kota'">
                     <label class="op-label">Kabupaten / Kota</label>
                     <div class="relative">
-                        <input list="sync-kabupaten-list" id="sync_kabupaten" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
-                        <datalist id="sync-kabupaten-list">
+                        <select id="sync_kabupaten" class="op-input op-input-icon op-select" :required="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                            <option value="" disabled selected>Pilih Kabupaten/Kota</option>
                             <template x-for="kab in syncListKabupaten" :key="kab">
-                                <option :value="kab"></option>
+                                <option :value="kab" x-text="kab"></option>
                             </template>
-                        </datalist>
+                        </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                             <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                         </div>
@@ -487,11 +515,31 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="op-label">Tahun Awal</label>
-                        <input type="number" id="sync_tahun_awal" min="1900" max="2100" class="op-input" placeholder="Tahun Awal">
+                        <div class="relative">
+                            <select id="sync_tahun_awal" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <label class="op-label">Tahun Akhir</label>
-                        <input type="number" id="sync_tahun_akhir" min="1900" max="2100" class="op-input" placeholder="Tahun Akhir">
+                        <div class="relative">
+                            <select id="sync_tahun_akhir" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -504,6 +552,7 @@
             </div>
         </div>
     </div>
+
 
 <script>
     async function processSync() {

@@ -54,18 +54,20 @@
         } else if (type === 'ss') {
             wsData = [
                 [
-                    "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun Awal", "Tahun Akhir", 
-                    "PDRB Sektor Analisis Awal", "PDRB Sektor Analisis Akhir", 
-                    "PDRB Sektor Pembanding Awal", "PDRB Sektor Pembanding Akhir", 
-                    "Total PDRB Pembanding Awal", "Total PDRB Pembanding Akhir"
+                    "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun", 
+                    "PDRB Sektor", "PDRB Sektor Pembanding", "Total PDRB Pembanding"
                 ],
                 [
-                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2021", "2022", 
-                    "15000", "16000", "50000", "52000", "200000", "210000"
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2021", 
+                    "15000", "50000", "200000"
+                ],
+                [
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2022", 
+                    "16000", "52000", "210000"
                 ]
             ];
             filename = "Template_Analisis_SS.xlsx";
-            colCount = 11;
+            colCount = 7;
         } else if (type === 'tipologi') {
             wsData = [
                 [
@@ -588,8 +590,8 @@
                             throw new Error("Data PDRB harus memiliki minimal 2 tahun data untuk analisis.");
                         }
                         
-                        if (type === 'klassen') {
-                            // Output all data rows for Klassen
+                        if (type === 'klassen' || type === 'ss') {
+                            // Output all data rows for Klassen/SS
                             statusEl.textContent = `Mengonversi ${dataRows.length} baris data tahunan untuk Klassen...`;
                             
                             // Calculate Total PDRB per region per year
