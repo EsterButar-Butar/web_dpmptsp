@@ -7,18 +7,71 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Membuat tabel data_hs_code.
      */
     public function up(): void
     {
         Schema::create('data_hs_code', function (Blueprint $table) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | PRIMARY KEY
+            |--------------------------------------------------------------------------
+            */
+
             $table->id();
+
+            /*
+            |--------------------------------------------------------------------------
+            | DATA HS CODE
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('kategori_kode', 100);
+
+            $table->string('kelompok_kode', 50);
+
+            $table->text('kelompok_uraian');
+
+            $table->string('subkelompok_kode', 50);
+
+            $table->text('subkelompok_uraian');
+
+            $table->string('hs_code', 20);
+
+            $table->text('uraian_barang');
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDEX
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index('kategori_kode');
+            $table->index('kelompok_kode');
+            $table->index('subkelompok_kode');
+            $table->index('hs_code');
+
+            /*
+            |--------------------------------------------------------------------------
+            | MENCEGAH DUPLIKAT HS CODE
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unique('hs_code');
+
+            /*
+            |--------------------------------------------------------------------------
+            | TIMESTAMP
+            |--------------------------------------------------------------------------
+            */
+
             $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Menghapus tabel data_hs_code.
      */
     public function down(): void
     {

@@ -58,5 +58,11 @@ class Sektor extends Model
     {
         return $this->hasMany(HasilTipologiKlassen::class,'sektor_id');
     }
+    
+    public const UPDATED_AT = null;
 
+    public function getIdAttribute()
+    {
+        return $this->sektor_id;
+    }
 }

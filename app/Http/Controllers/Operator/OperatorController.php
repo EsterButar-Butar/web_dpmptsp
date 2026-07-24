@@ -16,9 +16,13 @@ class OperatorController extends Controller
 {
     public static function logActivity($module, $action, $desc)
     {
+<<<<<<< HEAD
         if ($module !== 'Autentikasi') {
             return;
         }
+=======
+
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -64,8 +68,12 @@ class OperatorController extends Controller
         $statusTipologi = $this->getLatestStatus(\App\Models\Tipologi::class);
         $statusKlassen = $this->getLatestStatus(\App\Models\Klassen::class);
 
+<<<<<<< HEAD
         $activityLogs = ActivityLog::where('module', 'Autentikasi')
             ->whereIn('action', ['Login', 'Logout'])
+=======
+        $activityLogs = ActivityLog::whereNotIn('module', ['Autentikasi'])
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             ->latest()
             ->take(10)
             ->get();
@@ -84,8 +92,12 @@ class OperatorController extends Controller
 
     public function aktivitas(Request $request)
     {
+<<<<<<< HEAD
         $activityLogs = ActivityLog::where('module', 'Autentikasi')
             ->whereIn('action', ['Login', 'Logout'])
+=======
+        $activityLogs = ActivityLog::whereNotIn('module', ['Autentikasi'])
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             ->latest()
             ->get();
         $collection = collect($activityLogs);
@@ -144,7 +156,17 @@ class OperatorController extends Controller
 
     public function settings()
     {
+<<<<<<< HEAD
         return view('operator.settings');
+=======
+        $authLogs = \App\Models\ActivityLog::where('user_id', Auth::id())
+            ->where('module', 'Autentikasi')
+            ->latest()
+            ->limit(50)
+            ->get();
+            
+        return view('operator.settings', compact('authLogs'));
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
     }
 
     // Aksi update profil nyata

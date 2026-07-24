@@ -7,10 +7,6 @@
 rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-/>
     <meta charset="UTF-8">
 
     <meta
@@ -23,7 +19,7 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     </title>
 
 
-    {{-- Google Fonts --}
+    {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
     <link
@@ -49,7 +45,8 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     @vite([
         'resources/css/app.css',
         'resources/css/comparison.css',
-        'resources/js/app.js'
+        'resources/js/app.js',
+        'resources/css/footer.css'
     ])
 
 

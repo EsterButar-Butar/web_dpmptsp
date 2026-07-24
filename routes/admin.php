@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\DataWilayahController;
 use App\Http\Controllers\Admin\DataKbliController;
 use App\Http\Controllers\Admin\DataHsCodeController;
+use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\MoneyCurrencyController;
 
 Route::middleware([
     'auth',
@@ -19,6 +22,12 @@ Route::middleware([
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Pengguna
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('/pengguna', [PenggunaController::class, 'index'])
             ->name('pengguna.index');
 
@@ -30,6 +39,12 @@ Route::middleware([
 
         Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'destroy'])
             ->name('pengguna.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Data Wilayah
+        |--------------------------------------------------------------------------
+        */
 
         Route::get('/data-wilayah', [DataWilayahController::class, 'index'])
             ->name('data-wilayah.index');
@@ -43,6 +58,12 @@ Route::middleware([
         Route::delete('/data-wilayah/{dataWilayah}', [DataWilayahController::class, 'destroy'])
             ->name('data-wilayah.destroy');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Data KBLI
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('/data-kbli', [DataKbliController::class, 'index'])
             ->name('data-kbli.index');
 
@@ -54,6 +75,12 @@ Route::middleware([
 
         Route::delete('/data-kbli/{id}', [DataKbliController::class, 'destroy'])
             ->name('data-kbli.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | HS Code
+        |--------------------------------------------------------------------------
+        */
 
         Route::get('/hs-code', [DataHsCodeController::class, 'index'])
             ->name('hs-code.index');
@@ -67,4 +94,44 @@ Route::middleware([
         Route::delete('/hs-code/{id}', [DataHsCodeController::class, 'destroy'])
             ->name('hs-code.destroy');
 
-    });
+        /*
+        |--------------------------------------------------------------------------
+        | Profil Admin
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/profile', [AdminProfileController::class, 'index'])
+            ->name('profile.index');
+
+        Route::put('/profile', [AdminProfileController::class, 'update'])
+            ->name('profile.update');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pengaturan Admin
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/settings', [AdminSettingsController::class, 'index'])
+            ->name('settings.index');
+
+        Route::put(
+            '/settings/password',
+            [AdminSettingsController::class, 'updatePassword']
+        )->name('settings.password');
+
+        Route::put(
+            '/settings/two-factor',
+            [AdminSettingsController::class, 'toggleTwoFactor']
+        )->name('settings.2fa');
+
+        Route::get(
+            '/money-currency',
+            [MoneyCurrencyController::class, 'index']
+        )->name('money-currency.index');
+
+        Route::post(
+            '/money-currency/convert',
+            [MoneyCurrencyController::class, 'convert']
+        )->name('money-currency.convert');
+                    });

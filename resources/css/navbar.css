@@ -112,30 +112,23 @@
 }
 
 .nav-link{
-
-    color:#145239;
-
-    font-size:17px;
-
-    font-weight:600;
-    
+    position: relative;
     text-decoration: none;
-
+    color:#20523f;
+    font-weight:600;
     transition:.3s;
-
-    position:relative;
-
 }
+
 
 .nav-link:hover{
 
-    color:#efc53a;
+    color:#D4A017;
 
 }
 
 .nav-link.active{
 
-    color: #efc53a;
+    color: #D4A017;
 
 }
 
@@ -147,21 +140,28 @@
 
     left:50%;
 
-    transform:translateX(-50%);
-
     bottom:-8px;
 
     width:0;
 
     height:3px;
 
-    border-radius:10px;
+    background:#D8A62A;
 
-    background: #efc53a;
+    border-radius:50px;
 
-    transition:.3s;
+    transform:translateX(-50%);
+
+    transition:.35s;
 
 }
+
+.nav-link.active::after{
+
+    width:55%;
+
+}
+
 
 .nav-link:hover::after,
 .nav-link.active::after{
@@ -170,9 +170,17 @@
 
 }
 
+/* Saat active tidak ada garis */
+/* .nav-link.active::after{
+
+    width:0;
+} */
+
 .nav-link.active{
 
-    color:#efc53a;
+    color:#D4A017;
+
+    font-weight:700;
 }
 
 /* =========================
@@ -205,6 +213,7 @@
     font-weight:600;
 
     transition:.3s;
+     text-decoration: none !important;
 
 }
 
@@ -235,7 +244,18 @@
 
 .main-header.scrolled .nav-link.active{
 
-    color:#FFD54F;
+    color:#D4A017 !important;
+
+    font-weight:700;
+
+}
+
+.main-header .nav-link.active{
+
+    color:#D4A017 !important;
+
+    font-weight:700;
+
 }
 
 /* =========================

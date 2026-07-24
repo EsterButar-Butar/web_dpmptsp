@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ComparisonController;
+use App\Http\Controllers\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvestmentMapController;
 
@@ -22,9 +22,9 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::get('/tentang', function () {
-    return view('landing.about');
-})->name('about');
+// Route::get('/tentang', function () {
+//     return view('landing.about');
+// })->name('about');
 
 
 Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
@@ -57,7 +57,7 @@ Route::get(
 |
 | admin    → admin.dashboard
 | operator → operator.dashboard
-| user     → profile.show
+| user     → user.profile
 |
 */
 
@@ -76,7 +76,7 @@ Route::get('/dashboard', function () {
         ),
 
         'user' => redirect()->route(
-            'profile.show'
+            'user.profile'
         ),
 
         default => abort(
@@ -86,91 +86,16 @@ Route::get('/dashboard', function () {
     };
 
 })
-    ->middleware([
-        'auth',
-        'verified',
-    ])
-    ->name('dashboard');
-
-
-/*
-|--------------------------------------------------------------------------
-| PROFILE ROUTES
-|--------------------------------------------------------------------------
-|
-| Route profil dapat digunakan oleh:
-|
-| - admin
-| - operator
-| - user
-|
-*/
-
-Route::middleware([
+->middleware([
     'auth',
-])->group(function () {
+    'verified',
+])
+->name('dashboard');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Tampilkan Profil
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/profile',
-        [
-            ProfileController::class,
-            'show',
-        ]
-    )->name('profile.show');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Edit Profil
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/profile/edit',
-        [
-            ProfileController::class,
-            'edit',
-        ]
-    )->name('profile.edit');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Profil
-    |--------------------------------------------------------------------------
-    */
-
-    Route::patch(
-        '/profile',
-        [
-            ProfileController::class,
-            'update',
-        ]
-    )->name('profile.update');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Hapus Akun
-    |--------------------------------------------------------------------------
-    */
-
-    Route::delete(
-        '/profile',
-        [
-            ProfileController::class,
-            'destroy',
-        ]
-    )->name('profile.destroy');
-
-});
+Route::get('/about', function () {
+    return view('landing.about');
+})->name('about');
 
 
 /*
@@ -196,9 +121,6 @@ require __DIR__ . '/auth.php';
 |--------------------------------------------------------------------------
 | ADMIN ROUTES
 |--------------------------------------------------------------------------
-|
-| Route khusus pengguna dengan role admin.
-|
 */
 
 require __DIR__ . '/admin.php';
@@ -208,9 +130,6 @@ require __DIR__ . '/admin.php';
 |--------------------------------------------------------------------------
 | OPERATOR ROUTES
 |--------------------------------------------------------------------------
-|
-| Route khusus pengguna dengan role operator.
-|
 */
 
 require __DIR__ . '/operator.php';
@@ -220,9 +139,6 @@ require __DIR__ . '/operator.php';
 |--------------------------------------------------------------------------
 | USER ROUTES
 |--------------------------------------------------------------------------
-|
-| Route khusus pengguna dengan role user.
-|
 */
 
 require __DIR__ . '/user.php';

@@ -20,29 +20,17 @@ return new class extends Migration
             */
 
             $table->id();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DATA PROVINSI
-            |--------------------------------------------------------------------------
-            */
-
             $table->string('nama_provinsi', 255);
-
             $table->string('kode_provinsi', 20);
 
-
             /*
             |--------------------------------------------------------------------------
-            | DATA KABUPATEN / KOTA
+            | DATA KABUPATEN
             |--------------------------------------------------------------------------
             */
 
             $table->string('nama_kabupaten', 255);
-
             $table->string('kode_kabupaten', 20);
-
 
             /*
             |--------------------------------------------------------------------------
@@ -51,9 +39,7 @@ return new class extends Migration
             */
 
             $table->string('nama_kecamatan', 255);
-
             $table->string('kode_kecamatan', 20);
-
 
             /*
             |--------------------------------------------------------------------------
@@ -62,23 +48,7 @@ return new class extends Migration
             */
 
             $table->string('nama_desa', 255);
-
-            $table->string('kode_desa', 30)
-                ->unique();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS DATA
-            |--------------------------------------------------------------------------
-            */
-
-            $table->string('status', 20)
-                ->default('Aktif');
-
-            $table->text('keterangan')
-                ->nullable();
-
+            $table->string('kode_desa', 30)->unique();
 
             /*
             |--------------------------------------------------------------------------
@@ -88,7 +58,6 @@ return new class extends Migration
 
             $table->timestamps();
 
-
             /*
             |--------------------------------------------------------------------------
             | INDEX
@@ -96,23 +65,15 @@ return new class extends Migration
             */
 
             $table->index('kode_provinsi');
-
             $table->index('kode_kabupaten');
-
             $table->index('kode_kecamatan');
 
             $table->index('nama_provinsi');
-
             $table->index('nama_kabupaten');
-
             $table->index('nama_kecamatan');
-
             $table->index('nama_desa');
-
-            $table->index('status');
         });
     }
-
 
     /**
      * Menghapus tabel data_wilayah.

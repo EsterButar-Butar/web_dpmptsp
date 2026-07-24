@@ -1,4 +1,4 @@
-@extends('layouts.operator')
+@extends('partials.layouts.operator')
 
 @section('content')
 <div>
@@ -136,22 +136,22 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
-                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_analisis', $editItem['pdrb_sektor_analisis'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
+                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_analisis', $editItem['pdrb_sektor_analisis'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
                         <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Sektor Kabupaten' : 'PDRB Sektor Provinsi'">PDRB Sektor Analisis</label>
                         <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="pdrb_sektor_analisis" :value="val.replace(/\./g, '')">
                     </div>
-                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_analisis', $editItem['total_pdrb_analisis'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
+                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_analisis', $editItem['total_pdrb_analisis'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
                         <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Total PDRB Kabupaten' : 'Total PDRB Provinsi'">Total PDRB Analisis</label>
                         <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="total_pdrb_analisis" :value="val.replace(/\./g, '')">
                     </div>
-                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_pembanding', $editItem['pdrb_sektor_pembanding'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
+                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_pembanding', $editItem['pdrb_sektor_pembanding'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
                         <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Sektor Provinsi' : 'PDB Sektor Nasional'">PDRB Sektor Pembanding</label>
                         <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="pdrb_sektor_pembanding" :value="val.replace(/\./g, '')">
                     </div>
-                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_pembanding', $editItem['total_pdrb_pembanding'] ?? '') }}', format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
+                    <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_pembanding', $editItem['total_pdrb_pembanding'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
                         <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Total PDRB Provinsi' : 'Total PDB Nasional'">Total PDRB Pembanding</label>
                         <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
                         <input type="hidden" name="total_pdrb_pembanding" :value="val.replace(/\./g, '')">
@@ -176,16 +176,30 @@
     <!-- Table Container -->
     <div class="op-card">
         <div class="op-card-header">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-slate-800">Hasil Analisis LQ</h2>
-                <p class="text-slate-600 mt-1">Data Analisis LQ Tersimpan</p>
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Hasil Analisis LQ</h2>
+                    <p class="text-slate-600 mt-1">Data Analisis LQ Tersimpan</p>
+                </div>
+                <form action="{{ route('operator.lq.index') }}" method="GET" class="relative w-full md:w-72">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah atau Sektor..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:border-[#D8A62A] focus:ring-1 focus:ring-[#D8A62A] outline-none transition-all shadow-sm">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </form>
             </div>
 
             <div class="overflow-x-auto border-t border-slate-200">
                 <table id="lqTable" class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50">
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">NO</th>
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-12 text-center">
+                                <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Tingkat Wilayah</th>
                             <th class="px-4 py-4 font-semibold whitespace-nowrap">KAB/KOTA</th>
                             <th class="px-4 py-4 font-semibold whitespace-nowrap">PROVINSI</th>
                             <th class="px-4 py-4 font-semibold min-w-[200px]">SEKTOR</th>
@@ -200,7 +214,11 @@
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
                         @forelse($lqData as $index => $data)
                             <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                    <input type="checkbox" class="row-checkbox rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" value="{{ $data['id'] }}">
+                                </td>
                                 <td class="px-4 py-4">{{ ($lqData->currentPage() - 1) * $lqData->perPage() + $loop->iteration }}</td>
+                                <td class="px-4 py-4">{{ $data['tingkat_wilayah'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['sektor'] }}</td>
@@ -227,7 +245,7 @@
                                 <td class="px-4 py-4 text-xs whitespace-nowrap">{{ $data['riwayat'] }}</td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('operator.lq.index', ['edit' => $data['id']]) }}" class="text-slate-400 hover:text-emerald-600 transition-colors" title="Edit">
+                                        <a href="{{ route('operator.lq.index', ['edit' => $data['id']]) }}" class="p-1.5 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm" title="Edit">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -235,7 +253,7 @@
                                         <form action="{{ route('operator.lq.destroy', $data['id']) }}" method="POST" onsubmit="return confirmDelete(event, this);" class="inline-block">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-slate-400 hover:text-red-600 transition-colors" title="Hapus">
+                                            <button type="submit" class="p-1.5 text-red-600 bg-red-50 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Hapus">
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
@@ -260,13 +278,36 @@
                 {{ $lqData->links('pagination::tailwind') }}
             </div>
 
-            <div class="mt-8 border-t border-slate-200 pt-6">
-                <button type="button" onclick="exportToExcel()" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+            <div class="mt-8 border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-end gap-3 w-full">
+                <form id="bulkDeleteForm" action="{{ route('operator.lq.bulkDestroy') }}" method="POST" onsubmit="return confirmBulkDelete(event, this);" class="w-full sm:w-auto">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="ids" id="selectedIds">
+                    <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Hapus Terpilih
+                    </button>
+                </form>
+
+                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh Hasil Analisis (Excel)
                 </button>
+
+                <form action="{{ route('operator.lq.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Hapus Semua Data
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -274,7 +315,7 @@
         </div>
     </div>
 
-    <x-import-modal action="{{ route('operator.lq.import') }}" />
+    <x-import-modal action="{{ route('operator.lq.import') }}" type="lq" />
 
 <script>
     function exportToExcel() {
@@ -285,7 +326,8 @@
         var rows = clone.rows;
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
-                rows[i].deleteCell(-1);
+                rows[i].deleteCell(-1); // Delete Aksi column
+                rows[i].deleteCell(0);  // Delete Checkbox column
             }
         }
         

@@ -1,4 +1,4 @@
-@extends('layouts.operator')
+@extends('partials.layouts.operator')
 
 @section('content')
 
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 !-mt-12 md:!-mt-16 relative z-20 px-2 md:px-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 !-mt-12 md:!-mt-16 relative z-20 px-2 md:px-4">
         <!-- Stat Card 1 -->
         <div
             class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
@@ -228,14 +228,14 @@
                         @php
                             $iconClass = match (strtolower($log->action)) {
                                 'ditambah' => 'bg-green-100 text-green-600',
-                                'diperbarui' => 'bg-emerald-100 text-emerald-600',
+                                'diperbarui', 'diubah' => 'bg-emerald-100 text-emerald-600',
                                 'diimpor' => 'bg-purple-100 text-purple-600',
                                 'dihapus' => 'bg-red-100 text-red-600',
                                 default => 'bg-slate-100 text-slate-600'
                             };
                             $iconSvg = match (strtolower($log->action)) {
                                 'ditambah' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />',
-                                'diperbarui' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
+                                'diperbarui', 'diubah' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
                                 'diimpor' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />',
                                 'dihapus' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />',
                                 default => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'

@@ -1,4 +1,4 @@
-@extends('layouts.operator')
+@extends('partials.layouts.operator')
 
 @section('content')
     <!-- Header -->
@@ -17,18 +17,8 @@
     @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Sidebar Settings -->
-        <div class="col-span-1 space-y-2">
-            <a href="#" class="block px-4 py-3 bg-white border-l-4 border-emerald-600 rounded-r-lg shadow-sm font-medium text-emerald-700">
-                Keamanan & Password
-            </a>
-            <a href="#" class="block px-4 py-3 hover:bg-white border-l-4 border-transparent hover:border-slate-300 rounded-r-lg transition-colors font-medium text-slate-600">
-                Log Aktivitas
-            </a>
-        </div>
-
-        <!-- Main Settings Form -->
-        <div class="col-span-1 lg:col-span-2 space-y-6">
+        <!-- Main Settings Form (Left) -->
+        <div class="lg:col-span-2 space-y-6">
             <!-- Ubah Password -->
             <form action="{{ route('operator.settings.password') }}" method="POST" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 @csrf
@@ -97,6 +87,36 @@
                             </button>
                         @endif
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Aktivitas Sidebar (Right) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden sticky top-6">
+                <div class="border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+                    <h2 class="font-semibold text-slate-800">Riwayat Login & Logout</h2>
+                </div>
+                <div class="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
+                    @forelse($authLogs as $log)
+                        <div class="p-4 px-6 hover:bg-slate-50 transition-colors flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 {{ $log->action === 'Login' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600' }}">
+                                @if($log->action === 'Login')
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                                @else
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800">{{ $log->desc }}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">{{ $log->created_at->translatedFormat('d F Y \P\u\k\u\l H:i') }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-8 text-center text-slate-500 text-sm">
+                            Belum ada riwayat aktivitas autentikasi.
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>

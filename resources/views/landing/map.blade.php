@@ -13,9 +13,9 @@
     @vite([
         'resources/css/navbar.css',
         'resources/css/map.css',
-
         'resources/js/navbar.js',
         'resources/js/map.js',
+        'resources/css/footer.css'
     ])
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
@@ -182,17 +182,25 @@
             </div>
 
         </div>
-
     </section>
 
     {{-- FOOTER --}}
-    @include('partials.landing.footer')
+     @include('partials.landing.footer')
+      {{-- <button
+        type="button"
+        class="back-to-top"
+        id="backToTop"
+        aria-label="Kembali ke atas"
+    >
+
+        <i class="fa-solid fa-arrow-up"></i>
+
+    </button> --}}
 
     <script>
-
-        window.lokasi = @json($lokasi);
-
-    </script>
+    window.lokasi = @json($lokasi);
+    window.analysis = @json($analysis);
+</script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 

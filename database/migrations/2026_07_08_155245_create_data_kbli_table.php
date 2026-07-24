@@ -7,18 +7,62 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Membuat tabel data_kbli.
      */
     public function up(): void
     {
         Schema::create('data_kbli', function (Blueprint $table) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | PRIMARY KEY
+            |--------------------------------------------------------------------------
+            */
+
             $table->id();
-            $table->timestamps();
+
+            /*
+            |--------------------------------------------------------------------------
+            | DATA KBLI
+            |--------------------------------------------------------------------------
+            */
+
+            // Nomor urut
+            $table->integer('no')->nullable();
+
+            // Kode KBLI
+            $table->text('kode');
+
+            // Judul KBLI
+            $table->text('judul');
+
+            // Cakupan
+            $table->text('cakupan')->nullable();
+
+            // Tidak termasuk cakupan
+            $table->text('tidak_cakupan')->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDEX
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index('kode');
+            $table->index('no');
+
+            /*
+            |--------------------------------------------------------------------------
+            | TIMESTAMP
+            |--------------------------------------------------------------------------
+            */
+
+            $table->timestamp('updated_at')->nullable();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Menghapus tabel data_kbli.
      */
     public function down(): void
     {

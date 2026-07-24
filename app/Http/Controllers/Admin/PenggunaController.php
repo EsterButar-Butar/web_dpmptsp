@@ -52,11 +52,12 @@ class PenggunaController extends Controller
             ->paginate(7)
             ->withQueryString();
 
+        // Warna kartu disamakan dengan palet dashboard: green / yellow / blue / red
         $stats = [
             [
                 'label' => 'Total Pengguna',
                 'value' => User::count(),
-                'color' => 'mint',
+                'color' => 'green',
                 'icon' => 'fa-users',
             ],
             [
@@ -64,7 +65,7 @@ class PenggunaController extends Controller
                 'value' => $hasRoleColumn
                     ? User::whereRaw('LOWER(TRIM(role)) = ?', ['admin'])->count()
                     : 0,
-                'color' => 'cream',
+                'color' => 'yellow',
                 'icon' => 'fa-user-shield',
             ],
             [
