@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DataHsCodeController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\MoneyCurrencyController;
+use App\Http\Controllers\Admin\DataKbkiController;
 
 Route::middleware([
     'auth',
@@ -46,6 +47,18 @@ Route::middleware([
         |--------------------------------------------------------------------------
         */
 
+        Route::get('/data-wilayah/options/provinsi', [DataWilayahController::class, 'provinceOptions'])
+            ->name('data-wilayah.options.provinsi');
+
+        Route::get('/data-wilayah/options/kabupaten', [DataWilayahController::class, 'regencyOptions'])
+            ->name('data-wilayah.options.kabupaten');
+
+        Route::get('/data-wilayah/options/kecamatan', [DataWilayahController::class, 'districtOptions'])
+            ->name('data-wilayah.options.kecamatan');
+
+        Route::get('/data-wilayah/options/desa', [DataWilayahController::class, 'villageOptions'])
+            ->name('data-wilayah.options.desa');
+
         Route::get('/data-wilayah', [DataWilayahController::class, 'index'])
             ->name('data-wilayah.index');
 
@@ -57,6 +70,7 @@ Route::middleware([
 
         Route::delete('/data-wilayah/{dataWilayah}', [DataWilayahController::class, 'destroy'])
             ->name('data-wilayah.destroy');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -75,6 +89,27 @@ Route::middleware([
 
         Route::delete('/data-kbli/{id}', [DataKbliController::class, 'destroy'])
             ->name('data-kbli.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Data KBKI
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/data-kbki', [DataKbkiController::class, 'index'])
+            ->name('data-kbki.index');
+
+        Route::post('/data-kbki', [DataKbkiController::class, 'store'])
+            ->name('data-kbki.store');
+
+        Route::put('/data-kbki/{id}', [DataKbkiController::class, 'update'])
+            ->name('data-kbki.update');
+
+        Route::delete('/data-kbki/{id}', [DataKbkiController::class, 'destroy'])
+            ->name('data-kbki.destroy');
+
+        Route::get('/data-kbki/parent-options',[DataKbkiController::class, 'parentOptions'])
+            ->name('data-kbki.parent-options');
 
         /*
         |--------------------------------------------------------------------------

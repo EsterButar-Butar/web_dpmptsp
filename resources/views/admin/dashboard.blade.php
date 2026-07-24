@@ -185,7 +185,7 @@
                         text-emerald-100/90
                     "
                 >
-                    Kelola dan pantau data pengguna, wilayah, KBLI,
+                    Kelola dan pantau data pengguna, wilayah, KBLI, KBKI,
                     serta HS Code DPMPTSP Provinsi Sumatera Utara.
                 </p>
             </div>
@@ -246,15 +246,16 @@
             class="
                 relative
                 z-20
-                !-mt-12
+                -mt-10
                 grid
-                grid-cols-2
+                grid-cols-1
                 gap-4
                 px-2
-                sm:grid-cols-3
-                md:!-mt-16
+                sm:grid-cols-2
+                md:-mt-14
                 md:px-4
-                lg:grid-cols-5
+                xl:grid-cols-3
+                xl:gap-5
             "
         >
             @foreach ($stats as $stat)
@@ -267,20 +268,21 @@
                     class="
                         group
                         relative
+                        min-h-[132px]
                         overflow-hidden
-                        rounded-xl
+                        rounded-2xl
                         border
                         border-emerald-100
                         bg-white
-                        p-4
+                        p-5
                         shadow-sm
                         transition-all
                         duration-300
                         hover:-translate-y-1
                         hover:shadow-md
+                        sm:min-h-[140px]
                     "
                 >
-                    {{-- Hiasan sudut kanan --}}
                     <div
                         class="
                             absolute
@@ -288,8 +290,8 @@
                             -mt-8
                             right-0
                             top-0
-                            h-16
-                            w-16
+                            h-20
+                            w-20
                             rounded-bl-full
                             transition-transform
                             duration-500
@@ -298,34 +300,63 @@
                         "
                     ></div>
 
-                    <p
-                        class="
-                            relative
-                            z-10
-                            mb-2
-                            text-center
-                            text-xs
-                            font-bold
-                            text-slate-600
-                        "
-                    >
-                        {{ $stat['label'] }}
-                    </p>
-
                     <div
                         class="
                             relative
                             z-10
                             flex
+                            h-full
                             items-center
-                            justify-center
-                            gap-3
+                            justify-between
+                            gap-5
                         "
                     >
+                        <div class="min-w-0 flex-1">
+                            <p
+                                class="
+                                    m-0
+                                    text-sm
+                                    font-bold
+                                    leading-snug
+                                    text-slate-500
+                                "
+                            >
+                                {{ $stat['label'] }}
+                            </p>
+
+                            <p
+                                class="
+                                    m-0
+                                    mt-4
+                                    whitespace-nowrap
+                                    text-3xl
+                                    font-black
+                                    leading-none
+                                    tracking-tight
+                                    text-slate-800
+                                    tabular-nums
+                                    sm:text-[2.15rem]
+                                    2xl:text-[2.45rem]
+                                "
+                            >
+                                {{ number_format(
+                                    $stat['value'],
+                                    0,
+                                    ',',
+                                    '.'
+                                ) }}
+                            </p>
+                        </div>
+
                         <div
                             class="
-                                rounded-lg
-                                p-2
+                                flex
+                                h-14
+                                w-14
+                                flex-shrink-0
+                                items-center
+                                justify-center
+                                rounded-xl
                                 text-white
                                 shadow-sm
                                 {{ $style['icon'] }}
@@ -335,26 +366,10 @@
                                 class="
                                     fa-solid
                                     {{ $stat['icon'] }}
-                                    flex
-                                    h-5
-                                    w-5
-                                    items-center
-                                    justify-center
-                                    text-base
+                                    text-xl
                                 "
                             ></i>
                         </div>
-
-                        <span
-                            class="
-                                text-2xl
-                                font-black
-                                text-slate-800
-                                xl:text-3xl
-                            "
-                        >
-                            {{ number_format($stat['value'], 0, ',', '.') }}
-                        </span>
                     </div>
                 </article>
             @endforeach
@@ -366,7 +381,7 @@
 
         <section
             class="
-                mt-6
+                mt-8
                 grid
                 grid-cols-1
                 gap-6

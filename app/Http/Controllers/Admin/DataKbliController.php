@@ -13,23 +13,32 @@ class DataKbliController extends Controller
 {
     private string $table = 'data_kbli';
 
+    private array $levels = [
+        'Kategori' => 1,
+        'Golongan Pokok' => 2,
+        'Golongan' => 3,
+        'Subgolongan' => 4,
+        'Kelompok' => 5,
+    ];
+
     public function index(Request $request)
     {
         $tableExists = Schema::hasTable($this->table);
-        $columns = $this->columnMap();
+        $columnsReady = $this->tableReady();
+        $mode = $request->query('mode');
+        $editData = null;
+        $perPageOptions = [10, 22, 50];
+        $perPage = (int) $request->query('per_page', 22);
 
-        $hasIdColumn = $columns['id'] !== null;
-        $hasStatusColumn = $columns['status'] !== null;
-
-        $columnsReady = $tableExists
-            && $columns['kode']
-            && $columns['judul'];
+        if (! in_array($perPage, $perPageOptions, true)) {
+            $perPage = 22;
+        }
 
         if (! $columnsReady) {
-            $dataKbli = new LengthAwarePaginator(
+            $paginator = new LengthAwarePaginator(
                 [],
                 0,
-                10,
+                $perPage,
                 1,
                 [
                     'path' => $request->url(),
@@ -40,451 +49,521 @@ class DataKbliController extends Controller
             return view('admin.data-kbli', [
                 'tableExists' => $tableExists,
                 'columnsReady' => false,
-                'hasIdColumn' => $hasIdColumn,
-                'hasStatusColumn' => $hasStatusColumn,
-                'dataKbli' => $dataKbli,
+                'dataKbli' => collect(),
+                'paginator' => $paginator,
                 'stats' => $this->emptyStats(),
-                'mode' => $request->query('mode'),
+                'categories' => collect(),
+                'parentOptions' => collect(),
+                'mode' => $mode,
                 'editData' => null,
+                'perPageOptions' => $perPageOptions,
+                'hierarchyMode' => true,
+                'totalData' => 0,
             ]);
         }
 
-        $query = DB::table($this->table)
-            ->select([
-                $this->selectAlias($columns['id'], 'id'),
-                $this->selectAlias($columns['no'], 'no_urut'),
-                $this->selectAlias($columns['kode'], 'kode_kbli'),
-                $this->selectAlias($columns['judul'], 'judul_kbli'),
-                $this->selectAlias($columns['cakupan'], 'cakupan'),
-                $this->selectAlias(
-                    $columns['tidak_cakupan'],
-                    'tidak_cakupan'
-                ),
-                $this->selectAlias($columns['status'], 'status'),
-                $this->selectAlias(
-                    $columns['created_at'],
-                    'created_at'
-                ),
-                $this->selectAlias(
-                    $columns['updated_at'],
-                    'updated_at'
-                ),
+        if ($request->boolean('export')) {
+            return $this->exportCsv($request);
+        }
+
+        $categories = DB::table($this->table)
+            ->where('struktur', 'Kategori')
+            ->orderBy('kode')
+            ->get(['kode', 'judul']);
+
+        $parentOptions = DB::table($this->table)
+            ->whereBetween('level', [1, 4])
+            ->orderBy('kategori_kode')
+            ->orderByRaw("CASE WHEN level = 1 THEN '' ELSE kode END")
+            ->orderBy('level')
+            ->get([
+                'id',
+                'struktur',
+                'level',
+                'kode',
+                'kode_induk',
+                'kategori_kode',
+                'judul',
             ]);
 
-        if ($request->filled('search')) {
-            $search = '%' . strtolower(
-                trim((string) $request->search)
-            ) . '%';
+        $totalData = DB::table($this->table)->count();
+        $hierarchyMode = ! $request->filled('search') && ! $request->filled('struktur');
 
-            $searchColumns = array_filter([
-                $columns['kode'],
-                $columns['judul'],
-                $columns['cakupan'],
-                $columns['tidak_cakupan'],
-                $columns['status'],
-            ]);
+        if ($hierarchyMode) {
+            $categoryQuery = DB::table($this->table)
+                ->where('struktur', 'Kategori');
 
-            $query->where(
-                function ($subQuery) use (
-                    $searchColumns,
-                    $search
-                ) {
-                    foreach ($searchColumns as $column) {
-                        $subQuery->orWhereRaw(
-                            'LOWER(CAST('
-                            . $this->quotedColumn($column)
-                            . ' AS TEXT)) LIKE ?',
-                            [$search]
-                        );
-                    }
-                }
-            );
+            if ($request->filled('kategori')) {
+                $categoryQuery->where(
+                    'kode',
+                    strtoupper(trim((string) $request->query('kategori')))
+                );
+            }
+
+            $paginator = $categoryQuery
+                ->orderBy('kode')
+                ->paginate($perPage)
+                ->withQueryString();
+
+            $categoryCodes = collect($paginator->items())
+                ->pluck('kode')
+                ->filter()
+                ->values();
+
+            $dataKbli = $categoryCodes->isEmpty()
+                ? collect()
+                : $this->hierarchyRowsQuery()
+                    ->whereIn('k.kategori_kode', $categoryCodes)
+                    ->orderBy('k.kategori_kode')
+                    ->orderByRaw("CASE WHEN k.level = 1 THEN '' ELSE k.kode END")
+                    ->orderBy('k.level')
+                    ->get();
+        } else {
+            $paginator = $this->filteredQuery($request)
+                ->select($this->selectColumns())
+                ->selectSub(function ($subQuery) {
+                    $subQuery
+                        ->from($this->table . ' as child')
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('child.kode_induk', 'k.kode');
+                }, 'child_count')
+                ->orderBy('k.kategori_kode')
+                ->orderByRaw("CASE WHEN k.level = 1 THEN '' ELSE k.kode END")
+                ->orderBy('k.level')
+                ->paginate($perPage)
+                ->withQueryString();
+
+            $dataKbli = collect($paginator->items());
         }
 
-        if (
-            $request->filled('status')
-            && $hasStatusColumn
-        ) {
-            $query->whereRaw(
-                'LOWER(TRIM(CAST('
-                . $this->quotedColumn($columns['status'])
-                . ' AS TEXT))) = ?',
-                [
-                    strtolower(
-                        trim((string) $request->status)
-                    ),
-                ]
-            );
-        }
+        $stats = $this->stats();
 
-        if ($columns['id']) {
-            $query->orderBy($columns['id'], 'asc');
-        } elseif ($columns['kode']) {
-            $query->orderBy($columns['kode'], 'asc');
-        }
-
-        $dataKbli = $query
-            ->paginate(10)
-            ->withQueryString();
-
-        $stats = $this->stats($columns);
-
-        $mode = $request->query('mode');
-        $editData = null;
-
-        if (
-            $request->filled('edit')
-            && $hasIdColumn
-        ) {
-            $editData = $this->findRow(
-                $request->edit,
-                $columns
-            );
-
+        if ($request->filled('edit')) {
+            $editData = $this->findRow($request->query('edit'));
             $mode = 'edit';
         }
 
         return view('admin.data-kbli', compact(
             'tableExists',
             'columnsReady',
-            'hasIdColumn',
-            'hasStatusColumn',
             'dataKbli',
+            'paginator',
             'stats',
+            'categories',
+            'parentOptions',
             'mode',
-            'editData'
+            'editData',
+            'perPageOptions',
+            'hierarchyMode',
+            'totalData'
         ));
     }
 
     public function store(Request $request)
     {
-        if (! Schema::hasTable($this->table)) {
+        if (! $this->tableReady()) {
             return redirect()
                 ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Tabel data_kbli belum tersedia di Supabase.'
-                );
+                ->with('error', 'Struktur tabel data_kbli belum sesuai dengan dataset KBLI 2025.');
         }
 
-        $columns = $this->columnMap();
+        $data = $this->validatedData($request);
+        $payload = $this->buildPayload($data);
 
-        if (! $columns['kode'] || ! $columns['judul']) {
-            return redirect()
-                ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Kolom Kode dan Judul belum sesuai.'
-                );
+        if (Schema::hasColumn($this->table, 'created_at')) {
+            $payload['created_at'] = now();
         }
 
-        $data = $request->validate(
-            $this->rules($columns),
-            $this->messages()
-        );
-
-        $this->ensureUniqueKode(
-            $data['kode_kbli'],
-            $columns
-        );
-
-        $insert = $this->payload($data, $columns);
-
-        if ($columns['created_at']) {
-            $insert[$columns['created_at']] = now();
+        if (Schema::hasColumn($this->table, 'updated_at')) {
+            $payload['updated_at'] = now();
         }
 
-        if ($columns['updated_at']) {
-            $insert[$columns['updated_at']] = now();
-        }
-
-        DB::table($this->table)->insert($insert);
+        DB::table($this->table)->insert($payload);
 
         return redirect()
             ->route('admin.data-kbli.index')
-            ->with(
-                'success',
-                'Data KBLI berhasil ditambahkan.'
-            );
+            ->with('success', 'Data KBLI berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
     {
-        $columns = $this->columnMap();
-
-        if (! $columns['id']) {
+        if (! $this->tableReady()) {
             return redirect()
                 ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Kolom id belum tersedia.'
-                );
+                ->with('error', 'Struktur tabel data_kbli belum sesuai dengan dataset KBLI 2025.');
         }
 
-        $data = $request->validate(
-            $this->rules($columns),
-            $this->messages()
-        );
+        $current = $this->findRow($id);
+        $data = $this->validatedData($request, $current);
+        $payload = $this->buildPayload($data);
 
-        $this->ensureUniqueKode(
-            $data['kode_kbli'],
-            $columns,
-            $id
-        );
-
-        $update = $this->payload($data, $columns);
-
-        if ($columns['updated_at']) {
-            $update[$columns['updated_at']] = now();
+        if (Schema::hasColumn($this->table, 'updated_at')) {
+            $payload['updated_at'] = now();
         }
 
         DB::table($this->table)
-            ->where($columns['id'], $id)
-            ->update($update);
+            ->where('id', $id)
+            ->update($payload);
 
         return redirect()
             ->route('admin.data-kbli.index')
-            ->with(
-                'success',
-                'Data KBLI berhasil diperbarui.'
-            );
+            ->with('success', 'Data KBLI berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $columns = $this->columnMap();
-
-        if (! $columns['id']) {
+        if (! $this->tableReady()) {
             return redirect()
                 ->route('admin.data-kbli.index')
-                ->with(
-                    'error',
-                    'Kolom id belum tersedia.'
-                );
+                ->with('error', 'Struktur tabel data_kbli belum sesuai dengan dataset KBLI 2025.');
+        }
+
+        $row = $this->findRow($id);
+
+        $hasChildren = DB::table($this->table)
+            ->where('kode_induk', $row->kode)
+            ->exists();
+
+        if ($hasChildren) {
+            return redirect()
+                ->route('admin.data-kbli.index')
+                ->with('error', 'Data tidak dapat dihapus karena masih memiliki data turunan.');
         }
 
         DB::table($this->table)
-            ->where($columns['id'], $id)
+            ->where('id', $id)
             ->delete();
 
         return redirect()
             ->route('admin.data-kbli.index')
-            ->with(
-                'success',
-                'Data KBLI berhasil dihapus.'
-            );
+            ->with('success', 'Data KBLI berhasil dihapus.');
     }
 
-    private function rules(array $columns): array
+    private function hierarchyRowsQuery()
     {
-        $rules = [
-            'kode_kbli' => [
-                'required',
-                'string',
-                'max:30',
-            ],
-            'judul_kbli' => [
-                'required',
-                'string',
-                'max:500',
-            ],
-            'cakupan' => [
-                'nullable',
-                'string',
-            ],
-            'tidak_cakupan' => [
-                'nullable',
-                'string',
-            ],
-        ];
-
-        if ($columns['status']) {
-            $rules['status'] = [
-                'required',
-                'in:Aktif,Nonaktif',
-            ];
-        }
-
-        return $rules;
+        return DB::table($this->table . ' as k')
+            ->select($this->selectColumns())
+            ->selectSub(function ($subQuery) {
+                $subQuery
+                    ->from($this->table . ' as child')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('child.kode_induk', 'k.kode');
+            }, 'child_count');
     }
 
-    private function messages(): array
+    private function selectColumns(): array
     {
         return [
-            'kode_kbli.required' =>
-                'Kode KBLI wajib diisi.',
-            'judul_kbli.required' =>
-                'Judul KBLI wajib diisi.',
-            'status.required' =>
-                'Status wajib dipilih.',
-            'status.in' =>
-                'Status yang dipilih tidak valid.',
+            'k.id',
+            'k.struktur',
+            'k.level',
+            'k.kode',
+            'k.kode_induk',
+            'k.kategori_kode',
+            'k.golongan_pokok_kode',
+            'k.golongan_kode',
+            'k.subgolongan_kode',
+            'k.kelompok_kode',
+            'k.judul',
+            'k.cakupan',
+            'k.tidak_cakupan',
+            'k.no_asli',
+            'k.kode_asli',
+            'k.catatan',
+            'k.created_at',
+            'k.updated_at',
         ];
     }
 
-    private function payload(
-        array $data,
-        array $columns
-    ): array {
-        $payload = [];
+    private function filteredQuery(Request $request)
+    {
+        $query = DB::table($this->table . ' as k');
 
-        if ($columns['kode']) {
-            $payload[$columns['kode']] =
-                trim($data['kode_kbli']);
+        if ($request->filled('search')) {
+            $search = '%' . mb_strtolower(trim((string) $request->query('search'))) . '%';
+
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery
+                    ->whereRaw('LOWER(CAST(k.kode AS TEXT)) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(CAST(k.judul AS TEXT)) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(CAST(k.cakupan AS TEXT)) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(CAST(k.tidak_cakupan AS TEXT)) LIKE ?', [$search]);
+            });
         }
 
-        if ($columns['judul']) {
-            $payload[$columns['judul']] =
-                trim($data['judul_kbli']);
+        if ($request->filled('struktur')) {
+            $query->where('k.struktur', $request->query('struktur'));
         }
 
-        if ($columns['cakupan']) {
-            $payload[$columns['cakupan']] =
-                $data['cakupan'] ?? null;
-        }
-
-        if ($columns['tidak_cakupan']) {
-            $payload[$columns['tidak_cakupan']] =
-                $data['tidak_cakupan'] ?? null;
-        }
-
-        if ($columns['status']) {
-            $payload[$columns['status']] =
-                $data['status'] ?? 'Aktif';
-        }
-
-        return $payload;
-    }
-
-    private function ensureUniqueKode(
-        string $kode,
-        array $columns,
-        $ignoreId = null
-    ): void {
-        if (! $columns['kode']) {
-            return;
-        }
-
-        $query = DB::table($this->table)
-            ->whereRaw(
-                'LOWER(TRIM(CAST('
-                . $this->quotedColumn($columns['kode'])
-                . ' AS TEXT))) = ?',
-                [strtolower(trim($kode))]
-            );
-
-        if (
-            $ignoreId !== null
-            && $columns['id']
-        ) {
+        if ($request->filled('kategori')) {
             $query->where(
-                $columns['id'],
-                '!=',
-                $ignoreId
+                'k.kategori_kode',
+                strtoupper(trim((string) $request->query('kategori')))
             );
         }
 
-        if ($query->exists()) {
-            throw ValidationException::withMessages([
-                'kode_kbli' =>
-                    'Kode KBLI sudah terdaftar.',
-            ]);
-        }
+        return $query;
     }
 
-    private function findRow(
-        $id,
-        array $columns
-    ) {
-        return DB::table($this->table)
+    private function exportCsv(Request $request)
+    {
+        $query = $this->filteredQuery($request)
             ->select([
-                $this->selectAlias($columns['id'], 'id'),
-                $this->selectAlias($columns['no'], 'no_urut'),
-                $this->selectAlias($columns['kode'], 'kode_kbli'),
-                $this->selectAlias($columns['judul'], 'judul_kbli'),
-                $this->selectAlias($columns['cakupan'], 'cakupan'),
-                $this->selectAlias(
-                    $columns['tidak_cakupan'],
-                    'tidak_cakupan'
-                ),
-                $this->selectAlias($columns['status'], 'status'),
-                $this->selectAlias(
-                    $columns['created_at'],
-                    'created_at'
-                ),
-                $this->selectAlias(
-                    $columns['updated_at'],
-                    'updated_at'
-                ),
+                'k.id',
+                'k.struktur',
+                'k.level',
+                'k.kode',
+                'k.kode_induk',
+                'k.kategori_kode',
+                'k.golongan_pokok_kode',
+                'k.golongan_kode',
+                'k.subgolongan_kode',
+                'k.kelompok_kode',
+                'k.judul',
+                'k.cakupan',
+                'k.tidak_cakupan',
+                'k.no_asli',
+                'k.kode_asli',
+                'k.catatan',
             ])
-            ->where($columns['id'], $id)
+            ->orderBy('k.kategori_kode')
+            ->orderByRaw("CASE WHEN k.level = 1 THEN '' ELSE k.kode END")
+            ->orderBy('k.level');
+
+        $filename = 'data-kbli-2025-' . now()->format('Y-m-d-His') . '.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'id',
+                'struktur',
+                'level',
+                'kode',
+                'kode_induk',
+                'kategori_kode',
+                'golongan_pokok_kode',
+                'golongan_kode',
+                'subgolongan_kode',
+                'kelompok_kode',
+                'judul',
+                'cakupan',
+                'tidak_cakupan',
+                'no_asli',
+                'kode_asli',
+                'catatan',
+            ]);
+
+            foreach ($query->cursor() as $row) {
+                fputcsv($handle, [
+                    $row->id,
+                    $row->struktur,
+                    $row->level,
+                    $row->kode,
+                    $row->kode_induk,
+                    $row->kategori_kode,
+                    $row->golongan_pokok_kode,
+                    $row->golongan_kode,
+                    $row->subgolongan_kode,
+                    $row->kelompok_kode,
+                    $row->judul,
+                    $row->cakupan,
+                    $row->tidak_cakupan,
+                    $row->no_asli,
+                    $row->kode_asli,
+                    $row->catatan,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    private function validatedData(Request $request, $current = null): array
+    {
+        $data = $request->validate([
+            'struktur' => ['required', 'string', 'in:' . implode(',', array_keys($this->levels))],
+            'kode_induk' => ['nullable', 'string', 'max:5'],
+            'kode' => ['required', 'string', 'max:5'],
+            'judul' => ['required', 'string', 'max:500'],
+            'cakupan' => ['nullable', 'string'],
+            'tidak_cakupan' => ['nullable', 'string'],
+            'catatan' => ['nullable', 'string'],
+        ], [
+            'struktur.required' => 'Level struktur wajib dipilih.',
+            'struktur.in' => 'Level struktur tidak valid.',
+            'kode.required' => 'Kode KBLI wajib diisi.',
+            'judul.required' => 'Judul KBLI wajib diisi.',
+        ]);
+
+        $data['struktur'] = trim($data['struktur']);
+        $data['level'] = $this->levels[$data['struktur']];
+        $data['kode'] = strtoupper(trim($data['kode']));
+        $data['kode_induk'] = isset($data['kode_induk']) && trim($data['kode_induk']) !== ''
+            ? strtoupper(trim($data['kode_induk']))
+            : null;
+        $data['judul'] = trim($data['judul']);
+        $data['cakupan'] = $this->nullableText($data['cakupan'] ?? null);
+        $data['tidak_cakupan'] = $this->nullableText($data['tidak_cakupan'] ?? null);
+        $data['catatan'] = $this->nullableText($data['catatan'] ?? null);
+
+        $errors = [];
+        $expectedLength = $data['level'];
+
+        if ($data['level'] === 1) {
+            if (! preg_match('/^[A-V]$/', $data['kode'])) {
+                $errors['kode'] = 'Kode kategori harus berupa satu huruf A sampai V.';
+            }
+
+            $data['kode_induk'] = null;
+        } else {
+            if (! preg_match('/^\d{' . $expectedLength . '}$/', $data['kode'])) {
+                $errors['kode'] = 'Kode ' . $data['struktur'] . ' harus terdiri dari ' . $expectedLength . ' digit.';
+            }
+
+            if (! $data['kode_induk']) {
+                $errors['kode_induk'] = 'Data induk wajib dipilih.';
+            }
+        }
+
+        $parent = null;
+
+        if ($data['kode_induk']) {
+            $parent = DB::table($this->table)
+                ->where('kode', $data['kode_induk'])
+                ->first();
+
+            if (! $parent) {
+                $errors['kode_induk'] = 'Data induk tidak ditemukan.';
+            } elseif ((int) $parent->level !== $data['level'] - 1) {
+                $errors['kode_induk'] = 'Level data induk tidak sesuai dengan struktur yang dipilih.';
+            } elseif ($data['level'] >= 3 && ! str_starts_with($data['kode'], $parent->kode)) {
+                $errors['kode'] = 'Kode harus diawali dengan kode induk ' . $parent->kode . '.';
+            }
+        }
+
+        $duplicateQuery = DB::table($this->table)
+            ->whereRaw('LOWER(TRIM(CAST(kode AS TEXT))) = ?', [mb_strtolower($data['kode'])]);
+
+        if ($current) {
+            $duplicateQuery->where('id', '!=', $current->id);
+        }
+
+        if ($duplicateQuery->exists()) {
+            $errors['kode'] = 'Kode KBLI sudah terdaftar.';
+        }
+
+        if ($current) {
+            $hasChildren = DB::table($this->table)
+                ->where('kode_induk', $current->kode)
+                ->exists();
+
+            $structureChanged = $data['struktur'] !== $current->struktur;
+            $codeChanged = $data['kode'] !== $current->kode;
+            $parentChanged = ($data['kode_induk'] ?? null) !== ($current->kode_induk ?? null);
+
+            if ($hasChildren && ($structureChanged || $codeChanged || $parentChanged)) {
+                $errors['struktur'] = 'Struktur, kode, dan induk tidak dapat diubah karena data ini memiliki turunan.';
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        $data['parent'] = $parent;
+
+        return $data;
+    }
+
+    private function buildPayload(array $data): array
+    {
+        $level = $data['level'];
+        $kode = $data['kode'];
+        $parent = $data['parent'] ?? null;
+
+        $kategoriKode = $level === 1
+            ? $kode
+            : ($parent->kategori_kode ?: ($parent->struktur === 'Kategori' ? $parent->kode : null));
+
+        return [
+            'struktur' => $data['struktur'],
+            'level' => $level,
+            'kode' => $kode,
+            'kode_induk' => $level === 1 ? null : $data['kode_induk'],
+            'kategori_kode' => $kategoriKode,
+            'golongan_pokok_kode' => $level >= 2 ? substr($kode, 0, 2) : null,
+            'golongan_kode' => $level >= 3 ? substr($kode, 0, 3) : null,
+            'subgolongan_kode' => $level >= 4 ? substr($kode, 0, 4) : null,
+            'kelompok_kode' => $level === 5 ? $kode : null,
+            'judul' => $data['judul'],
+            'cakupan' => $data['cakupan'],
+            'tidak_cakupan' => $data['tidak_cakupan'],
+            'catatan' => $data['catatan'],
+        ];
+    }
+
+    private function findRow($id)
+    {
+        return DB::table($this->table)
+            ->where('id', $id)
             ->firstOrFail();
     }
 
-    private function stats(array $columns): array
+    private function stats(): array
     {
-        $total = DB::table($this->table)->count();
+        $counts = DB::table($this->table)
+            ->select('struktur', DB::raw('COUNT(*) AS total'))
+            ->groupBy('struktur')
+            ->pluck('total', 'struktur');
 
-        $aktif = $total;
-        $nonaktif = 0;
-        $cakupanTerisi = 0;
-
-        if ($columns['status']) {
-            $aktif = DB::table($this->table)
-                ->whereRaw(
-                    'LOWER(TRIM(CAST('
-                    . $this->quotedColumn($columns['status'])
-                    . ' AS TEXT))) = ?',
-                    ['aktif']
-                )
-                ->count();
-
-            $nonaktif = DB::table($this->table)
-                ->whereRaw(
-                    'LOWER(TRIM(CAST('
-                    . $this->quotedColumn($columns['status'])
-                    . ' AS TEXT))) = ?',
-                    ['nonaktif']
-                )
-                ->count();
-        }
-
-        if ($columns['cakupan']) {
-            $cakupanTerisi = DB::table($this->table)
-                ->whereNotNull($columns['cakupan'])
-                ->whereRaw(
-                    'TRIM(CAST('
-                    . $this->quotedColumn($columns['cakupan'])
-                    . ' AS TEXT)) != ?',
-                    ['']
-                )
-                ->count();
-        }
+        $total = (int) $counts->sum();
 
         return [
             [
-                'label' => 'Total KBLI',
+                'label' => 'Kategori',
+                'value' => (int) ($counts['Kategori'] ?? 0),
+                'description' => 'Huruf A–V',
+                'icon' => 'fa-layer-group',
+                'tone' => 'green',
+            ],
+            [
+                'label' => 'Golongan Pokok',
+                'value' => (int) ($counts['Golongan Pokok'] ?? 0),
+                'description' => '2 digit',
+                'icon' => 'fa-building',
+                'tone' => 'orange',
+            ],
+            [
+                'label' => 'Golongan',
+                'value' => (int) ($counts['Golongan'] ?? 0),
+                'description' => '3 digit',
+                'icon' => 'fa-map',
+                'tone' => 'blue',
+            ],
+            [
+                'label' => 'Subgolongan',
+                'value' => (int) ($counts['Subgolongan'] ?? 0),
+                'description' => '4 digit',
+                'icon' => 'fa-location-dot',
+                'tone' => 'red',
+            ],
+            [
+                'label' => 'Kelompok',
+                'value' => (int) ($counts['Kelompok'] ?? 0),
+                'description' => '5 digit',
+                'icon' => 'fa-sitemap',
+                'tone' => 'violet',
+            ],
+            [
+                'label' => 'Total Data',
                 'value' => $total,
-                'color' => 'green',
-                'icon' => 'fa-table-cells-large',
-            ],
-            [
-                'label' => 'Aktif',
-                'value' => $aktif,
-                'color' => 'yellow',
-                'icon' => 'fa-circle-check',
-            ],
-            [
-                'label' => 'Nonaktif',
-                'value' => $nonaktif,
-                'color' => 'blue',
-                'icon' => 'fa-circle-xmark',
-            ],
-            [
-                'label' => 'Cakupan Terisi',
-                'value' => $cakupanTerisi,
-                'color' => 'red',
-                'icon' => 'fa-file-lines',
+                'description' => 'Seluruh struktur',
+                'icon' => 'fa-database',
+                'tone' => 'teal',
             ],
         ];
     }
@@ -492,124 +571,45 @@ class DataKbliController extends Controller
     private function emptyStats(): array
     {
         return [
-            [
-                'label' => 'Total KBLI',
-                'value' => 0,
-                'color' => 'green',
-                'icon' => 'fa-table-cells-large',
-            ],
-            [
-                'label' => 'Aktif',
-                'value' => 0,
-                'color' => 'yellow',
-                'icon' => 'fa-circle-check',
-            ],
-            [
-                'label' => 'Nonaktif',
-                'value' => 0,
-                'color' => 'blue',
-                'icon' => 'fa-circle-xmark',
-            ],
-            [
-                'label' => 'Cakupan Terisi',
-                'value' => 0,
-                'color' => 'red',
-                'icon' => 'fa-file-lines',
-            ],
+            ['label' => 'Kategori', 'value' => 0, 'description' => 'Huruf A–V', 'icon' => 'fa-layer-group', 'tone' => 'green'],
+            ['label' => 'Golongan Pokok', 'value' => 0, 'description' => '2 digit', 'icon' => 'fa-building', 'tone' => 'orange'],
+            ['label' => 'Golongan', 'value' => 0, 'description' => '3 digit', 'icon' => 'fa-map', 'tone' => 'blue'],
+            ['label' => 'Subgolongan', 'value' => 0, 'description' => '4 digit', 'icon' => 'fa-location-dot', 'tone' => 'red'],
+            ['label' => 'Kelompok', 'value' => 0, 'description' => '5 digit', 'icon' => 'fa-sitemap', 'tone' => 'violet'],
+            ['label' => 'Total Data', 'value' => 0, 'description' => 'Seluruh struktur', 'icon' => 'fa-database', 'tone' => 'teal'],
         ];
     }
 
-    private function columnMap(): array
+    private function tableReady(): bool
     {
-        return [
-            'id' => $this->firstExistingColumn([
-                'id',
-            ]),
-            'no' => $this->firstExistingColumn([
-                'no_urut',
-                'No',
-                'no',
-            ]),
-            'kode' => $this->firstExistingColumn([
-                'kode_kbli',
-                'Kode',
-                'kode',
-            ]),
-            'judul' => $this->firstExistingColumn([
-                'judul_kbli',
-                'Judul',
-                'judul',
-                'nama_kbli',
-            ]),
-            'cakupan' => $this->firstExistingColumn([
-                'Cakupan',
-                'cakupan',
-            ]),
-            'tidak_cakupan' => $this->firstExistingColumn([
-                'Tidak Cakupan',
-                'tidak_cakupan',
-                'Tidak_Cakupan',
-            ]),
-            'status' => $this->firstExistingColumn([
-                'status',
-                'Status',
-            ]),
-            'created_at' => $this->firstExistingColumn([
-                'created_at',
-            ]),
-            'updated_at' => $this->firstExistingColumn([
-                'updated_at',
-            ]),
-        ];
+        return Schema::hasTable($this->table) && Schema::hasColumns($this->table, [
+            'id',
+            'struktur',
+            'level',
+            'kode',
+            'kode_induk',
+            'kategori_kode',
+            'golongan_pokok_kode',
+            'golongan_kode',
+            'subgolongan_kode',
+            'kelompok_kode',
+            'judul',
+            'cakupan',
+            'tidak_cakupan',
+            'no_asli',
+            'kode_asli',
+            'catatan',
+        ]);
     }
 
-    private function firstExistingColumn(
-        array $columns
-    ): ?string {
-        if (! Schema::hasTable($this->table)) {
+    private function nullableText($value): ?string
+    {
+        if ($value === null) {
             return null;
         }
 
-        $existingColumns =
-            Schema::getColumnListing($this->table);
+        $value = trim((string) $value);
 
-        foreach ($columns as $targetColumn) {
-            foreach ($existingColumns as $existingColumn) {
-                if (
-                    strtolower($existingColumn)
-                    === strtolower($targetColumn)
-                ) {
-                    return $existingColumn;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private function selectAlias(
-        ?string $column,
-        string $alias
-    ) {
-        if (! $column) {
-            return DB::raw(
-                'NULL AS "' . $alias . '"'
-            );
-        }
-
-        return DB::raw(
-            $this->quotedColumn($column)
-            . ' AS "'
-            . $alias
-            . '"'
-        );
-    }
-
-    private function quotedColumn(
-        string $column
-    ): string {
-        return '"'
-            . str_replace('"', '""', $column)
-            . '"';
+        return $value === '' ? null : $value;
     }
 }
