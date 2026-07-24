@@ -117,7 +117,72 @@
     
     @if($paginatedLogs->hasPages())
         <div class="p-6 border-t border-slate-100 bg-slate-50/30">
-            {{ $paginatedLogs->links() }}
+            @php $paginator = $paginatedLogs; @endphp
+            @if ($paginator->hasPages())
+                @php
+                    $current = $paginator->currentPage();
+                    $last = $paginator->lastPage();
+                    
+                    $pages = [];
+                    if ($last <= 3) {
+                        for ($i = 1; $i <= $last; $i++) {
+                            $pages[] = $i;
+                        }
+                    } else {
+                        if ($current <= 2) {
+                            $pages = [1, 2, '...'];
+                        } elseif ($current >= $last - 1) {
+                            $pages = ['...', $last - 1, $last];
+                        } else {
+                            $pages = ['...', $current, '...'];
+                        }
+                    }
+                @endphp
+
+                <section class="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <p class="m-0 text-sm text-slate-500">
+                        Menampilkan
+                        <span class="font-semibold text-slate-700">{{ $paginator->firstItem() }}</span>
+                        sampai
+                        <span class="font-semibold text-slate-700">{{ $paginator->lastItem() }}</span>
+                        dari
+                        <span class="font-semibold text-slate-700">{{ $paginator->total() }}</span>
+                        data
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if ($paginator->onFirstPage())
+                            <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                <i class="fa-solid fa-chevron-left"></i> Prev
+                            </span>
+                        @else
+                            <a href="{{ $paginator->previousPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                <i class="fa-solid fa-chevron-left"></i> Prev
+                            </a>
+                        @endif
+
+                        @foreach ($pages as $page)
+                            @if ($page === '...')
+                                <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">...</span>
+                            @elseif ($page == $current)
+                                <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#FFD54F] bg-[#FFD54F] px-3 text-xs font-bold text-emerald-900">{{ $page }}</span>
+                            @else
+                                <a href="{{ $paginator->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        @if ($paginator->hasMorePages())
+                            <a href="{{ $paginator->nextPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                Next <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        @else
+                            <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                Next <i class="fa-solid fa-chevron-right"></i>
+                            </span>
+                        @endif
+                    </div>
+                </section>
+            @endif
         </div>
     @endif
 </div>

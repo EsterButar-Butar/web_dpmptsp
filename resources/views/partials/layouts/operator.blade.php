@@ -129,7 +129,8 @@
         </aside>
 
         <main class="admin-main">
-            <div class="p-4 md:p-6 lg:p-8 w-full space-y-6 flex-1">
+            {{-- Add pt-20 on mobile to prevent hamburger menu from overlapping the content --}}
+            <div class="p-4 pt-20 md:p-6 md:pt-6 lg:p-8 w-full space-y-6 flex-1">
                 @yield('content')
             </div>
         </main>
