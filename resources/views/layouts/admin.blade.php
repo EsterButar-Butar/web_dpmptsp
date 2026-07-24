@@ -587,6 +587,7 @@
                         </button>
                     </div>
                 </div>
+            </div>
 
             <nav class="sidebar-content">
                 <div class="sidebar-section-title">
@@ -631,6 +632,16 @@
                         >
                             <i class="fa-solid fa-table-cells"></i>
                             <span>Data KBLI</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a
+                            href="{{ route('admin.data-kbki.index') }}"
+                            class="sidebar-link {{ request()->routeIs('admin.data-kbki.*') ? 'active' : '' }}"
+                        >
+                            <i class="fa-solid fa-layer-group"></i>
+                            <span>Data KBKI</span>
                         </a>
                     </li>
 
