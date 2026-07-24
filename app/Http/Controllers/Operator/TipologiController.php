@@ -23,20 +23,7 @@ class TipologiController extends Controller
                 'provinsi' => $item->daerah_pembanding,
                 'kabupaten' => $item->daerah_analisis,
                 'sektor' => $item->sektor->nama_sektor ?? '-',
-<<<<<<< HEAD
-                'tahun_awal' => $item->tahun_awal,
-                'tahun_akhir' => $item->tahun_akhir,
-                'pdrb_sektor_analisis_awal' => $item->pdrb_sektor_analisis_awal,
-                'pdrb_sektor_analisis_akhir' => $item->pdrb_sektor_analisis_akhir,
-                'total_pdrb_analisis_awal' => $item->total_pdrb_analisis_awal,
-                'total_pdrb_analisis_akhir' => $item->total_pdrb_analisis_akhir,
-                'pdrb_sektor_pembanding_awal' => $item->pdrb_sektor_pembanding_awal,
-                'pdrb_sektor_pembanding_akhir' => $item->pdrb_sektor_pembanding_akhir,
-                'total_pdrb_pembanding_awal' => $item->total_pdrb_pembanding_awal,
-                'total_pdrb_pembanding_akhir' => $item->total_pdrb_pembanding_akhir,
-=======
                 'tahun' => $item->tahun_akhir, // Hanya menggunakan tahun akhir
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
                 'nilai_ss' => $item->nilai_ss,
                 'nilai_lq' => $item->nilai_lq,
                 'tipologi' => $item->tipologi,
@@ -47,9 +34,6 @@ class TipologiController extends Controller
 
     public function index(Request $request)
     {
-<<<<<<< HEAD
-        $rawDbData = Tipologi::with('sektor')->latest()->get();
-=======
         $query = Tipologi::with('sektor');
 
         if ($request->has('search') && !empty($request->search)) {
@@ -64,7 +48,6 @@ class TipologiController extends Controller
         }
 
         $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         $tipologiData = collect($this->mapDbToView($rawDbData));
 
         $editItem = null;
@@ -74,21 +57,13 @@ class TipologiController extends Controller
 
         $perPage = 10;
         $page = $request->get('page', 1);
-<<<<<<< HEAD
-        $paginatedData = new LengthAwarePaginator(
-=======
         $paginatedData = (new LengthAwarePaginator(
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             $tipologiData->forPage($page, $perPage),
             $tipologiData->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
-<<<<<<< HEAD
-        );
-=======
         ))->onEachSide(1);
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
 
         return view('operator.tipologi.index', [
             'tipologiData' => $paginatedData,
@@ -96,49 +71,6 @@ class TipologiController extends Controller
         ]);
     }
 
-<<<<<<< HEAD
-    // Menghitung Tipologi Sektor berdasarkan pertumbuhan dan kontribusi.
-    private function calculateTipologiData($item)
-    {
-        $pdrbSektorKabAwal = $this->parseNumber($item['pdrb_sektor_analisis_awal'] ?? 0);
-        $pdrbSektorKabAkhir = $this->parseNumber($item['pdrb_sektor_analisis_akhir'] ?? 0);
-        $pdrbTotalKabAwal = $this->parseNumber($item['total_pdrb_analisis_awal'] ?? 0);
-        $pdrbTotalKabAkhir = $this->parseNumber($item['total_pdrb_analisis_akhir'] ?? 0);
-
-        $pdrbSektorProvAwal = $this->parseNumber($item['pdrb_sektor_pembanding_awal'] ?? 0);
-        $pdrbSektorProvAkhir = $this->parseNumber($item['pdrb_sektor_pembanding_akhir'] ?? 0);
-        $pdrbTotalProvAwal = $this->parseNumber($item['total_pdrb_pembanding_awal'] ?? 0);
-        $pdrbTotalProvAkhir = $this->parseNumber($item['total_pdrb_pembanding_akhir'] ?? 0);
-
-        if ($pdrbSektorKabAwal == 0 || $pdrbSektorProvAwal == 0 || $pdrbTotalKabAkhir == 0 || $pdrbTotalProvAkhir == 0 || $pdrbTotalKabAwal == 0 || $pdrbTotalProvAwal == 0) {
-            return null; // Prevent Division by Zero
-        }
-
-        // 1. MENGHITUNG NILAI TOTAL SHIFT SHARE (dij)
-        $rij = ($pdrbSektorKabAkhir - $pdrbSektorKabAwal) / $pdrbSektorKabAwal;
-        $rin = ($pdrbSektorProvAkhir - $pdrbSektorProvAwal) / $pdrbSektorProvAwal;
-        $rn = ($pdrbTotalProvAkhir - $pdrbTotalProvAwal) / $pdrbTotalProvAwal;
-
-        $nij = $pdrbSektorKabAwal * $rn;
-        $mij = $pdrbSektorKabAwal * ($rin - $rn);
-        $cij = $pdrbSektorKabAwal * ($rij - $rn);
-        $dij = $nij + $mij + $cij;
-
-        // 2. MENGHITUNG NILAI LQ (Menggunakan rata-rata tahun awal dan akhir)
-        $lqAwal = ($pdrbSektorKabAwal / $pdrbTotalKabAwal) / ($pdrbSektorProvAwal / $pdrbTotalProvAwal);
-        $lqAkhir = ($pdrbSektorKabAkhir / $pdrbTotalKabAkhir) / ($pdrbSektorProvAkhir / $pdrbTotalProvAkhir);
-        $lq = ($lqAwal + $lqAkhir) / 2;
-
-        // 3. MENENTUKAN TIPOLOGI SEKTOR
-        if ($dij > 0 && $lq > 1) {
-            $tipologi = 'Maju dan Tumbuh Cepat';
-        } elseif ($dij > 0 && $lq <= 1) {
-            $tipologi = 'Potensial / Berkembang Cepat';
-        } elseif ($dij <= 0 && $lq > 1) {
-            $tipologi = 'Berkembang / Maju Tapi Tertekan';
-        } else {
-            $tipologi = 'Relatif Tertinggal';
-=======
     // Fungsi bantu untuk parsing string angka dari Excel
     protected function parseExcelNumber($val)
     {
@@ -189,7 +121,6 @@ class TipologiController extends Controller
             $tipologi = 'III'; // Kuadran III: Sektor Maju tetapi Tertekan
         } else {
             $tipologi = 'IV'; // Kuadran IV: Sektor Relatif Tertinggal
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         }
 
         $daerah_analisis = ($item['tingkat_wilayah'] ?? 'Kabupaten/Kota') === 'Provinsi' ? $item['provinsi'] : $item['kabupaten'];
@@ -202,23 +133,6 @@ class TipologiController extends Controller
             'daerah_analisis' => $daerah_analisis,
             'daerah_pembanding' => $daerah_pembanding,
             'sektor' => $item['sektor'],
-<<<<<<< HEAD
-            'tahun_awal' => $item['tahun_awal'],
-            'tahun_akhir' => $item['tahun_akhir'],
-
-            'pdrb_sektor_analisis_awal' => $pdrbSektorKabAwal,
-            'pdrb_sektor_analisis_akhir' => $pdrbSektorKabAkhir,
-            'total_pdrb_analisis_awal' => $pdrbTotalKabAwal,
-            'total_pdrb_analisis_akhir' => $pdrbTotalKabAkhir,
-
-            'pdrb_sektor_pembanding_awal' => $pdrbSektorProvAwal,
-            'pdrb_sektor_pembanding_akhir' => $pdrbSektorProvAkhir,
-            'total_pdrb_pembanding_awal' => $pdrbTotalProvAwal,
-            'total_pdrb_pembanding_akhir' => $pdrbTotalProvAkhir,
-
-            'nilai_ss' => round($dij, 4),
-            'nilai_lq' => round($lq, 4),
-=======
             'tahun_awal' => (int) $item['tahun'] - 1,
             'tahun_akhir' => (int) $item['tahun'],
 
@@ -234,7 +148,6 @@ class TipologiController extends Controller
 
             'nilai_ss' => $dij,
             'nilai_lq' => $lq,
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             'tipologi' => $tipologi,
         ];
     }
@@ -246,42 +159,21 @@ class TipologiController extends Controller
             'provinsi' => 'required|string',
             'kabupaten' => 'nullable|string',
             'sektor' => 'required|string',
-<<<<<<< HEAD
-            'tahun_awal' => 'required|string',
-            'tahun_akhir' => 'required|string',
-            'pdrb_sektor_analisis_awal' => 'required',
-            'pdrb_sektor_analisis_akhir' => 'required',
-            'total_pdrb_analisis_awal' => 'required',
-            'total_pdrb_analisis_akhir' => 'required',
-            'pdrb_sektor_pembanding_awal' => 'required',
-            'pdrb_sektor_pembanding_akhir' => 'required',
-            'total_pdrb_pembanding_awal' => 'required',
-            'total_pdrb_pembanding_akhir' => 'required',
-=======
             'tahun' => 'required|string',
             'nilai_ss' => 'required',
             'nilai_lq' => 'required',
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         ]);
 
         $data = $this->calculateTipologiData($request->all());
         if (! $data) {
-<<<<<<< HEAD
-            return back()->with('error', 'Terdapat nilai 0 pada data awal. Periksa kembali input nilai Anda agar tidak terjadi pembagian dengan nol.');
-=======
             return back()->with('error', 'Terjadi kesalahan perhitungan.');
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         }
 
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
         Tipologi::create([
             'user_id' => Auth::id() ?? 1,
-<<<<<<< HEAD
-            'sektor_id' => $sektorModel->id,
-=======
             'sektor_id' => $sektorModel->sektor_id,
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
@@ -307,8 +199,6 @@ class TipologiController extends Controller
 
     public function update(Request $request, $id)
     {
-<<<<<<< HEAD
-=======
         $request->validate([
             'tingkat_wilayah' => 'required|string',
             'provinsi' => 'required|string',
@@ -319,7 +209,6 @@ class TipologiController extends Controller
             'nilai_lq' => 'required',
         ]);
 
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         $tipologi = Tipologi::find($id);
         if (!$tipologi) {
             return redirect()->route('operator.tipologi.index')->with('error', 'Data tidak ditemukan!');
@@ -327,36 +216,18 @@ class TipologiController extends Controller
 
         $data = $this->calculateTipologiData($request->all());
         if (! $data) {
-<<<<<<< HEAD
-            return back()->with('error', 'Terdapat nilai 0 pada data awal. Periksa kembali input nilai Anda.');
-=======
             return back()->with('error', 'Terjadi kesalahan perhitungan.');
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         }
 
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
         $tipologi->update([
-<<<<<<< HEAD
-            'sektor_id' => $sektorModel->id,
-=======
             'sektor_id' => $sektorModel->sektor_id,
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
             'tahun_awal' => $data['tahun_awal'],
             'tahun_akhir' => $data['tahun_akhir'],
-<<<<<<< HEAD
-            'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
-            'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
-            'total_pdrb_analisis_awal' => $data['total_pdrb_analisis_awal'],
-            'total_pdrb_analisis_akhir' => $data['total_pdrb_analisis_akhir'],
-            'pdrb_sektor_pembanding_awal' => $data['pdrb_sektor_pembanding_awal'],
-            'pdrb_sektor_pembanding_akhir' => $data['pdrb_sektor_pembanding_akhir'],
-            'total_pdrb_pembanding_awal' => $data['total_pdrb_pembanding_awal'],
-            'total_pdrb_pembanding_akhir' => $data['total_pdrb_pembanding_akhir'],
-=======
             'pdrb_sektor_analisis_awal' => 0,
             'pdrb_sektor_analisis_akhir' => 0,
             'total_pdrb_analisis_awal' => 0,
@@ -365,7 +236,6 @@ class TipologiController extends Controller
             'pdrb_sektor_pembanding_akhir' => 0,
             'total_pdrb_pembanding_awal' => 0,
             'total_pdrb_pembanding_akhir' => 0,
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             'nilai_ss' => $data['nilai_ss'],
             'nilai_lq' => $data['nilai_lq'],
             'tipologi' => $data['tipologi']
@@ -388,11 +258,6 @@ class TipologiController extends Controller
         return back()->with('success', 'Data Tipologi berhasil dihapus secara permanen!');
     }
 
-<<<<<<< HEAD
-    // Memproses import data massal dari file Excel.
-    public function import(Request $request)
-    {
-=======
     public function empty()
     {
         Tipologi::truncate();
@@ -415,7 +280,6 @@ class TipologiController extends Controller
     public function import(Request $request)
     {
         set_time_limit(300);
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         $payload = $request->json()->all();
         if (! $payload || ! is_array($payload)) {
             return response()->json(['success' => false, 'message' => 'Format data tidak valid.']);
@@ -423,64 +287,6 @@ class TipologiController extends Controller
 
         $successCount = 0;
 
-<<<<<<< HEAD
-        foreach ($payload as $item) {
-            if (! isset($item['Provinsi']) || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
-                ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
-                ! isset($item['Total PDRB Analisis Awal']) || ! isset($item['Total PDRB Analisis Akhir']) ||
-                ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
-                ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
-                continue;
-            }
-
-            $tingkat = (isset($item['Kabupaten/Kota']) && $item['Kabupaten/Kota'] != '-' && $item['Kabupaten/Kota'] != '') ? 'Kabupaten/Kota' : 'Provinsi';
-            
-            $mappedItem = [
-                'tingkat_wilayah' => $tingkat,
-                'provinsi' => $item['Provinsi'],
-                'kabupaten' => $item['Kabupaten/Kota'] ?? '-',
-                'sektor' => $item['Sektor'],
-                'tahun_awal' => $item['Tahun Awal'],
-                'tahun_akhir' => $item['Tahun Akhir'],
-                'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
-                'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
-                'total_pdrb_analisis_awal' => $item['Total PDRB Analisis Awal'] ?? 0,
-                'total_pdrb_analisis_akhir' => $item['Total PDRB Analisis Akhir'] ?? 0,
-                'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
-                'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
-                'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
-                'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
-            ];
-
-            $newData = $this->calculateTipologiData($mappedItem);
-
-            if ($newData) {
-                $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
-                
-                Tipologi::create([
-                    'user_id' => Auth::id() ?? 1,
-                    'sektor_id' => $sektorModel->id,
-                    'tingkat_wilayah' => $newData['tingkat_wilayah'],
-                    'daerah_analisis' => $newData['daerah_analisis'],
-                    'daerah_pembanding' => $newData['daerah_pembanding'],
-                    'tahun_awal' => $newData['tahun_awal'],
-                    'tahun_akhir' => $newData['tahun_akhir'],
-                    'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
-                    'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
-                    'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],
-                    'total_pdrb_analisis_akhir' => $newData['total_pdrb_analisis_akhir'],
-                    'pdrb_sektor_pembanding_awal' => $newData['pdrb_sektor_pembanding_awal'],
-                    'pdrb_sektor_pembanding_akhir' => $newData['pdrb_sektor_pembanding_akhir'],
-                    'total_pdrb_pembanding_awal' => $newData['total_pdrb_pembanding_awal'],
-                    'total_pdrb_pembanding_akhir' => $newData['total_pdrb_pembanding_akhir'],
-                    'nilai_ss' => $newData['nilai_ss'],
-                    'nilai_lq' => $newData['nilai_lq'],
-                    'tipologi' => $newData['tipologi']
-                ]);
-                $successCount++;
-            }
-        }
-=======
         // Preload all sectors in memory
         $sektorsCache = Sektor::all()->pluck('sektor_id', 'nama_sektor')->mapWithKeys(fn($id, $name) => [strtolower(trim($name)) => $id])->toArray();
 
@@ -554,7 +360,6 @@ class TipologiController extends Controller
                 }
             }
         });
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
 
         if ($successCount > 0) {
             OperatorController::logActivity('Analisis Tipologi', 'diimpor', "Mengimpor {$successCount} data Analisis Tipologi Sektor secara massal dari Template Master.");
@@ -565,8 +370,6 @@ class TipologiController extends Controller
 
         return response()->json(['success' => false, 'message' => 'Tidak ada data valid yang dapat diimpor. Pastikan format kolom sesuai dengan Template Master.']);
     }
-<<<<<<< HEAD
-=======
 
     public function syncFromDatabase(Request $request)
     {
@@ -655,6 +458,5 @@ class TipologiController extends Controller
 
         return back()->with('success', 'Sinkronisasi selesai. Tidak ada data baru yang ditambahkan (semua sudah tersinkron atau data tidak cocok).');
     }
->>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
 }
 
