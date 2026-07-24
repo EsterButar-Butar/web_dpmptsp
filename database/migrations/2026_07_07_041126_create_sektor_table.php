@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Membuat tabel sektor.
+     */
     public function up(): void
     {
         Schema::create('sektor', function (Blueprint $table) {
-
-            $table->id();
-
-            $table->string('nama_sektor');
-
-            $table->timestamps();
-
+            $table->id('sektor_id');
+            $table->string('nama_sektor', 255);
+            $table->index('nama_sektor');
         });
     }
 
-
+    /**
+     * Menghapus tabel sektor.
+     */
     public function down(): void
     {
         Schema::dropIfExists('sektor');

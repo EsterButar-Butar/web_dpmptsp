@@ -17,7 +17,6 @@ class OperatorController extends Controller
     public static function logActivity($module, $action, $desc)
     {
 
-
         ActivityLog::create([
             'user_id' => Auth::id(),
             'module' => $module,

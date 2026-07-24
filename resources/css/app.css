@@ -182,7 +182,7 @@
         gap: 24px;
     }
 
-
+}
     /* BRAND */
 
     /* =====================================================
@@ -2305,5 +2305,4 @@ NAVBAR BRAND
 input::-ms-reveal,
 input::-ms-clear {
     display: none !important;
-}
 }

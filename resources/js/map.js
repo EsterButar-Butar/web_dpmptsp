@@ -7,17 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (typeof analysis === "undefined") {
         console.error("Data analysis tidak ditemukan!");
-        return;
-    }
-
-    // ==========================
     // MAP
     // ==========================
     const map = L.map("map", {
         zoomControl: true,
         scrollWheelZoom: true,
     });
-
     map.setView([2.9, 99.2], 8);
 
     L.tileLayer(

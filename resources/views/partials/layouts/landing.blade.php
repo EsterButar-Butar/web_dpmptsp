@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -82,6 +83,12 @@ src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     @stack('scripts')
+
+    <div class="summary-icon">
+
+        <i class="{{ $card['icon'] }}"></i>
+
+    </div>
 
 
 </body>

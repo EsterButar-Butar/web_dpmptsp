@@ -28,9 +28,11 @@
 
     font-size:42px;
 
-    font-weight:800;
+    font-weight:1000;
 
-    margin-bottom:60px;
+    margin-top: 60px;
+
+    margin-bottom:40px;
 
 }
 
@@ -40,65 +42,63 @@
    FILTER
 ================================ */
 
-
 .comparison-filter {
 
-    width:100%;
+    width: 100%;
 
-    background:white;
+    background: white;
 
-    padding:32px;
+    padding: 32px;
 
-    border-radius:18px;
+    border-radius: 18px;
 
-    border:1px solid #d7dde8;
+    border: 1px solid #d7dde8;
 
-
-    display:grid;
+    display: grid;
 
     grid-template-columns:
-        1.2fr
-        1.2fr
-        1.2fr
-        .8fr
-        .8fr
-        auto;
+        minmax(180px, 1fr)
+        minmax(180px, 1fr)
+        minmax(280px, 2fr)
+        100px
+        100px
+        minmax(140px, 160px);
 
-    gap:24px;
+    gap: 24px;
 
-    align-items:center;
+    align-items: center;
 
-    margin-bottom:50px;
+    margin-bottom: 50px;
 
 }
-
-
 
 .comparison-filter select {
 
+    width: 100%;
 
-    height:62px;
+    min-width: 0;
 
-    padding:0 18px;
-
-
-    border-radius:8px;
+    height: 62px;
 
 
-    border:1px solid #9aa7bc;
+    border-radius: 8px;
+
+    border: 1px solid #9aa7bc;
 
 
-    background:white;
+    font-size: 15px;
 
-
-    font-size:15px;
-
-
-    cursor:pointer;
-
+    cursor: pointer;
 
 }
 
+.comparison-filter select:focus {
+
+    outline: none;
+
+    border-color: #00663f;
+
+}
 
 
 .comparison-filter select:focus {
@@ -114,49 +114,35 @@
 
 .comparison-filter button {
 
+    width: 100%;
 
-    height:62px;
+    height: 62px;
 
+    border: none;
 
-    padding:0 35px;
+    border-radius: 12px;
 
+    background: #00663f;
 
-    border:none;
+    color: white;
 
+    font-size: 16px;
 
-    border-radius:12px;
+    font-weight: 700;
 
+    cursor: pointer;
 
-    background:#00663f;
-
-
-    color:white;
-
-
-    font-size:16px;
-
-
-    font-weight:700;
-
-
-    cursor:pointer;
-
-
-    transition:.25s;
+    transition: .25s;
 
 }
-
-
 
 .comparison-filter button:hover {
 
-    background:#004d30;
+    background: #004d30;
 
-    transform:translateY(-2px);
+    transform: translateY(-2px);
 
 }
-
-
 
 
 /* ==============================
@@ -250,7 +236,7 @@
     font-weight:600;
 
 
-    color:#333;
+    color:#FFD54F;
 
 
 }
@@ -284,21 +270,11 @@
 
 .chart-card {
 
-
     background:white;
-
-
-    min-height:420px;
-
-
+    min-height:430px;
     padding:35px;
-
-
     border-radius:18px;
-
-
     border:1px solid #d7dde8;
-
 
 }
 
@@ -326,7 +302,7 @@
     width:100%!important;
 
 
-    height:320px!important;
+    height:340px!important;
 
 
 }
@@ -426,6 +402,96 @@
 
 }
 
+.status-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:140px;
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:.9rem;
+    font-weight:600;
+}
+
+/* Status LQ */
+
+.status-badge.basis{
+    background:#DDF8E8;
+    color:#0A8F5A;
+}
+
+.status-badge.non-basis{
+    background:#FFF2CC;
+    color:#D49400;
+}
+
+/* Tipologi */
+
+.status-badge.unggulan{
+    background:#DDF8E8;
+    color:#0A8F5A;
+}
+
+.status-badge.potensial{
+    background:#E2F0FF;
+    color:#1D6EFF;
+}
+
+.status-badge.berkembang{
+    background:#FFF2CC;
+    color:#D49400;
+}
+
+.status-badge.tertinggal{
+    background:#FFE0E0;
+    color:#E53935;
+}
+
+
+
+
+/* ==============================
+ JS ANIMATION
+================================ */
+
+
+.summary-card,
+.chart-card,
+.table-card {
+
+
+    opacity:0;
+
+
+    transform:translateY(30px);
+
+
+}
+
+
+
+.summary-card.show,
+.chart-card.show,
+.table-card.show {
+
+
+    opacity:1;
+
+
+    transform:translateY(0);
+
+
+    transition:.5s;
+
+
+}
+
+
+
+
+/* ==============================
+ RESPONSIVE
+================================ */
 
 
 
@@ -477,12 +543,18 @@
 @media(max-width:1200px){
 
 
-    .comparison-filter {
+    .comparison-filter{
+        display:grid;
+        grid-template-columns:
+            1fr
+            1fr
+            2fr
+            100px
+            100px
+            140px;
 
-
-        grid-template-columns:repeat(3,1fr);
-
-
+        gap:1.5rem;
+        align-items:end;
     }
 
 
@@ -516,9 +588,9 @@
     .comparison-summary,
     .comparison-chart-grid {
 
-
-        grid-template-columns:1fr;
-
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:2rem;
 
     }
 

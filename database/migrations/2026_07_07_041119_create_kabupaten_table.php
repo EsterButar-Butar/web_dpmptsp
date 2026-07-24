@@ -6,16 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Membuat tabel kabupaten.
+     */
     public function up(): void
     {
         Schema::create('kabupaten', function (Blueprint $table) {
-            $table->id();
+
             $table->foreignId('provinsi_id')->constrained('provinsi')->cascadeOnDelete();
-            $table->string('nama_kabupaten');
             $table->timestamps();
+            $table->id('kab_id');
+            $table->string('nama_kabupaten', 255);
+            $table->index('provinsi_id');
+            $table->index('nama_kabupaten');
         });
     }
 
+    /**
+     * Menghapus tabel kabupaten.
+     */
     public function down(): void
     {
         Schema::dropIfExists('kabupaten');
