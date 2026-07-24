@@ -28,7 +28,7 @@
     </a>
 
     {{-- Tentang --}}
-    <a href="{{ route('about') }}">
+    <a href="{{ route('home') }}#tentang">
         <i class="fa-solid fa-circle-info"></i>
         Tentang
     </a>

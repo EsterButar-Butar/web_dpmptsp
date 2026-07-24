@@ -469,7 +469,7 @@
                     class="
                         grid
                         grid-cols-1
-                        items-end
+                        items-start
                         gap-5
                         xl:grid-cols-[minmax(210px,0.9fr)_minmax(240px,1fr)_56px_minmax(240px,1fr)]
                     "
@@ -706,6 +706,7 @@
                             flex
                             items-center
                             justify-center
+                            xl:mt-8
                             xl:pb-0
                         "
                     >

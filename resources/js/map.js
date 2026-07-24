@@ -1,18 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // =====================================================
+    // CEK DATA LOKASI
+    // =====================================================
     if (typeof lokasi === "undefined") {
         console.error("Data lokasi tidak ditemukan!");
         return;
     }
 
-    if (typeof analysis === "undefined") {
-        console.error("Data analysis tidak ditemukan!");
-        return;
-    }
+    console.log("Jumlah lokasi:", lokasi.length);
 
-    // ==========================
-    // MAP
-    // ==========================
+
+    // =====================================================
+    // INISIALISASI MAP
+    // =====================================================
     const map = L.map("map", {
         zoomControl: true,
         scrollWheelZoom: true,
@@ -20,6 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     map.setView([2.9, 99.2], 8);
 
+
+    // =====================================================
+    // TILE LAYER
+    // =====================================================
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
@@ -28,38 +33,363 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     ).addTo(map);
 
-    // ==========================
-    // ICON
-    // ==========================
+
+    // =====================================================
+    // ICON MARKER HIJAU
+    // =====================================================
     const greenIcon = L.icon({
+
         iconUrl:
             "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+
         shadowUrl:
             "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
         iconSize: [25, 41],
+
         iconAnchor: [12, 41],
+
         popupAnchor: [1, -34],
-        shadowSize: [41, 41]
+
+        shadowSize: [41, 41],
+
     });
 
+
+    // =====================================================
+    // GROUP MARKER
+    // =====================================================
     const group = L.featureGroup().addTo(map);
 
     const markers = [];
 
-    // ==========================
-    // MARKER
-    // ==========================
-    lokasi.forEach(item => {
 
+    // =====================================================
+    // FUNGSI MENAMPILKAN DETAIL DAERAH
+    // =====================================================
+    function tampilkanDetail(item) {
+
+        const detailKosong =
+            document.getElementById("detailKosong");
+
+        const detailDaerah =
+            document.getElementById("detailDaerah");
+
+        const namaDaerah =
+            document.getElementById("namaDaerah");
+
+        const statusDaerah =
+            document.getElementById("statusDaerah");
+
+        const sektorDaerah =
+            document.getElementById("sektorDaerah");
+
+        const koordinatDaerah =
+            document.getElementById("koordinatDaerah");
+
+
+        // =================================================
+        // TAMPILKAN PANEL DETAIL
+        // =================================================
+        if (detailKosong) {
+            detailKosong.style.display = "none";
+        }
+
+        if (detailDaerah) {
+            detailDaerah.style.display = "block";
+        }
+
+
+        // =================================================
+        // NAMA DAERAH
+        // =================================================
+        if (namaDaerah) {
+            namaDaerah.innerText = item.nama;
+        }
+
+
+        // =================================================
+        // LOADING
+        // =================================================
+        if (sektorDaerah) {
+            sektorDaerah.innerText = "Memuat data...";
+        }
+
+        if (statusDaerah) {
+            statusDaerah.innerText = "Memuat...";
+        }
+
+
+        // =================================================
+        // KOORDINAT
+        // =================================================
+        if (koordinatDaerah) {
+
+            koordinatDaerah.innerText =
+                `${item.latitude}, ${item.longitude}`;
+
+        }
+
+
+        // =================================================
+        // URL API
+        // =================================================
+        const url =
+            `/map/analysis/${encodeURIComponent(item.nama)}`;
+
+        console.log("Mengambil:", url);
+
+
+        // =================================================
+        // FETCH DATA SEKTOR UNGGULAN
+        // =================================================
+        fetch(url, {
+            headers: {
+                "Accept": "application/json",
+            },
+        })
+
+        .then(async (response) => {
+
+            const data = await response.json();
+
+            console.log("SERVER RESPONSE:", data);
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "Terjadi kesalahan pada server."
+                );
+
+            }
+
+            return data;
+
+        })
+
+        .then((data) => {
+
+            // =============================================
+            // API GAGAL / DATA TIDAK DITEMUKAN
+            // =============================================
+            if (!data.success) {
+
+                if (sektorDaerah) {
+
+                    sektorDaerah.innerText =
+                        data.message ||
+                        "Belum ada sektor unggulan";
+
+                }
+
+                if (statusDaerah) {
+
+                    statusDaerah.innerText =
+                        "Belum ada data";
+
+                }
+
+                return;
+            }
+
+
+            // =============================================
+            // AMBIL DATA SEKTOR
+            // =============================================
+            const sektor = data.sektor;
+
+
+            // =============================================
+            // JIKA SEKTOR BERUPA ARRAY
+            // =============================================
+            if (Array.isArray(sektor) && sektor.length > 0) {
+
+                sektorDaerah.innerHTML = sektor
+                    .map((namaSektor, index) => {
+
+                        return `
+                            <div class="sektor-item">
+
+                                <span class="sektor-number">
+                                    ${index + 1}.
+                                </span>
+
+                                <span class="sektor-name">
+                                    ${namaSektor}
+                                </span>
+
+                            </div>
+                        `;
+
+                    })
+                    .join("");
+
+            }
+
+
+            // =============================================
+            // JIKA BACKEND MASIH MENGIRIM STRING
+            // =============================================
+            else if (
+                typeof sektor === "string" &&
+                sektor.trim() !== ""
+            ) {
+
+                /*
+                 * Kalau backend mengirim:
+                 *
+                 * "PERTANIAN<br>PERTAMBANGAN"
+                 *
+                 * atau dipisahkan newline,
+                 * kita coba pecah menjadi array.
+                 */
+
+                const daftarSektor = sektor
+                    .split(/<br\s*\/?>|\n/i)
+                    .map(item => item.trim())
+                    .filter(item => item !== "");
+
+
+                if (daftarSektor.length > 0) {
+
+                    sektorDaerah.innerHTML = daftarSektor
+                        .map((namaSektor, index) => {
+
+                            return `
+                                <div class="sektor-item">
+
+                                    <span class="sektor-number">
+                                        ${index + 1}.
+                                    </span>
+
+                                    <span class="sektor-name">
+                                        ${namaSektor}
+                                    </span>
+
+                                </div>
+                            `;
+
+                        })
+                        .join("");
+
+                } else {
+
+                    sektorDaerah.innerText =
+                        "Belum ada sektor unggulan";
+
+                }
+
+            }
+
+
+            // =============================================
+            // TIDAK ADA SEKTOR
+            // =============================================
+            else {
+
+                sektorDaerah.innerText =
+                    "Belum ada sektor unggulan";
+
+            }
+
+
+            // =============================================
+            // STATUS
+            // =============================================
+            if (statusDaerah) {
+
+                let status =
+                    data.status ||
+                    "Sektor Cepat Maju dan Cepat Tumbuh";
+
+                if (data.tahun) {
+
+                    status += `\nTahun ${data.tahun}`;
+
+                }
+
+                statusDaerah.innerText = status;
+
+            }
+
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "ERROR MENGAMBIL ANALISIS:",
+                error
+            );
+
+
+            if (sektorDaerah) {
+
+                sektorDaerah.innerText =
+                    "Gagal mengambil data.";
+
+            }
+
+
+            if (statusDaerah) {
+
+                statusDaerah.innerText =
+                    "Terjadi kesalahan";
+
+            }
+
+        });
+
+    }
+
+
+    // =====================================================
+    // LOOP SEMUA LOKASI
+    // =====================================================
+    lokasi.forEach((item) => {
+
+        // =============================================
+        // VALIDASI KOORDINAT
+        // =============================================
+        const latitude =
+            parseFloat(item.latitude);
+
+        const longitude =
+            parseFloat(item.longitude);
+
+
+        if (
+            Number.isNaN(latitude) ||
+            Number.isNaN(longitude)
+        ) {
+
+            console.warn(
+                "Koordinat tidak valid:",
+                item
+            );
+
+            return;
+        }
+
+
+        // =============================================
+        // BUAT MARKER
+        // =============================================
         const marker = L.marker(
-            [item.latitude, item.longitude],
+            [latitude, longitude],
             {
-                icon: greenIcon
+                icon: greenIcon,
             }
         ).addTo(group);
 
+
+        // =============================================
+        // POPUP
+        // =============================================
         marker.bindPopup(`
+
             <div class="popup-card">
+
                 <div class="popup-title">
                     📍 ${item.nama}
                 </div>
@@ -67,121 +397,127 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="popup-desc">
                     Klik untuk melihat informasi investasi.
                 </div>
+
             </div>
+
         `);
 
+
+        // =============================================
+        // KLIK MARKER
+        // =============================================
         marker.on("click", () => {
-            console.log("Nama marker:", item.nama);
-            console.log("Jumlah analysis:", window.analysis.length);
-            console.log("Contoh data pertama:", window.analysis[0]);
 
-            document.getElementById("detailKosong").style.display = "none";
-            document.getElementById("detailDaerah").style.display = "block";
-
-            document.getElementById("namaDaerah").innerText = item.nama;
-            document.getElementById("statusDaerah").innerText = "Sudah Dianalisis";
-            document.getElementById("koordinatDaerah").innerText =
-                item.latitude + ", " + item.longitude;
-
-            // Cari semua data kabupaten
-            const dataKabupaten = window.analysis.filter(row =>
-            row.kabupaten_kota === item.nama
-                );
-
-console.log("Hasil filter:", dataKabupaten);
-            if (dataKabupaten.length === 0) {
-
-                document.getElementById("sektorDaerah").innerHTML =
-                    "<strong>Belum ada data</strong>";
-
-                return;
-            }
-
-            // Cari sektor unggulan
-            const unggulan = dataKabupaten
-                .filter(row =>
-                    Number(row.lq) > 1 &&
-                    row.tipologi === "Unggulan" &&
-                    row.klassen === "I"
-                )
-                .sort((a, b) => Number(b.ssa) - Number(a.ssa))[0];
-
-            if (!unggulan) {
-
-                document.getElementById("sektorDaerah").innerHTML =
-                    "<strong>Belum ada sektor unggulan</strong>";
-
-                return;
-            }
-
-            document.getElementById("sektorDaerah").innerHTML = `
-                <strong>${unggulan.sektor}</strong>
-
-                <br><br>
-
-                <small>
-                    <b>LQ</b> : ${unggulan.lq}<br>
-                    <b>SSA</b> : ${unggulan.ssa}<br>
-                    <b>Klassen</b> : ${unggulan.klassen}<br>
-                    <b>Tipologi</b> : ${unggulan.tipologi}
-                </small>
-            `;
+            tampilkanDetail(item);
 
         });
 
+
+        // =============================================
+        // SIMPAN MARKER UNTUK SEARCH
+        // =============================================
         markers.push({
+
             nama: item.nama.toLowerCase(),
+
             marker: marker,
-            lat: item.latitude,
-            lng: item.longitude
+
+            lat: latitude,
+
+            lng: longitude,
+
+            item: item,
+
         });
 
     });
 
-    // ==========================
-    // FIT MAP
-    // ==========================
+
+    // =====================================================
+    // FIT MAP KE SEMUA MARKER
+    // =====================================================
     if (group.getLayers().length > 0) {
-        map.fitBounds(group.getBounds(), {
-            padding: [50, 50]
-        });
+
+        map.fitBounds(
+            group.getBounds(),
+            {
+                padding: [50, 50],
+            }
+        );
+
     }
 
-    // ==========================
-    // SEARCH
-    // ==========================
-    const search = document.getElementById("searchKabupaten");
+
+    // =====================================================
+    // SEARCH KABUPATEN / KOTA
+    // =====================================================
+    const search =
+        document.getElementById("searchKabupaten");
+
 
     if (search) {
 
-        search.addEventListener("keyup", function () {
+        search.addEventListener(
+            "keyup",
+            function () {
 
-            const keyword = this.value.toLowerCase();
+                const keyword =
+                    this.value
+                        .trim()
+                        .toLowerCase();
 
-            markers.forEach(item => {
 
-                if (item.nama.includes(keyword)) {
+                // Kalau search kosong
+                if (keyword === "") {
+                    return;
+                }
 
+
+                const ditemukan =
+                    markers.find((item) =>
+                        item.nama.includes(keyword)
+                    );
+
+
+                if (ditemukan) {
+
+                    // Pindahkan map
                     map.flyTo(
-                        [item.lat, item.lng],
+                        [
+                            ditemukan.lat,
+                            ditemukan.lng
+                        ],
                         10,
                         {
-                            duration: 1.5
+                            duration: 1.5,
                         }
                     );
 
-                    item.marker.openPopup();
+
+                    // Buka popup
+                    ditemukan.marker.openPopup();
+
+
+                    // Tampilkan detail juga
+                    tampilkanDetail(
+                        ditemukan.item
+                    );
 
                 }
 
-            });
-
-        });
+            }
+        );
 
     }
 
+
+    // =====================================================
+    // KLIK MAP
+    // =====================================================
     map.on("click", () => {
+
         map.closePopup();
+
     });
 
 });

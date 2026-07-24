@@ -1,41 +1,66 @@
-window.addEventListener("scroll",()=>{
+// ===============================
+// Navbar Scroll Effect
+// ===============================
+window.addEventListener("scroll", () => {
+    const navbar = document.querySelector(".main-header");
 
-    const navbar=document.querySelector(".main-header");
-
-    navbar.classList.toggle("scrolled",window.scrollY>50);
-
+    if (navbar) {
+        navbar.classList.toggle("scrolled", window.scrollY > 50);
+    }
 });
 
+
+// ===============================
+// DOM Ready
+// ===============================
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Kalau bukan halaman home, biarkan Laravel yang mengatur active
-    if (window.location.pathname !== "/") return;
+    // ===============================
+    // Active menu saat scroll (Home)
+    // ===============================
+    if (window.location.pathname === "/") {
 
-    const hero = document.getElementById("hero");
-    const tentang = document.getElementById("tentang");
+        const tentang = document.getElementById("tentang");
 
-    const navHome = document.getElementById("nav-home");
-    const navAbout = document.getElementById("nav-about");
+        const navHome = document.getElementById("nav-home");
+        const navAbout = document.getElementById("nav-about");
 
-    function setActive() {
+        function setActive() {
 
-        const posisi = window.scrollY;
+            if (!tentang) return;
 
-        if (posisi < tentang.offsetTop - 150) {
+            if (window.scrollY < tentang.offsetTop - 150) {
 
-            navHome.classList.add("active");
-            navAbout.classList.remove("active");
+                navHome?.classList.add("active");
+                navAbout?.classList.remove("active");
 
-        } else {
+            } else {
 
-            navHome.classList.remove("active");
-            navAbout.classList.add("active");
+                navHome?.classList.remove("active");
+                navAbout?.classList.add("active");
 
+            }
         }
+
+        setActive();
+
+        window.addEventListener("scroll", setActive);
     }
 
-    setActive();
 
-    window.addEventListener("scroll", setActive);
+    // ===============================
+    // Mobile Hamburger Menu
+    // ===============================
+    const menuBtn = document.querySelector(".mobile-menu-button");
+    const navMenu = document.querySelector(".main-navigation");
+    const navAction = document.querySelector(".navbar-action");
 
+    const menuBtn = document.getElementById("mobileMenuButton");
+const navMenu = document.getElementById("mainNavigation");
+
+if (menuBtn && navMenu) {
+    menuBtn.addEventListener("click", () => {
+        navMenu.classList.toggle("show");
+    });
+}
 });

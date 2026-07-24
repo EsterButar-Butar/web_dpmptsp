@@ -54,9 +54,8 @@
 
 
             <a
-                href="{{ route('about') }}"
-                class="nav-link
-                {{ request()->routeIs('about') ? 'active' : '' }}"
+                href="{{ route('home') }}#tentang"
+                class="nav-link"
             >
                 <i class="fa-solid fa-puzzle-piece"></i>
 

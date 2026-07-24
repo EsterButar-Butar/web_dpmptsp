@@ -30,6 +30,9 @@ Route::get('/', function () {
 Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
     ->name('investment.map');
 
+Route::get('/map/analysis/{nama}', [InvestmentMapController::class, 'analysis'])
+    ->name('investment.map.analysis');
+
 Route::get(
     '/analisis',
     [
