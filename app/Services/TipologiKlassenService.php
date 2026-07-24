@@ -263,4 +263,8 @@ class TipologiKlassenService extends BaseAnalysisService
 
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29

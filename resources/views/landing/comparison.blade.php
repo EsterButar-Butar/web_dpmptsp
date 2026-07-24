@@ -1,26 +1,21 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perbandingan Sektor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    @vite([
-        'resources/css/navbar.css',
-        'resources/css/home.css',
-        'resources/css/about.css',
-        'resources/css/analysis.css',
-        'resources/css/comparison.css',
-        'resources/js/navbar.js',
-        'resources/js/home.js',
-        'resources/js/about.js',
-        'resources/js/analysis.js',
-        'resources/js/comparison.js',
-    ])
-</head>
-<body>
+@php
+    use Illuminate\Support\Str;
+@endphp
+
+@vite([
+    'resources/css/navbar.css',
+    'resources/css/home.css',
+    'resources/css/about.css',
+    'resources/css/analysis.css',
+    'resources/css/comparison.css',
+
+    'resources/js/navbar.js',
+    'resources/js/home.js',
+    'resources/js/about.js',
+    'resources/js/analysis.js',
+    'resources/js/comparison.js',
+])
+
 
 {{-- NAVBAR --}}
 @include('partials.landing.navbar')
@@ -32,9 +27,8 @@
 
     {{-- TITLE --}}
     <h1 class="comparison-title">
-        Analisis Perbandingan Sektor
-    </h1>
-
+        Dashboard Analisis Sektor
+    </h2>
 
 
     {{-- FILTER --}}
@@ -43,42 +37,65 @@
         action="{{ route('comparison') }}"
         class="comparison-filter"
     >
-
-
         <select name="provinsi">
 
-            <option>
-                {{ $filter['provinsi'] }}
+            <option value="">
+                Pilih Provinsi
             </option>
 
+            @foreach($provinsi as $item)
+
+                <option
+                    value="{{ $item->provinsi_id }}"
+                    @selected($filter['provinsi']==$item->provinsi_id)
+                >
+                    {{ Str::title(Str::lower($item->nama_provinsi)) }}                
+                </option>
+
+            @endforeach
+
         </select>
-
-
 
         <select name="kabupaten">
 
-            <option>
-                {{ $filter['kabupaten'] }}
+            <option value="">
+                Pilih Kabupaten / Kota
             </option>
 
+            @foreach($kabupaten as $item)
+
+                <option
+                    value="{{ $item->kab_id }}"
+                    @selected($filter['kabupaten']==$item->kab_id)
+                >
+                    {{ Str::title(Str::lower($item->nama_kabupaten)) }}                </option>
+
+            @endforeach
+
         </select>
-
-
 
         <select name="sektor">
 
-            <option>
-                {{ $filter['sektor'] }}
+            <option value="">
+                Pilih Sektor
             </option>
 
+            @foreach($sektor as $item)
+
+                <option
+                    value="{{ $item->sektor_id }}"
+                    @selected($filter['sektor']==$item->sektor_id)
+                >
+                    {{ Str::title(Str::lower($item->nama_sektor)) }}                </option>
+
+            @endforeach
+
         </select>
-
-
 
         <select name="tahun_awal">
 
 
-            @for($i=2019;$i<=2026;$i++)
+            @for($i=2021;$i<=2025;$i++)
 
             <option 
                 value="{{ $i }}"
@@ -100,7 +117,7 @@
         <select name="tahun_akhir">
 
 
-            @for($i=2019;$i<=2026;$i++)
+            @for($i=2021;$i<=2025;$i++)
 
             <option 
                 value="{{ $i }}"
@@ -129,371 +146,259 @@
 
     </form>
 
-
-
-
+    @if($dashboard)
 
     {{-- SUMMARY --}}
-
     <div class="comparison-summary">
 
-
-
         <div class="summary-card">
 
             <h2>
-                {{ $summary['growth'] }}%
+
+                {{ $dashboard['summary']['growth']['average'] ?? '-' }}%
+
             </h2>
 
             <p>
+
                 Pertumbuhan rata-rata
+
             </p>
 
+            <small>
+
+                Tertinggi pada
+                {{ $dashboard['summary']['growth']['highest']['tahun'] ?? '-' }}
+
+                ({{ $dashboard['summary']['growth']['highest']['nilai'] ?? '-' }}%)
+
+            </small>
+
         </div>
-
-
-
-
 
         <div class="summary-card">
 
             <h2>
-                {{ $summary['contribution'] }}%
+
+                {{ $dashboard['summary']['contribution']['average'] ?? '-' }}%
+
             </h2>
 
             <p>
+
                 Kontribusi rata-rata
+
             </p>
 
+            <small>
+
+                Tertinggi pada
+                {{ $dashboard['summary']['contribution']['highest']['tahun'] ?? '-' }}
+
+                ({{ $dashboard['summary']['contribution']['highest']['nilai'] ?? '-' }}%)
+
+            </small>
+
         </div>
-
-
-
-
-
 
         <div class="summary-card">
 
             <h2>
-                {{ $summary['lq'] }}
+
+                {{ $dashboard['summary']['lq']['nilai'] ?? '-' }}
+
             </h2>
 
             <p>
-                Nilai LQ terakhir
+
+                Nilai LQ Terakhir
+                ({{ $dashboard['summary']['lq']['tahun'] ?? '-' }})
+
             </p>
 
+            <small>
+
+                {{ $dashboard['summary']['lq']['status'] ?? '-' }}
+
+                <br>
+
+                @if(($dashboard['summary']['lq']['change'] ?? 0) >= 0)
+
+                    Naik
+
+                @else
+
+                    Turun
+
+                @endif
+
+                {{ abs($dashboard['summary']['lq']['change'] ?? 0) }}%
+
+                dari tahun sebelumnya
+
+            </small>
+
         </div>
-
-
-
-
 
         <div class="summary-card">
 
             <h2>
-                {{ $summary['status'] }}
+
+                {{ $dashboard['summary']['tipologi']['kategori'] ?? '-' }}
+
             </h2>
 
             <p>
-                {{ $summary['kategori'] }}
+
+                Status Tipologi Klassen Terakhir
+
             </p>
 
+            <small>
+
+                {{ $dashboard['summary']['tipologi']['movement'] ?? '-' }}
+
+            </small>
+
         </div>
-
-
 
     </div>
-
-
-
-
-
-
 
 
     {{-- CHART --}}
 
     <div class="comparison-chart-grid">
 
-
         <div class="chart-card">
-
-
-            <h3>
-                Trend Pertumbuhan Sektor (%)
-            </h3>
-
-
+            <h3>Tren Pertumbuhan</h3>
             <canvas id="growthChart"></canvas>
-
-
         </div>
-
-
-
-
-
 
         <div class="chart-card">
-
-
-            <h3>
-                Perbandingan Indikator Tahunan
-            </h3>
-
-
-            <canvas id="indicatorChart"></canvas>
-
-
+            <h3>Tren Kontribusi</h3>
+            <canvas id="contributionChart"></canvas>
         </div>
 
+        <div class="chart-card">
+            <h3>Tren Nilai LQ</h3>
+            <canvas id="lqChart"></canvas>
+        </div>
 
+        <div class="chart-card">
+            <h3>Tren Nilai SSA</h3>
+            <canvas id="ssaChart"></canvas>
+        </div>
 
     </div>
 
 
-
-
-
-
-
-
     {{-- TABLE --}}
-
     <div class="table-card">
 
-
-        <h3>
-            Daftar Sektor Berdasarkan Tipologi
-        </h3>
-
-
+        <h3>Ringkasan Hasil Analisis Sektor Per Tahun</h3>
 
         <table>
 
-
             <thead>
-
                 <tr>
-
                     <th>Tahun</th>
                     <th>Pertumbuhan</th>
                     <th>Kontribusi</th>
                     <th>LQ</th>
                     <th>SSA</th>
+                    <th>Status LQ</th>
                     <th>Kuadran</th>
-                    <th>Status</th>
-
+                    <th>Kategori</th>
                 </tr>
-
             </thead>
-
-
-
-
 
             <tbody>
 
-
-            @foreach($trend as $row)
-
+            @forelse($dashboard['table'] ?? [] as $row)
 
                 <tr>
 
                     <td>{{ $row['tahun'] }}</td>
 
-                    <td>{{ $row['growth'] }}</td>
+                    <td>{{ number_format($row['growth'], 2) }}%</td>
 
-                    <td>{{ $row['contribution'] }}</td>
+                    <td>{{ number_format($row['contribution'], 2) }}%</td>
 
-                    <td>{{ $row['lq'] }}</td>
+                    <td>{{ number_format($row['lq'], 3) }}</td>
 
-                    <td>{{ $row['ssa'] }}</td>
+                    <td>{{ number_format($row['ssa'], 2) }}</td>
+
+                    <td>
+                        <span class="status-badge {{ $row['status_lq'] === 'Basis' ? 'basis' : 'non-basis' }}">
+                            {{ $row['status_lq'] }}
+                        </span>
+                    </td>
 
                     <td>{{ $row['kuadran'] }}</td>
 
-                    <td>{{ $row['status'] }}</td>
+                    <td>
+                        <span class="status-badge
+                            @switch($row['kategori'])
+                                @case('Sektor Unggulan')
+                                    unggulan
+                                    @break
 
+                                @case('Sektor Potensial')
+                                    potensial
+                                    @break
+
+                                @case('Sektor Berkembang')
+                                    berkembang
+                                    @break
+
+                                @default
+                                    tertinggal
+                            @endswitch
+                        ">
+                            {{ $row['kategori'] }}
+                        </span>
+                    </td>
 
                 </tr>
 
+            @empty
 
-            @endforeach
+                <tr>
+                    <td colspan="8" class="text-center">
+                        Pilih kabupaten dan sektor untuk menampilkan data.
+                    </td>
+                </tr>
 
+            @endforelse
 
             </tbody>
 
-
-
         </table>
-
 
     </div>
 
+    @else
 
+    <div class="comparison-empty">
 
+        <h3>Analisis Sektor</h3>
+
+        <p>
+            Pilih kabupaten, sektor, dan rentang tahun,
+            kemudian klik <strong>Analisis</strong>.
+        </p>
+
+    </div>
+
+    @endif
+
+    <script>
+    window.comparisonCharts =
+        @json($dashboard['charts'] ?? []);
+    </script>
 
 </section>
 
 
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-
 <script>
-
-
-const comparisonData =
-@json($trend);
-
-
-
-
-
-new Chart(
-
-    document.getElementById('growthChart'),
-
-    {
-
-        type:'line',
-
-
-        data:{
-
-
-            labels:
-                comparisonData.map(
-                    item => item.tahun
-                ),
-
-
-
-            datasets:[
-
-                {
-
-                    label:'Pertumbuhan',
-
-                    data:
-                        comparisonData.map(
-                            item => item.growth
-                        )
-
-                }
-
-            ]
-
-
-        }
-
-
-    }
-
-);
-
-
-
-
-
-
-
-new Chart(
-
-    document.getElementById('indicatorChart'),
-
-
-    {
-
-        type:'line',
-
-
-
-        data:{
-
-
-            labels:
-
-                comparisonData.map(
-
-                    item => item.tahun
-
-                ),
-
-
-
-
-            datasets:[
-
-
-                {
-
-                    label:'LQ',
-
-                    data:
-
-                        comparisonData.map(
-
-                            item => item.lq
-
-                        )
-
-                },
-
-
-
-
-                {
-
-                    label:'SSA',
-
-                    data:
-
-                        comparisonData.map(
-
-                            item => item.ssa
-
-                        )
-
-                },
-
-
-
-
-
-                {
-
-                    label:'Kontribusi',
-
-                    data:
-
-                        comparisonData.map(
-
-                            item => item.contribution
-
-                        )
-
-                }
-
-
-
-            ]
-
-
-        }
-
-
-    }
-
-
-);
-
-
-
 </script>
-
-</body>
-</html>

@@ -20,13 +20,6 @@ return new class extends Migration
             */
 
             $table->id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | DATA PROVINSI
-            |--------------------------------------------------------------------------
-            */
-
             $table->string('nama_provinsi', 255);
             $table->string('kode_provinsi', 20);
 

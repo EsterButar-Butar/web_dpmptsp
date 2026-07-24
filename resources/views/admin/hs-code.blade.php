@@ -359,6 +359,12 @@
                 type="text"
                 name="search"
                 value="{{ request('search') }}"
+<<<<<<< HEAD
+                placeholder="Cari HS Code, kategori, kelompok, uraian..."
+            >
+
+            <button type="submit">
+=======
                 placeholder="Cari kode, kelompok, atau uraian..."
                 class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12
                     text-sm text-slate-700 outline-none transition placeholder:text-slate-400
@@ -373,10 +379,403 @@
                     items-center justify-center rounded-lg bg-emerald-50 text-sm
                     text-emerald-600 transition hover:bg-emerald-100"
             >
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </div>
 
+<<<<<<< HEAD
+        <a
+            href="{{ route('admin.hs-code.index') }}"
+            class="btn-reset"
+        >
+            Reset
+        </a>
+    </form>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>NOMOR</th>
+                        <th>KATEGORI</th>
+                        <th>KELOMPOK</th>
+                        <th>SUBKELOMPOK</th>
+                        <th>HS CODE</th>
+                        <th>URAIAN BARANG</th>
+                        <th>STATUS</th>
+                        <th>AKSI</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse ($dataHsCode as $item)
+                        @php
+                            $nomor = ($dataHsCode->currentPage() - 1) * $dataHsCode->perPage() + $loop->iteration;
+                            $status = $item->status ?? 'Aktif';
+                            $statusLower = strtolower(trim($status));
+                        @endphp
+
+                        <tr>
+                            <td>{{ str_pad($nomor, 5, '0', STR_PAD_LEFT) }}</td>
+
+                            <td>
+                                <span class="code-pill">
+                                    {{ $item->kode_kategori ?: '-' }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="sub-title">
+                                    {{ \Illuminate\Support\Str::limit($item->uraian_kelompok ?: '-', 70) }}
+                                </div>
+                                <div class="sub-code">
+                                    {{ $item->kode_kelompok ?: '-' }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="sub-title">
+                                    {{ \Illuminate\Support\Str::limit($item->uraian_subkelompok ?: '-', 70) }}
+                                </div>
+                                <div class="sub-code">
+                                    {{ $item->kode_subkelompok ?: '-' }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="code-pill hs">
+                                    {{ $item->hs_code ?: '-' }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <div
+                                    class="text-preview"
+                                    title="{{ $item->uraian_barang }}"
+                                >
+                                    {{ \Illuminate\Support\Str::limit($item->uraian_barang ?: '-', 110) }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge {{ $statusLower === 'nonaktif' ? 'badge-inactive' : 'badge-active' }}">
+                                    {{ $status }}
+                                </span>
+                            </td>
+
+                            <td>
+                                @if ($hasIdColumn && $item->id)
+                                    <div class="action-group">
+                                        <a
+                                            href="{{ route('admin.hs-code.index', array_merge(request()->query(), ['edit' => $item->id])) }}"
+                                            class="action-btn"
+                                            title="Edit"
+                                        >
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </a>
+
+                                        <form
+                                            action="{{ route('admin.hs-code.destroy', $item->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Yakin ingin menghapus data HS Code ini?')"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="action-btn delete"
+                                                title="Hapus"
+                                            >
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                Belum ada data HS Code.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if ($dataHsCode->hasPages())
+        <div class="pagination-wrap">
+            <div class="pagination-info">
+                Menampilkan {{ $dataHsCode->firstItem() }} - {{ $dataHsCode->lastItem() }}
+                dari {{ $dataHsCode->total() }} data HS Code
+            </div>
+
+            <div class="pagination">
+                <a
+                    href="{{ $dataHsCode->previousPageUrl() ?? '#' }}"
+                    class="page-link {{ $dataHsCode->onFirstPage() ? 'disabled' : '' }}"
+                >
+                    <i class="fa-solid fa-chevron-left"></i>&nbsp; PREV
+                </a>
+
+                @php
+                    $currentPage = $dataHsCode->currentPage();
+                    $lastPage = $dataHsCode->lastPage();
+
+                    $pages = collect([
+                        1,
+                        2,
+                        $currentPage - 1,
+                        $currentPage,
+                        $currentPage + 1,
+                        $lastPage - 1,
+                        $lastPage,
+                    ])
+                        ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
+                        ->unique()
+                        ->sort()
+                        ->values();
+
+                    $previousPageNumber = null;
+                @endphp
+
+                @foreach ($pages as $page)
+                    @if ($previousPageNumber && $page - $previousPageNumber > 1)
+                        <span class="page-dots">...</span>
+                    @endif
+
+                    <a
+                        href="{{ $dataHsCode->url($page) }}"
+                        class="page-link {{ $page === $currentPage ? 'active' : '' }}"
+                    >
+                        {{ $page }}
+                    </a>
+
+                    @php
+                        $previousPageNumber = $page;
+                    @endphp
+                @endforeach
+
+                <a
+                    href="{{ $dataHsCode->nextPageUrl() ?? '#' }}"
+                    class="page-link {{ $dataHsCode->hasMorePages() ? '' : 'disabled' }}"
+                >
+                    NEXT &nbsp;<i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    @endif
+</div>
+
+@if ($isModalOpen)
+    <div class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h2>{{ $isEdit ? 'Edit Data HS Code' : 'Tambah Data HS Code' }}</h2>
+                    <p>
+                        Isi data kategori, kelompok, subkelompok, HS Code, dan uraian barang.
+                    </p>
+                </div>
+
+                <a
+                    href="{{ route('admin.hs-code.index', request()->except(['mode', 'edit'])) }}"
+                    class="btn-close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+            </div>
+
+            <form action="{{ $formAction }}" method="POST">
+                @csrf
+
+                @if ($isEdit)
+                    @method('PUT')
+                @endif
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="excel_id">ID Excel</label>
+                        <input
+                            id="excel_id"
+                            type="number"
+                            name="excel_id"
+                            value="{{ old('excel_id', $isEdit ? $editData->excel_id : '') }}"
+                            placeholder="Opsional"
+                        >
+                        @error('excel_id')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kode_kategori">Kode Kategori</label>
+                        <input
+                            id="kode_kategori"
+                            type="text"
+                            name="kode_kategori"
+                            value="{{ old('kode_kategori', $isEdit ? $editData->kode_kategori : '') }}"
+                            placeholder="Contoh: 01"
+                        >
+                        @error('kode_kategori')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kode_kelompok">Kode Kelompok</label>
+                        <input
+                            id="kode_kelompok"
+                            type="text"
+                            name="kode_kelompok"
+                            value="{{ old('kode_kelompok', $isEdit ? $editData->kode_kelompok : '') }}"
+                            placeholder="Contoh: 01.01"
+                        >
+                        @error('kode_kelompok')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kode_subkelompok">Kode Subkelompok</label>
+                        <input
+                            id="kode_subkelompok"
+                            type="text"
+                            name="kode_subkelompok"
+                            value="{{ old('kode_subkelompok', $isEdit ? $editData->kode_subkelompok : '') }}"
+                            placeholder="Contoh: 0101.30"
+                        >
+                        @error('kode_subkelompok')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="uraian_kelompok">Uraian Kelompok</label>
+                        <input
+                            id="uraian_kelompok"
+                            type="text"
+                            name="uraian_kelompok"
+                            value="{{ old('uraian_kelompok', $isEdit ? $editData->uraian_kelompok : '') }}"
+                            placeholder="Contoh: Kuda, keledai, bagal, hinnie, hidup"
+                        >
+                        @error('uraian_kelompok')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="uraian_subkelompok">Uraian Subkelompok</label>
+                        <input
+                            id="uraian_subkelompok"
+                            type="text"
+                            name="uraian_subkelompok"
+                            value="{{ old('uraian_subkelompok', $isEdit ? $editData->uraian_subkelompok : '') }}"
+                            placeholder="Contoh: Keledai"
+                        >
+                        @error('uraian_subkelompok')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hs_code">HS Code</label>
+                        <input
+                            id="hs_code"
+                            type="text"
+                            name="hs_code"
+                            value="{{ old('hs_code', $isEdit ? $editData->hs_code : '') }}"
+                            placeholder="Contoh: 0101.21.00"
+                            required
+                        >
+                        @error('hs_code')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    @if ($hasStatusColumn)
+                        <div class="form-group">
+                            <label for="status">Status</label>
+
+                            @php
+                                $selectedStatus = old('status', $isEdit ? ($editData->status ?? 'Aktif') : 'Aktif');
+                            @endphp
+
+                            <select
+                                id="status"
+                                name="status"
+                                required
+                            >
+                                <option value="Aktif" {{ $selectedStatus === 'Aktif' ? 'selected' : '' }}>
+                                    Aktif
+                                </option>
+                                <option value="Nonaktif" {{ $selectedStatus === 'Nonaktif' ? 'selected' : '' }}>
+                                    Nonaktif
+                                </option>
+                            </select>
+
+                            @error('status')
+                                <div class="error-text">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    @endif
+
+                    <div class="form-group full">
+                        <label for="uraian_barang">Uraian Barang</label>
+                        <textarea
+                            id="uraian_barang"
+                            name="uraian_barang"
+                            placeholder="Contoh: Bibit"
+                            required
+                        >{{ old('uraian_barang', $isEdit ? $editData->uraian_barang : '') }}</textarea>
+
+                        @error('uraian_barang')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="keterangan">Keterangan</label>
+                        <textarea
+                            id="keterangan"
+                            name="keterangan"
+                            placeholder="Opsional"
+                        >{{ old('keterangan', $isEdit ? $editData->keterangan : '') }}</textarea>
+
+                        @error('keterangan')
+                            <div class="error-text">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a
+                        href="{{ route('admin.hs-code.index', request()->except(['mode', 'edit'])) }}"
+                        class="btn-secondary"
+                    >
+                        Batal
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        {{ $isEdit ? 'Simpan Perubahan' : 'Tambah HS Code' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif
+=======
         {{-- Tombol Aksi --}}
         <div class="flex w-full flex-none gap-2 xl:w-auto">
             <button
@@ -1282,4 +1681,5 @@
             });
         </script>
     @endpush
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
 @endsection

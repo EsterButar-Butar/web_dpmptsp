@@ -281,6 +281,7 @@ class SsaService extends BaseAnalysisService
 
 }
 
+<<<<<<< HEAD
 /*
 |--------------------------------------------------------------------------
 | Catatan
@@ -298,3 +299,5 @@ class SsaService extends BaseAnalysisService
 | konsisten dengan dokumen acuan proyek.
 |--------------------------------------------------------------------------
 */
+=======
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29

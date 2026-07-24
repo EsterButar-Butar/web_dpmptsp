@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -58,8 +59,56 @@
                 @endforeach
 
             </select>
+=======
+@php
+    use Illuminate\Support\Str;
+@endphp
 
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+/>
 
+@vite([
+    'resources/css/navbar.css',
+    'resources/css/home.css',
+    'resources/css/about.css',
+    'resources/css/analysis.css',
+    'resources/js/navbar.js',
+    'resources/js/home.js',
+    'resources/js/about.js',
+    'resources/js/analysis.js',
+])
+
+@include('partials.landing.navbar')
+
+<section class="analysis-page">
+
+    <h1 class="analysis-title">
+        Dashboard Analisis Sektoral
+    </h1>
+
+    @include('partials.analysis.filters')
+
+    @if(!empty($dashboard))
+
+        @if(!empty($dashboard['header']))
+            <div class="analysis-header">
+
+                <h2>
+
+                    {{ $dashboard['header']['title'] }}
+
+                    pada
+
+                    <strong>
+
+                        {{ Str::title(Str::lower($dashboard['header']['kabupaten'])) }}
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
+
+                    </strong>
+
+<<<<<<< HEAD
             {{-- =======================
                 KABUPATEN
             ======================== --}}
@@ -81,8 +130,13 @@
                 @endforeach
 
             </select>
+=======
+                    Tahun
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
 
+                    {{ $dashboard['header']['tahun'] }}
 
+<<<<<<< HEAD
             {{-- =======================
                 METODE
             ======================== --}}
@@ -117,8 +171,13 @@
                 </option>
 
             </select>
+=======
+                </h2>
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
 
+                <p>
 
+<<<<<<< HEAD
             {{-- =======================
                 TAHUN
             ======================== --}}
@@ -136,15 +195,34 @@
                 @endfor
 
             </select>
+=======
+                    {{ $dashboard['header']['description'] }}
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
 
+                </p>
 
+<<<<<<< HEAD
             <button type="submit">
                 Analisis
             </button>
 
         </form>
+=======
+            </div>
+        @endif
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
 
+        @include('partials.analysis.summary')
+        
+        @if(
+            isset($dashboard['charts']['doughnut']) ||
+            isset($dashboard['charts']['bar']) ||
+            isset($dashboard['charts']['scatter'])
+        )
+            @include('partials.analysis.charts')
+        @endif
 
+<<<<<<< HEAD
         {{-- =======================
             SUMMARY
         ======================== --}}
@@ -169,9 +247,23 @@
                 </div>
 
             @endforeach
+=======
+        @if(!empty($dashboard['tabs']))
+            @include('partials.analysis.tabs')
+        @endif
 
+        @if(!empty($dashboard['table']))
+            @include('partials.analysis.table')
+        @endif
+
+    @else
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
+
+        <div class="empty-analysis">
+            Silakan pilih kabupaten dan metode analisis.
         </div>
 
+<<<<<<< HEAD
 
         {{-- =======================
             CHART
@@ -202,9 +294,13 @@
                     labels: labels,
 
                     datasets: [
+=======
+    @endif
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
 
                         {
 
+<<<<<<< HEAD
                             label: 'Nilai {{ strtoupper($metode) }} Tahun {{ $tahun }}',
 
                             data: values
@@ -230,3 +326,10 @@
 
 </body>
 </html>
+=======
+@if(!empty($dashboard))
+<script>
+    window.dashboardCharts = @json($dashboard['charts'] ?? []);
+</script>
+@endif
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29

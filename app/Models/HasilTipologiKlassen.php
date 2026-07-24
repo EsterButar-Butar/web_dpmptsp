@@ -22,6 +22,7 @@ class HasilTipologiKlassen extends Model
         return $this->belongsTo(Sektor::class,'sektor_id');
     }
 
+<<<<<<< HEAD
     public function indikatorProvinsi()
     {
         return $this->belongsTo(
@@ -30,11 +31,27 @@ class HasilTipologiKlassen extends Model
         );
     }
 
+=======
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
     public function indikatorKabupaten()
     {
         return $this->belongsTo(
             IndikatorKabupaten::class,
+<<<<<<< HEAD
             'indikator_kabupaten_id'
+=======
+            'indikator_kabupaten_id',
+            'id'
+        );
+    }
+
+    public function indikatorProvinsi()
+    {
+        return $this->belongsTo(
+            IndikatorProvinsi::class,
+            'indikator_provinsi_id',
+            'id'
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
         );
     }
 

@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\ComparisonController;
 use App\Http\Controllers\User\UserProfileController;
-use App\Http\Controllers\Landing\AnalysisController;
-use App\Http\Controllers\Landing\ComparisonController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvestmentMapController;
 
@@ -37,11 +37,8 @@ Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
 */
 
 Route::get(
-    '/analisis',
-    [
-        AnalysisController::class,
-        'index',
-    ]
+    '/analysis',
+    [AnalysisController::class,'index']
 )->name('analysis');
 
 
@@ -65,12 +62,15 @@ Route::get(
 
 
 Route::get(
-    '/perbandingan-sektor',
-    [
-        ComparisonController::class,
-        'index',
-    ]
+    '/comparison',
+    [ComparisonController::class,'index']
 )->name('comparison');
+
+// Route::get('/perbandingan-sektor', [
+//     ComparisonController::class,
+//     'index',
+// ])->name('comparison.index');
+// ])->name('comparison.index');
 
 
 /*

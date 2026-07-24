@@ -31,9 +31,15 @@ class SsController extends Controller
                 'pdrb_sektor_pembanding_akhir' => $item->pdrb_sektor_pembanding_akhir,
                 'total_pdrb_pembanding_awal' => $item->total_pdrb_pembanding_awal,
                 'total_pdrb_pembanding_akhir' => $item->total_pdrb_pembanding_akhir,
+<<<<<<< HEAD
+                'rij' => $item->rij,
+                'rin' => $item->rin,
+                'rn' => $item->rn,
+=======
                 'rij' => number_format((float) $item->rij, 3, '.', ''),
                 'rin' => number_format((float) $item->rin, 3, '.', ''),
                 'rn' => number_format((float) $item->rn, 3, '.', ''),
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
                 'nij' => $item->nij,
                 'mij' => $item->mij,
                 'cij' => $item->cij,
@@ -47,6 +53,9 @@ class SsController extends Controller
 
     public function index(Request $request)
     {
+<<<<<<< HEAD
+        $rawDbData = ShiftShare::with('sektor')->latest()->get();
+=======
         $query = ShiftShare::with('sektor');
 
         if ($request->has('search') && !empty($request->search)) {
@@ -61,6 +70,7 @@ class SsController extends Controller
         }
 
         $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         $ssData = collect($this->mapDbToView($rawDbData));
 
         $editItem = null;
@@ -70,13 +80,21 @@ class SsController extends Controller
 
         $perPage = 10;
         $page = $request->get('page', 1);
+<<<<<<< HEAD
+        $paginatedData = new LengthAwarePaginator(
+=======
         $paginatedData = (new LengthAwarePaginator(
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             $ssData->forPage($page, $perPage),
             $ssData->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
+<<<<<<< HEAD
+        );
+=======
         ))->onEachSide(1);
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
 
         return view('operator.ss.index', [
             'ssData' => $paginatedData,
@@ -88,6 +106,27 @@ class SsController extends Controller
     private function calculateSSData($item)
     {
         $pdrbAwal = $this->parseNumber($item['pdrb_sektor_analisis_awal']);
+<<<<<<< HEAD
+        $pdrbAkhir = $this->parseNumber($item['pdrb_sektor_analisis_akhir']);
+        $pdbAwal = $this->parseNumber($item['pdrb_sektor_pembanding_awal']);
+        $pdbAkhir = $this->parseNumber($item['pdrb_sektor_pembanding_akhir']);
+        $nasionalAwal = $this->parseNumber($item['total_pdrb_pembanding_awal']);
+        $nasionalAkhir = $this->parseNumber($item['total_pdrb_pembanding_akhir']);
+
+        if ($pdrbAwal == 0 || $pdbAwal == 0 || $nasionalAwal == 0) {
+            return null; // Prevent Division by Zero
+        }
+
+        // Rates
+        $rij = ($pdrbAkhir - $pdrbAwal) / $pdrbAwal;
+        $rin = ($pdbAkhir - $pdbAwal) / $pdbAwal;
+        $rn = ($nasionalAkhir - $nasionalAwal) / $nasionalAwal;
+
+        // Components
+        $nij = $pdrbAwal * $rn;
+        $mij = $pdrbAwal * ($rin - $rn);
+        $cij = $pdrbAwal * ($rij - $rn); // Using rn as per guidebook
+=======
         $xijAwal = $this->parseNumber($item['pdrb_sektor_analisis_awal']);
         $xijAkhir = $this->parseNumber($item['pdrb_sektor_analisis_akhir']);
         $xiAwal = $this->parseNumber($item['pdrb_sektor_pembanding_awal']);
@@ -118,6 +157,7 @@ class SsController extends Controller
             $ri_i = $xijAkhir > 0 ? 1 : 0;
         }
         $cij = $xijAwal * ($ri_i - $rin_i);
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         $dij = $nij + $mij + $cij;
 
         // Status
@@ -136,6 +176,17 @@ class SsController extends Controller
             'sektor' => $item['sektor'],
             'tahun_awal' => $item['tahun_awal'],
             'tahun_akhir' => $item['tahun_akhir'],
+<<<<<<< HEAD
+            'pdrb_sektor_analisis_awal' => $pdrbAwal,
+            'pdrb_sektor_analisis_akhir' => $pdrbAkhir,
+            'pdrb_sektor_pembanding_awal' => $pdbAwal,
+            'pdrb_sektor_pembanding_akhir' => $pdbAkhir,
+            'total_pdrb_pembanding_awal' => $nasionalAwal,
+            'total_pdrb_pembanding_akhir' => $nasionalAkhir,
+            'rij' => round($rij, 4),
+            'rin' => round($rin, 4),
+            'rn' => round($rn, 4),
+=======
             'pdrb_sektor_analisis_awal' => $xijAwal,
             'pdrb_sektor_analisis_akhir' => $xijAkhir,
             'pdrb_sektor_pembanding_awal' => $xiAwal,
@@ -145,6 +196,7 @@ class SsController extends Controller
             'rij' => round($ri_i, 4),
             'rin' => round($rin_i, 4),
             'rn' => round($rin, 4),
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             'nij' => round($nij, 2),
             'mij' => round($mij, 2),
             'cij' => round($cij, 2),
@@ -180,7 +232,11 @@ class SsController extends Controller
 
         ShiftShare::create([
             'user_id' => Auth::id() ?? 1,
+<<<<<<< HEAD
+            'sektor_id' => $sektorModel->id,
+=======
             'sektor_id' => $sektorModel->sektor_id,
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
@@ -223,7 +279,11 @@ class SsController extends Controller
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
         $ss->update([
+<<<<<<< HEAD
+            'sektor_id' => $sektorModel->id,
+=======
             'sektor_id' => $sektorModel->sektor_id,
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
@@ -263,6 +323,10 @@ class SsController extends Controller
         return back()->with('success', 'Data Shift Share berhasil dihapus secara permanen!');
     }
 
+<<<<<<< HEAD
+    public function import(Request $request)
+    {
+=======
     public function empty()
     {
         ShiftShare::truncate();
@@ -286,6 +350,7 @@ class SsController extends Controller
     public function import(Request $request)
     {
         set_time_limit(300);
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
         $payload = $request->json()->all();
         if (! $payload || ! is_array($payload)) {
             return response()->json(['success' => false, 'message' => 'Format data tidak valid.']);
@@ -293,6 +358,65 @@ class SsController extends Controller
 
         $successCount = 0;
 
+<<<<<<< HEAD
+        foreach ($payload as $item) {
+            if (! isset($item['Provinsi']) || ! isset($item['Sektor']) || ! isset($item['Tahun Awal']) || ! isset($item['Tahun Akhir']) ||
+                ! isset($item['PDRB Sektor Analisis Awal']) || ! isset($item['PDRB Sektor Analisis Akhir']) ||
+                ! isset($item['PDRB Sektor Pembanding Awal']) || ! isset($item['PDRB Sektor Pembanding Akhir']) ||
+                ! isset($item['Total PDRB Pembanding Awal']) || ! isset($item['Total PDRB Pembanding Akhir'])) {
+                continue;
+            }
+
+            $tingkat = (isset($item['Kabupaten/Kota']) && $item['Kabupaten/Kota'] != '-' && $item['Kabupaten/Kota'] != '') ? 'Kabupaten/Kota' : 'Provinsi';
+            
+            $mappedItem = [
+                'tingkat_wilayah' => $tingkat,
+                'provinsi' => $item['Provinsi'],
+                'kabupaten' => $item['Kabupaten/Kota'] ?? '-',
+                'sektor' => $item['Sektor'],
+                'tahun_awal' => $item['Tahun Awal'],
+                'tahun_akhir' => $item['Tahun Akhir'],
+                'pdrb_sektor_analisis_awal' => $item['PDRB Sektor Analisis Awal'] ?? 0,
+                'pdrb_sektor_analisis_akhir' => $item['PDRB Sektor Analisis Akhir'] ?? 0,
+                'pdrb_sektor_pembanding_awal' => $item['PDRB Sektor Pembanding Awal'] ?? 0,
+                'pdrb_sektor_pembanding_akhir' => $item['PDRB Sektor Pembanding Akhir'] ?? 0,
+                'total_pdrb_pembanding_awal' => $item['Total PDRB Pembanding Awal'] ?? 0,
+                'total_pdrb_pembanding_akhir' => $item['Total PDRB Pembanding Akhir'] ?? 0,
+            ];
+
+            $newData = $this->calculateSSData($mappedItem);
+
+            if ($newData) {
+                $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
+                
+                ShiftShare::create([
+                    'user_id' => Auth::id() ?? 1,
+                    'sektor_id' => $sektorModel->id,
+                    'tingkat_wilayah' => $newData['tingkat_wilayah'],
+                    'daerah_analisis' => $newData['daerah_analisis'],
+                    'daerah_pembanding' => $newData['daerah_pembanding'],
+                    'tahun_awal' => $newData['tahun_awal'],
+                    'tahun_akhir' => $newData['tahun_akhir'],
+                    'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
+                    'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
+                    'pdrb_sektor_pembanding_awal' => $newData['pdrb_sektor_pembanding_awal'],
+                    'pdrb_sektor_pembanding_akhir' => $newData['pdrb_sektor_pembanding_akhir'],
+                    'total_pdrb_pembanding_awal' => $newData['total_pdrb_pembanding_awal'],
+                    'total_pdrb_pembanding_akhir' => $newData['total_pdrb_pembanding_akhir'],
+                    'rij' => $newData['rij'],
+                    'rin' => $newData['rin'],
+                    'rn' => $newData['rn'],
+                    'nij' => $newData['nij'],
+                    'mij' => $newData['mij'],
+                    'cij' => $newData['cij'],
+                    'dij' => $newData['dij'],
+                    'status_pertumbuhan' => $newData['status_pertumbuhan'],
+                    'status_daya_saing' => $newData['status_daya_saing']
+                ]);
+                $successCount++;
+            }
+        }
+=======
         // Preload all sectors in memory
         $sektorsCache = Sektor::all()->pluck('sektor_id', 'nama_sektor')->mapWithKeys(fn($id, $name) => [strtolower(trim($name)) => $id])->toArray();
 
@@ -371,6 +495,7 @@ class SsController extends Controller
                 }
             }
         });
+>>>>>>> 4c77b612a43bfdb13f29af11e303045e71caf349
 
         if ($successCount > 0) {
             OperatorController::logActivity('Analisis SSA', 'diimpor', "Mengimpor {$successCount} data Analisis Shift Share secara massal dari Template Master.");

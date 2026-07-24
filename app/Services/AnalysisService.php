@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 class AnalysisService
 {
     public function __construct(
+<<<<<<< HEAD
 
         protected LqService $lqService,
 
@@ -19,6 +20,13 @@ class AnalysisService
 
         protected TipologiKlassenService $tipologiKlassenService
 
+=======
+        protected LqService $lqService,
+        protected SsaService $ssaService,
+        protected IndikatorService $indikatorService,
+        protected TipologiSektorService $tipologiSektorService,
+        protected TipologiKlassenService $tipologiKlassenService
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
     ) {
     }
 
@@ -41,7 +49,11 @@ class AnalysisService
 
             $kabId,
 
+<<<<<<< HEAD
             $tahun
+=======
+            $tahun,
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
 
         ) {
 
@@ -93,7 +105,11 @@ class AnalysisService
              * 5
              * Tipologi Klassen
              */
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
             $this->tipologiKlassenService
                 ->generate(
                     $kabId,

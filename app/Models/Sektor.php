@@ -6,10 +6,67 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sektor extends Model
 {
+<<<<<<< HEAD
     /**
      * Nama tabel yang digunakan.
      */
     protected $table = 'sektor';
+=======
+    protected $table='sektor';
+
+    protected $primaryKey='sektor_id';
+
+    public $timestamps=false;
+
+    protected $guarded=[];
+    
+    public function getNamaAttribute(): ?string
+    {
+        return $this->attributes['nama_sektor'] ?? null;
+    }
+
+    public function pdrbKabupaten()
+    {
+        return $this->hasMany(PdrbKabupaten::class,'sektor_id');
+    }
+
+    public function pdrbSumut()
+    {
+        return $this->hasMany(PdrbSumut::class,'sektor_id');
+    }
+
+    public function hasilLq()
+    {
+        return $this->hasMany(HasilLq::class,'sektor_id');
+    }
+
+    public function hasilSsa()
+    {
+        return $this->hasMany(HasilSsa::class,'sektor_id');
+    }
+
+    public function tipologiSektor()
+    {
+        return $this->hasMany(HasilTipologiSektor::class,'sektor_id');
+    }
+
+    public function indikatorProvinsi()
+    {
+        return $this->hasMany(IndikatorProvinsi::class,'sektor_id');
+    }
+
+    public function indikatorKabupaten()
+    {
+        return $this->hasMany(IndikatorKabupaten::class,'sektor_id');
+    }
+
+    public function tipologiKlassen()
+    {
+        return $this->hasMany(HasilTipologiKlassen::class,'sektor_id');
+    }
+    
+    public const UPDATED_AT = null;
+>>>>>>> 256d8aec886297726809100f5a3cc0916fce2a29
 
     /**
      * Primary key tabel.
