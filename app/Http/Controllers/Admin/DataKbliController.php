@@ -138,6 +138,9 @@ class DataKbliController extends Controller
 
         $stats = $this->stats();
 
+        $mode = $request->query('mode');
+        $editData = null;
+
         if ($request->filled('edit')) {
             $editData = $this->findRow($request->query('edit'));
             $mode = 'edit';
