@@ -739,7 +739,6 @@ class DataHsCodeController extends Controller
             ]),
             'excel_id' => $this->firstExistingColumn([
                 'excel_id',
-                'ID',
                 'id_excel',
             ]),
             'kode_kategori' => $this->firstExistingColumn([

@@ -16,6 +16,7 @@ class AdminDashboardController extends Controller
     {
         $wilayah = $this->countWilayah();
         $kbli = $this->countTable('data_kbli');
+        $kbki = $this->countTable('data_kbki');
         $hsCode = $this->countHsCode();
         $pengguna = $this->countTable('users');
 
@@ -23,7 +24,7 @@ class AdminDashboardController extends Controller
             [
                 'key' => 'total',
                 'label' => 'Total Data',
-                'value' => $wilayah + $kbli + $hsCode + $pengguna,
+                'value' => $wilayah + $kbli + $kbki + $hsCode + $pengguna,
                 'icon' => 'fa-clipboard-list',
                 'color' => 'green',
                 'url' => null,
@@ -43,6 +44,14 @@ class AdminDashboardController extends Controller
                 'icon' => 'fa-table-cells-large',
                 'color' => 'blue',
                 'url' => $this->routeLink('admin.data-kbli.index'),
+            ],
+            [
+                'key' => 'kbki',
+                'label' => 'Kode KBKI',
+                'value' => $kbki,
+                'icon' => 'fa-boxes-stacked',
+                'color' => 'purple',
+                'url' => $this->routeLink('admin.data-kbki.index'),
             ],
             [
                 'key' => 'hs',
@@ -76,6 +85,12 @@ class AdminDashboardController extends Controller
                 'data_terakhir' => $activityData['latestByCategory']['kbli']['title'] ?? '-',
                 'total' => $kbli,
                 'url' => $this->routeLink('admin.data-kbli.index'),
+            ],
+            [
+                'label' => 'Kode KBKI',
+                'data_terakhir' => $activityData['latestByCategory']['kbki']['title'] ?? '-',
+                'total' => $kbki,
+                'url' => $this->routeLink('admin.data-kbki.index'),
             ],
             [
                 'label' => 'Kode HS',
@@ -165,6 +180,7 @@ class AdminDashboardController extends Controller
         $this->appendUserActivities($activities);
         $this->appendWilayahActivities($activities);
         $this->appendKbliActivities($activities);
+        $this->appendKbkiActivities($activities);
         $this->appendHsActivities($activities);
 
         $activities = $activities
@@ -177,6 +193,7 @@ class AdminDashboardController extends Controller
         foreach ([
             'wilayah',
             'kbli',
+            'kbki',
             'hs',
             'pengguna',
         ] as $category) {
@@ -357,6 +374,64 @@ class AdminDashboardController extends Controller
                 'aktivitas' => 'Kode KBLI ' . $title . ' ditambahkan.',
                 'icon' => 'fa-table-cells-large',
                 'color' => 'blue',
+                'time' => $time,
+                'waktu' => $this->formatDate($time),
+            ]);
+        }
+    }
+
+    private function appendKbkiActivities(Collection $activities): void
+    {
+        $table = 'data_kbki';
+
+        if (! Schema::hasTable($table)) {
+            return;
+        }
+
+        $kodeColumn = $this->firstExistingColumn($table, [
+            'kode',
+            'kode_kbki',
+            'Kode',
+        ]);
+
+        $judulColumn = $this->firstExistingColumn($table, [
+            'judul',
+            'judul_kbki',
+            'nama_kbki',
+            'Judul',
+        ]);
+
+        $timeColumn = $this->timeColumn($table);
+
+        if ((! $kodeColumn && ! $judulColumn) || ! $timeColumn) {
+            return;
+        }
+
+        $rows = DB::table($table)
+            ->select([
+                $this->selectAlias($kodeColumn, 'kode'),
+                $this->selectAlias($judulColumn, 'judul'),
+                $this->selectAlias($timeColumn, 'activity_time'),
+            ])
+            ->orderByDesc($timeColumn)
+            ->limit(3)
+            ->get();
+
+        foreach ($rows as $row) {
+            $title = trim(
+                ($row->kode ? $row->kode . ' - ' : '') .
+                ($row->judul ?: 'Data KBKI')
+            );
+
+            $time = $this->parseDate($row->activity_time ?? null);
+
+            $activities->push([
+                'category' => 'kbki',
+                'category_label' => 'KBKI',
+                'title' => $title,
+                'aktivitas' => 'Kode KBKI ' . $title . ' ditambahkan.',
+                'icon' => 'fa-boxes-stacked',
+                'color' => 'purple',
                 'time' => $time,
                 'waktu' => $this->formatDate($time),
             ]);
