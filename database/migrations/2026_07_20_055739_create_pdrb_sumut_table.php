@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pdrb_provinsi', function (Blueprint $table) {
+        Schema::create('pdrb_sumut', function (Blueprint $table) {
 
             // Primary Key
             $table->id();
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pdrb_provinsi');
+        Schema::dropIfExists('pdrb_sumut');
     }
 };

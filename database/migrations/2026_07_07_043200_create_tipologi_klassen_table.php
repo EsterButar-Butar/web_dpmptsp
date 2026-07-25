@@ -6,91 +6,74 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Membuat tabel tipologi_klassen.
-     */
     public function up(): void
     {
-        Schema::create('tipologi_klassen', function (Blueprint $table) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | PRIMARY KEY
-            |--------------------------------------------------------------------------
-            */
+        Schema::create('hasil_tipologi_klassen', function (Blueprint $table) {
 
             $table->id();
 
-            /*
-            |--------------------------------------------------------------------------
-            | RELASI
-            |--------------------------------------------------------------------------
-            */
+            $table->unsignedBigInteger('indikator_provinsi_id');
+            $table->unsignedBigInteger('indikator_kabupaten_id');
 
-            $table->foreignId('indikator_provinsi_id')
-                ->constrained('indikator_provinsi')
-                ->cascadeOnDelete();
-
-            $table->foreignId('indikator_kabupaten_id')
-                ->constrained('indikator_kabupaten')
-                ->cascadeOnDelete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | DATA TIPOLOGI KLASSEN
-            |--------------------------------------------------------------------------
-            */
+            $table->unsignedBigInteger('kab_id');
+            $table->unsignedBigInteger('sektor_id');
 
             $table->integer('tahun');
 
-            $table->decimal('pertumbuhan_kabupaten', 10, 5);
+            $table->string('pertumbuhan_kabupaten');
+            $table->string('kontribusi_kabupaten');
 
-            $table->decimal('kontribusi_kabupaten', 10, 5);
-
-            $table->decimal('pertumbuhan_provinsi', 10, 5);
-
-            $table->decimal('kontribusi_provinsi', 10, 5);
+            $table->string('pertumbuhan_provinsi');
+            $table->string('kontribusi_provinsi');
 
             $table->string('kuadran', 30);
 
-            /*
-            |--------------------------------------------------------------------------
-            | INDEX
-            |--------------------------------------------------------------------------
-            */
+            $table->timestamps();
 
-            $table->index('indikator_provinsi_id');
-            $table->index('indikator_kabupaten_id');
-            $table->index('tahun');
-            $table->index('kuadran');
+            // Foreign Key
+            $table->foreign('indikator_provinsi_id')
+                ->references('id')
+                ->on('indikator_provinsi')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-            /*
-            |--------------------------------------------------------------------------
-            | MENCEGAH DUPLIKAT
-            |--------------------------------------------------------------------------
-            */
+            $table->foreign('indikator_kabupaten_id')
+                ->references('id')
+                ->on('indikator_kabupaten')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
+            $table->foreign('kab_id')
+                ->references('kab_id')
+                ->on('kabupaten')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreign('sektor_id')
+                ->references('sektor_id')
+                ->on('sektor')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            // Unique Constraint
             $table->unique([
                 'indikator_provinsi_id',
                 'indikator_kabupaten_id',
-                'tahun'
+                'tahun',
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | TIMESTAMP
-            |--------------------------------------------------------------------------
-            */
-
-            $table->timestamps();
+            // Index
+            $table->index('indikator_provinsi_id');
+            $table->index('indikator_kabupaten_id');
+            $table->index('kab_id');
+            $table->index('sektor_id');
+            $table->index('tahun');
+            $table->index('kuadran');
         });
     }
 
-    /**
-     * Menghapus tabel tipologi_klassen.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('tipologi_klassen');
+        Schema::dropIfExists('hasil_tipologi_klassen');
     }
 };

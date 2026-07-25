@@ -13,10 +13,26 @@ return new class extends Migration
     {
         Schema::create('kabupaten', function (Blueprint $table) {
 
-            $table->foreignId('provinsi_id')->constrained('provinsi')->cascadeOnDelete();
-            $table->timestamps();
+            // Primary Key
             $table->id('kab_id');
+
+            // Foreign Key ke tabel provinsi
+            $table->unsignedBigInteger('provinsi_id');
+
+            // Data kabupaten
             $table->string('nama_kabupaten', 255);
+
+            // Timestamp
+            $table->timestamps();
+
+            // Foreign Key Constraint
+            $table->foreign('provinsi_id')
+                ->references('provinsi_id')
+                ->on('provinsi')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            // Index
             $table->index('provinsi_id');
             $table->index('nama_kabupaten');
         });
