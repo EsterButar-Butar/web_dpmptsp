@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        window.daftarWilayah = {
+            "Sumatera Utara": ["Medan", "Binjai"]
+        };
+    </script>
+</head>
+<body>
+    <div x-data="{
+        sync_provinsi: '',
+        syncListKabupaten: [],
+        init() {
+            this.$watch('sync_provinsi', value => {
+                this.syncListKabupaten = window.daftarWilayah[value] || [];
+            });
+        }
+    }">
+        <select x-model="sync_provinsi">
+            <option value="" disabled selected>Pilih Provinsi</option>
+            <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
+                <option :value="prov" x-text="prov"></option>
+            </template>
+        </select>
+        
+        <select :disabled="!sync_provinsi">
+            <option value="" disabled selected x-text="sync_provinsi ? 'Pilih Kabupaten' : 'Pilih Provinsi Dahulu'"></option>
+            <template x-for="kab in syncListKabupaten" :key="kab">
+                <option :value="kab" x-text="kab"></option>
+            </template>
+        </select>
+        
+        <p x-text="sync_provinsi"></p>
+    </div>
+</body>
+</html>

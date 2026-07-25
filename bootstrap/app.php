@@ -21,8 +21,9 @@ return Application::configure(
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->reportable(function (\Throwable $e) {
             file_put_contents(
-                'L:\web_dpmptsp\web_dpmptsp\error_trace.log',
-                get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString()
+                storage_path('logs/error_trace.log'),
+                get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString(),
+                FILE_APPEND
             );
         });
     })

@@ -530,6 +530,99 @@ class KlassenController extends Controller
         ]);
     }
 
+    public function syncAllFromDatabase(Request $request)
+    {
+        $request->validate([
+            'tingkat_wilayah' => 'required|string',
+            'provinsi' => 'required|string',
+            'kabupaten' => 'nullable|string',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
+        ]);
+
+        $daerahAnalisis = $request->tingkat_wilayah === 'Provinsi' ? $request->provinsi : $request->kabupaten;
+        $tahunAwal = $request->tahun_awal;
+        $tahunAkhir = $request->tahun_akhir;
+
+        if ($tahunAkhir <= $tahunAwal) {
+            return response()->json(['success' => false, 'message' => 'Tahun akhir harus lebih besar dari tahun awal.']);
+        }
+
+        // Ambil semua data LQ untuk daerah tersebut pada rentang tahun yang dipilih
+        $lqData = \App\Models\Lq::with('sektor')
+            ->where('daerah_analisis', $daerahAnalisis)
+            ->whereBetween('tahun', [$tahunAwal, $tahunAkhir])
+            ->orderBy('tahun', 'asc')
+            ->get();
+
+        if ($lqData->isEmpty()) {
+            return response()->json(['success' => false, 'message' => "Tidak ada data PDRB ditemukan untuk daerah {$daerahAnalisis} dalam rentang {$tahunAwal} - {$tahunAkhir} di database LQ."]);
+        }
+
+        // Kelompokkan berdasarkan sektor
+        $groupedBySektor = $lqData->groupBy('sektor_id');
+        $successCount = 0;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($groupedBySektor, $request, &$successCount) {
+            foreach ($groupedBySektor as $sektorId => $items) {
+                // Pastikan minimal ada 2 tahun data
+                if ($items->count() < 2) continue;
+
+                $sektorName = $items->first()->sektor->nama_sektor;
+
+                // Format data array tahunan untuk calculateKlassenData
+                $yearsData = $items->map(function ($item) {
+                    return [
+                        'tahun' => $item->tahun,
+                        'pdrb_sektor_analisis' => $item->pdrb_sektor_analisis,
+                        'total_pdrb_analisis' => $item->total_pdrb_analisis,
+                        'pdrb_sektor_pembanding' => $item->pdrb_sektor_pembanding,
+                        'total_pdrb_pembanding' => $item->total_pdrb_pembanding,
+                    ];
+                })->toArray();
+
+                $newData = $this->calculateKlassenData($yearsData, $request->tingkat_wilayah, $request->provinsi, $request->kabupaten, $sektorName);
+
+                if ($newData) {
+                    Klassen::create([
+                        'user_id' => Auth::id() ?? 1,
+                        'sektor_id' => $sektorId,
+                        'tingkat_wilayah' => $newData['tingkat_wilayah'],
+                        'daerah_analisis' => $newData['daerah_analisis'],
+                        'daerah_pembanding' => $newData['daerah_pembanding'],
+                        'tahun_awal' => $newData['tahun_awal'],
+                        'tahun_akhir' => $newData['tahun_akhir'],
+                        'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
+                        'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
+                        'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],
+                        'total_pdrb_analisis_akhir' => $newData['total_pdrb_analisis_akhir'],
+                        'pdrb_sektor_pembanding_awal' => $newData['pdrb_sektor_pembanding_awal'],
+                        'pdrb_sektor_pembanding_akhir' => $newData['pdrb_sektor_pembanding_akhir'],
+                        'total_pdrb_pembanding_awal' => $newData['total_pdrb_pembanding_awal'],
+                        'total_pdrb_pembanding_akhir' => $newData['total_pdrb_pembanding_akhir'],
+                        'ri' => $newData['ri'],
+                        'r' => $newData['r'],
+                        'yi' => $newData['yi'],
+                        'y' => $newData['y'],
+                        'klasifikasi' => $newData['klasifikasi']
+                    ]);
+                    $successCount++;
+                }
+            }
+        });
+
+        if ($successCount > 0) {
+            OperatorController::logActivity('Analisis Klassen', 'diimpor', "Menarik {$successCount} Sektor Analisis Tipologi Klassen dari database secara massal.");
+            session()->flash('success', "Berhasil menarik dan menghitung {$successCount} sektor dari database!");
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil memproses {$successCount} sektor."
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Data ditemukan tapi tidak cukup lengkap (minimal 2 tahun berurutan) untuk dihitung.']);
+    }
+
     public function downloadPdf(Request $request)
     {
         $query = Klassen::with('sektor');

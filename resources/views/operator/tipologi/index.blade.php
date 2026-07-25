@@ -49,9 +49,13 @@
             <!-- Form -->
             <form action="{{ $editItem ? route('operator.tipologi.update', $editItem['id']) : route('operator.tipologi.store') }}" method="POST" class="space-y-6" x-data="{ 
                 tingkat_wilayah: '{{ old('tingkat_wilayah', $editItem['tingkat_wilayah'] ?? 'Kabupaten/Kota') }}',
-                provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? '') }}',
-                get listKabupaten() {
-                    return window.daftarWilayah[this.provinsi] || [];
+                provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? 'Sumatera Utara') }}',
+                listKabupaten: [],
+                init() {
+                    this.listKabupaten = window.daftarWilayah[this.provinsi] || [];
+                    this.$watch('provinsi', value => {
+                        this.listKabupaten = window.daftarWilayah[value] || [];
+                    });
                 }
             }">
         @csrf
@@ -97,31 +101,17 @@
                     </div>
                 </div>
             </div>
-            <!-- Tahun -->
-            <div class="space-y-2 col-span-1">
-                <label class="op-label">Tahun</label>
-                <div class="relative">
-                    <select name="tahun" class="op-input op-input-icon op-select" required>
-                        <option value="" disabled {{ old('tahun', $editItem['tahun'] ?? '') == '' ? 'selected' : '' }}>Pilih Tahun</option>
-                        @for($i = 2021; $i <= 2045; $i++)
-                            <option value="{{ $i }}" {{ old('tahun', $editItem['tahun'] ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
-                        @endfor
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                        <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
-                    </div>
-                </div>
-            </div>
+            
             <!-- Provinsi -->
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Provinsi</label>
                 <div class="relative">
-                    <input list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
-                    <datalist id="provinsi-list">
+                    <select name="provinsi" x-model="provinsi" class="op-input op-input-icon op-select" required>
+                        <option value="" disabled selected>Pilih Provinsi</option>
                         <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                            <option :value="prov"></option>
+                            <option :value="prov" x-text="prov"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
@@ -134,18 +124,41 @@
             <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
                 <label class="op-label">Kabupaten / Kota</label>
                 <div class="relative">
-                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
-                    <datalist id="kabupaten-list">
+                    <select name="kabupaten" class="op-input op-input-icon op-select" :required="tingkat_wilayah === 'Kabupaten/Kota'">
+                        <option value="" disabled selected x-text="provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
                         <template x-for="kab in listKabupaten" :key="kab">
-                            <option :value="kab"></option>
+                            <option :value="kab" x-text="kab" :selected="kab === '{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}'"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
                         </svg>
                     </div>
                 </div>
+            </div>
+
+            <!-- Row 3: Tahun Awal & Akhir -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 col-span-full">
+                <div class="space-y-2">
+                    <label class="op-label">Tahun Awal</label>
+                    <input type="number" name="tahun_awal" value="{{ old('tahun_awal', $editItem['tahun_awal'] ?? '') }}" class="op-input" required placeholder="Contoh: 2018" min="1900" max="2099">
+                </div>
+                <div class="space-y-2">
+                    <label class="op-label">Tahun Akhir</label>
+                    <input type="number" name="tahun_akhir" value="{{ old('tahun_akhir', $editItem['tahun_akhir'] ?? '') }}" class="op-input" required placeholder="Contoh: 2023" min="1900" max="2099">
+                </div>
+            </div>
+
+            <!-- Row 4: Sektor -->
+            <div class="space-y-2 col-span-full">
+                <label class="op-label">Sektor</label>
+                <input list="sektor-list" name="sektor" value="{{ old('sektor', $editItem['sektor']['nama_sektor'] ?? '') }}" class="op-input" required placeholder="Pilih atau ketik Sektor" autocomplete="off">
+                <datalist id="sektor-list">
+                    @foreach (\App\Models\Sektor::orderBy('nama_sektor', 'asc')->get() as $s)
+                        <option value="{{ $s->nama_sektor }}"></option>
+                    @endforeach
+                </datalist>
             </div>
 
             <!-- Nilai LQ -->
@@ -207,11 +220,11 @@
                             <th class="px-4 py-4 whitespace-nowrap">Daerah Analisis</th>
                             <th class="px-4 py-4 whitespace-nowrap">Provinsi</th>
                             <th class="px-4 py-4 min-w-[200px]">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Tahun</th>
+                            <th class="px-4 py-4 whitespace-nowrap">Tahun Awal</th>
+                            <th class="px-4 py-4 whitespace-nowrap">Tahun Akhir</th>
                             <th class="px-4 py-4 whitespace-nowrap">Nilai SS (Dij)</th>
                             <th class="px-4 py-4 whitespace-nowrap">Nilai LQ (Rasio Kontribusi)</th>
                             <th class="px-4 py-4 whitespace-nowrap text-center">Tipologi (Kuadran)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Riwayat</th>
                             <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -225,7 +238,8 @@
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-4">{{ $data['tahun'] ?? '-' }}</td>
+                                <td class="px-4 py-4">{{ $data['tahun_awal'] ?? '-' }}</td>
+                                <td class="px-4 py-4">{{ $data['tahun_akhir'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_ss'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap text-center">
@@ -250,9 +264,6 @@
                                             {{ $data['tipologi'] }}
                                         </span>
                                     @endif
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-xs text-slate-500">
-                                    {{ $data['riwayat'] ?? '-' }}
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center justify-center gap-2">
@@ -412,9 +423,13 @@
     <!-- Sync Modal -->
     <div id="syncModal" class="fixed inset-0 z-[99] hidden items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm px-4 py-8 transition-opacity" style="display: none;" x-data="{
         sync_tingkat_wilayah: 'Kabupaten/Kota',
-        sync_provinsi: '',
-        get syncListKabupaten() {
-            return window.daftarWilayah[this.sync_provinsi] || [];
+        sync_provinsi: 'Sumatera Utara',
+        syncListKabupaten: [],
+        init() {
+            this.syncListKabupaten = window.daftarWilayah[this.sync_provinsi] || [];
+            this.$watch('sync_provinsi', value => {
+                this.syncListKabupaten = window.daftarWilayah[value] || [];
+            });
         }
     }">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100">
@@ -467,7 +482,7 @@
                     <label class="op-label">Kabupaten / Kota</label>
                     <div class="relative">
                         <select name="kabupaten" class="op-input op-input-icon op-select" :required="sync_tingkat_wilayah === 'Kabupaten/Kota'">
-                            <option value="" disabled selected>Pilih Kabupaten/Kota</option>
+                            <option value="" disabled selected x-text="sync_provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
                             <template x-for="kab in syncListKabupaten" :key="kab">
                                 <option :value="kab" x-text="kab"></option>
                             </template>
@@ -477,12 +492,14 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
+                    <!-- Tahun Awal -->
                     <div class="space-y-2">
                         <label class="op-label">Tahun Awal</label>
                         <div class="relative">
                             <select name="tahun_awal" class="op-input op-input-icon op-select" required>
-                                <option value="" disabled selected>Pilih Tahun</option>
+                                <option value="" disabled selected>Pilih Tahun Awal</option>
                                 @for($i = 2021; $i <= 2045; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                 @endfor
@@ -492,11 +509,13 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Tahun Akhir -->
                     <div class="space-y-2">
                         <label class="op-label">Tahun Akhir</label>
                         <div class="relative">
                             <select name="tahun_akhir" class="op-input op-input-icon op-select" required>
-                                <option value="" disabled selected>Pilih Tahun</option>
+                                <option value="" disabled selected>Pilih Tahun Akhir</option>
                                 @for($i = 2021; $i <= 2045; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                 @endfor

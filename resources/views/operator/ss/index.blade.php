@@ -47,11 +47,15 @@
             </div>
 
             <!-- Form -->
-            <form action="{{ $editItem ? route('operator.ss.update', $editItem['id']) : route('operator.ss.store') }}" method="POST" class="space-y-6" x-data="{ 
+            <form action="{{ $editItem ? route('operator.ss.update', $editItem['id']) : route('operator.ss.store') }}" method="POST" class="space-y-6" id="ssForm" x-data="{ 
                 tingkat_wilayah: '{{ old('tingkat_wilayah', $editItem['tingkat_wilayah'] ?? 'Kabupaten/Kota') }}',
-                provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? '') }}',
-                get listKabupaten() {
-                    return window.daftarWilayah[this.provinsi] || [];
+                provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? 'Sumatera Utara') }}',
+                listKabupaten: [],
+                init() {
+                    this.listKabupaten = window.daftarWilayah[this.provinsi] || [];
+                    this.$watch('provinsi', value => {
+                        this.listKabupaten = window.daftarWilayah[value] || [];
+                    });
                 },
                 years: @if($editItem)
                 [
@@ -141,12 +145,12 @@
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Provinsi</label>
                 <div class="relative">
-                    <input list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
-                    <datalist id="provinsi-list">
+                    <select name="provinsi" x-model="provinsi" class="op-input op-input-icon op-select" required>
+                        <option value="" disabled selected>Pilih Provinsi</option>
                         <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                            <option :value="prov"></option>
+                            <option :value="prov" x-text="prov"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
@@ -159,12 +163,12 @@
             <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
                 <label class="op-label">Kabupaten / Kota</label>
                 <div class="relative">
-                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
-                    <datalist id="kabupaten-list">
+                    <select name="kabupaten" class="op-input op-input-icon op-select" :required="tingkat_wilayah === 'Kabupaten/Kota'">
+                        <option value="" disabled selected x-text="provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
                         <template x-for="kab in listKabupaten" :key="kab">
-                            <option :value="kab"></option>
+                            <option :value="kab" x-text="kab" :selected="kab === '{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}'"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
@@ -496,9 +500,13 @@
     <!-- Sync Modal -->
     <div id="syncModal" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm px-4 py-8" style="display: none;" x-data="{
         sync_tingkat_wilayah: 'Kabupaten/Kota',
-        sync_provinsi: '',
-        get syncListKabupaten() {
-            return window.daftarWilayah[this.sync_provinsi] || [];
+        sync_provinsi: 'Sumatera Utara',
+        syncListKabupaten: [],
+        init() {
+            this.syncListKabupaten = window.daftarWilayah[this.sync_provinsi] || [];
+            this.$watch('sync_provinsi', value => {
+                this.syncListKabupaten = window.daftarWilayah[value] || [];
+            });
         }
     }">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden relative">
@@ -526,7 +534,7 @@
                 <div class="space-y-2">
                     <label class="op-label">Provinsi</label>
                     <div class="relative">
-                        <select id="sync_provinsi" x-model="sync_provinsi" class="op-input op-input-icon op-select" required>
+                        <select id="sync_provinsi" name="provinsi" x-model="sync_provinsi" class="op-input op-input-icon op-select" required>
                             <option value="" disabled selected>Pilih Provinsi</option>
                             <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
                                 <option :value="prov" x-text="prov"></option>
@@ -541,8 +549,8 @@
                 <div class="space-y-2" x-show="sync_tingkat_wilayah === 'Kabupaten/Kota'">
                     <label class="op-label">Kabupaten / Kota</label>
                     <div class="relative">
-                        <select id="sync_kabupaten" class="op-input op-input-icon op-select" :required="sync_tingkat_wilayah === 'Kabupaten/Kota'">
-                            <option value="" disabled selected>Pilih Kabupaten/Kota</option>
+                        <select id="sync_kabupaten" name="kabupaten" class="op-input op-input-icon op-select" :required="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                            <option value="" disabled selected x-text="sync_provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
                             <template x-for="kab in syncListKabupaten" :key="kab">
                                 <option :value="kab" x-text="kab"></option>
                             </template>
@@ -553,26 +561,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <label class="op-label">Sektor</label>
-                    <div class="relative">
-                        <input list="sync-sektor-list" id="sync_sektor" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
-                        <datalist id="sync-sektor-list">
-                            <option value="PERTANIAN, KEHUTANAN, DAN PERIKANAN">
-                            <option value="PERTAMBANGAN DAN PENGGALIAN">
-                            <option value="INDUSTRI PENGOLAHAN">
-                            <option value="PENGADAAN LISTRIK DAN GAS">
-                            <option value="KONSTRUKSI">
-                            <option value="PERDAGANGAN BESAR DAN ECERAN">
-                            <option value="TRANSPORTASI DAN PERGUDANGAN">
-                            <option value="INFORMASI DAN KOMUNIKASI">
-                            <option value="JASA KEUANGAN DAN ASURANSI">
-                        </datalist>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
-                        </div>
-                    </div>
-                </div>
+                <!-- Sektor input removed for bulk sync -->
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
@@ -621,25 +610,24 @@
         const tingkat = document.getElementById('sync_tingkat_wilayah').value;
         const provinsi = document.getElementById('sync_provinsi').value;
         const kabupaten = document.getElementById('sync_kabupaten').value;
-        const sektor = document.getElementById('sync_sektor').value;
         const tahunAwal = document.getElementById('sync_tahun_awal').value;
         const tahunAkhir = document.getElementById('sync_tahun_akhir').value;
         const statusEl = document.getElementById('syncStatus');
         const processBtn = document.getElementById('processSyncBtn');
 
-        if (!provinsi || !sektor || !tahunAwal || !tahunAkhir || (tingkat === 'Kabupaten/Kota' && !kabupaten)) {
+        if (!provinsi || !tahunAwal || !tahunAkhir || (tingkat === 'Kabupaten/Kota' && !kabupaten)) {
             statusEl.textContent = 'Harap lengkapi semua isian terlebih dahulu!';
             statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
             return;
         }
 
         processBtn.disabled = true;
-        processBtn.textContent = 'Mencari Data...';
-        statusEl.textContent = 'Mencari data PDRB di database...';
+        processBtn.textContent = 'Mencari & Menghitung Data...';
+        statusEl.textContent = 'Mencari data PDRB di database dan menghitung Shift Share...';
         statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
 
         try {
-            const response = await fetch("{{ route('operator.ss.sync') }}", {
+            const response = await fetch("{{ route('operator.ss.sync-all') }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -650,7 +638,6 @@
                     tingkat_wilayah: tingkat,
                     provinsi: provinsi,
                     kabupaten: kabupaten,
-                    sektor: sektor,
                     tahun_awal: tahunAwal,
                     tahun_akhir: tahunAkhir
                 })
@@ -659,53 +646,11 @@
             const result = await response.json();
             
             if (result.success) {
-                statusEl.textContent = 'Data ditemukan! Mengisi form otomatis...';
-                
-                // Get the main Alpine data component on the form
-                const formEl = document.querySelector('form');
-                
-                // We dispatch events to update non-alpine selects
-                const tingkatSelect = document.querySelector('select[name="tingkat_wilayah"]');
-                tingkatSelect.value = tingkat;
-                tingkatSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                statusEl.textContent = result.message + ' Memuat ulang halaman...';
                 
                 setTimeout(() => {
-                    const provinsiInput = document.querySelector('input[name="provinsi"]');
-                    provinsiInput.value = provinsi;
-                    provinsiInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    
-                    if (tingkat === 'Kabupaten/Kota') {
-                        const kabInput = document.querySelector('input[name="kabupaten"]');
-                        if (kabInput) kabInput.value = kabupaten;
-                    }
-                    
-                    const sektorInput = document.querySelector('input[name="sektor"]');
-                    if (sektorInput) sektorInput.value = sektor;
-                    
-                    // Access Alpine Component Data safely and set years array
-                    if (formEl.__x) {
-                        const component = formEl.__x.$data;
-                        const newYears = result.data.map(y => ({
-                            tahun: y.tahun,
-                            pdrb_sektor_analisis: y.pdrb_sektor_analisis.toString().split('.')[0],
-                            pdrb_sektor_pembanding: y.pdrb_sektor_pembanding.toString().split('.')[0],
-                            total_pdrb_pembanding: y.total_pdrb_pembanding.toString().split('.')[0],
-                            pdrb_sektor_analisis_fmt: component.format(y.pdrb_sektor_analisis.toString().split('.')[0]),
-                            pdrb_sektor_pembanding_fmt: component.format(y.pdrb_sektor_pembanding.toString().split('.')[0]),
-                            total_pdrb_pembanding_fmt: component.format(y.total_pdrb_pembanding.toString().split('.')[0])
-                        }));
-                        
-                        component.years = newYears;
-                    }
-
-                    statusEl.textContent = 'Selesai!';
-                    setTimeout(() => {
-                        document.getElementById('syncModal').style.display='none';
-                        statusEl.className = 'text-sm font-medium mt-2 hidden';
-                        processBtn.disabled = false;
-                        processBtn.textContent = 'Mulai Tarik Data';
-                    }, 1000);
-                }, 100);
+                    window.location.reload();
+                }, 1500);
             } else {
                 throw new Error(result.message || 'Gagal mencari data.');
             }

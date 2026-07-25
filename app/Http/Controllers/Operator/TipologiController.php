@@ -135,8 +135,8 @@ class TipologiController extends Controller
             'daerah_analisis' => $daerah_analisis,
             'daerah_pembanding' => $daerah_pembanding,
             'sektor' => $item['sektor'],
-            'tahun_awal' => (int) $item['tahun'] - 1,
-            'tahun_akhir' => (int) $item['tahun'],
+            'tahun_awal' => $item['tahun_awal'],
+            'tahun_akhir' => $item['tahun_akhir'],
 
             // Kolom PDRB diset 0 karena tidak digunakan lagi
             'pdrb_sektor_analisis_awal' => 0,
@@ -161,7 +161,8 @@ class TipologiController extends Controller
             'provinsi' => 'required|string',
             'kabupaten' => 'nullable|string',
             'sektor' => 'required|string',
-            'tahun' => 'required|string',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
             'nilai_ss' => 'required',
             'nilai_lq' => 'required',
         ]);
@@ -206,7 +207,8 @@ class TipologiController extends Controller
             'provinsi' => 'required|string',
             'kabupaten' => 'nullable|string',
             'sektor' => 'required|string',
-            'tahun' => 'required|string',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
             'nilai_ss' => 'required',
             'nilai_lq' => 'required',
         ]);
@@ -303,8 +305,8 @@ class TipologiController extends Controller
 
                 $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
 
-                // Also accept 'sektor' and 'tahun', 'nilailq', 'nilaiss'
-                if (!$hasProvinsi || !isset($item['sektor']) || !isset($item['tahun']) || !isset($item['nilailq']) || !isset($item['nilaiss'])) {
+                // Also accept 'sektor' and 'tahun_awal', 'tahun_akhir', 'nilailq', 'nilaiss'
+                if (!$hasProvinsi || !isset($item['sektor']) || !isset($item['tahunawal']) || !isset($item['tahunakhir']) || !isset($item['nilailq']) || !isset($item['nilaiss'])) {
                     continue;
                 }
 
@@ -330,7 +332,8 @@ class TipologiController extends Controller
                     'provinsi' => $provinsi,
                     'kabupaten' => $kabupaten,
                     'sektor' => $sektorName,
-                    'tahun' => $item['tahun'],
+                    'tahun_awal' => $item['tahunawal'],
+                    'tahun_akhir' => $item['tahunakhir'],
                     'nilai_lq' => $item['nilailq'],
                     'nilai_ss' => $item['nilaiss'],
                 ];
@@ -384,15 +387,16 @@ class TipologiController extends Controller
         ]);
 
         $daerah = $request->tingkat_wilayah === 'Provinsi' ? $request->provinsi : $request->kabupaten;
-        $startYear = $request->tahun_awal;
-        $endYear = $request->tahun_akhir;
+        $tahunAwal = $request->tahun_awal;
+        $tahunAkhir = $request->tahun_akhir;
 
         $ssData = \App\Models\ShiftShare::where('daerah_analisis', $daerah)
-            ->whereBetween('tahun_akhir', [$startYear, $endYear])
+            ->where('tahun_awal', $tahunAwal)
+            ->where('tahun_akhir', $tahunAkhir)
             ->get();
 
         $lqData = \App\Models\LQ::where('daerah_analisis', $daerah)
-            ->whereBetween('tahun', [$startYear, $endYear])
+            ->where('tahun', $tahunAkhir)
             ->get();
 
         if ($ssData->isEmpty() || $lqData->isEmpty()) {
@@ -414,7 +418,8 @@ class TipologiController extends Controller
                         'provinsi' => $ss->daerah_pembanding === 'Nasional' ? $ss->daerah_analisis : $ss->daerah_pembanding, // Aproksimasi
                         'kabupaten' => $ss->tingkat_wilayah === 'Kabupaten/Kota' ? $ss->daerah_analisis : '-',
                         'sektor' => $ss->sektor->nama_sektor,
-                        'tahun' => $ss->tahun_akhir,
+                        'tahun_awal' => $ss->tahun_awal,
+                        'tahun_akhir' => $ss->tahun_akhir,
                         'nilai_ss' => $ss->dij,
                         'nilai_lq' => $lq->nilai_lq
                     ];

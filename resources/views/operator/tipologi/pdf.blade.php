@@ -6,9 +6,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 10px;
+            font-size: 9.5px;
             color: #333;
-            line-height: 1.4;
+            line-height: 1.35;
             margin: 0;
             padding: 0;
         }
@@ -46,7 +46,7 @@
         }
         .title-block p {
             margin: 0;
-            font-size: 10px;
+            font-size: 9.5px;
             color: #555;
         }
         table {
@@ -56,7 +56,7 @@
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 6px 8px;
+            padding: 5px 7px;
             text-align: left;
         }
         th {
@@ -64,7 +64,7 @@
             color: white;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 9.5px;
+            font-size: 9px;
         }
         tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -76,9 +76,9 @@
             text-align: right;
         }
         .badge {
-            padding: 3px 5px;
+            padding: 2px 4px;
             border-radius: 3px;
-            font-size: 8.5px;
+            font-size: 8px;
             font-weight: bold;
             text-transform: uppercase;
         }

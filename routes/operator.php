@@ -47,6 +47,7 @@ Route::middleware([
         Route::delete('/analisis-ss/{id}', [SsController::class, 'destroy'])->name('ss.destroy');
         Route::post('/analisis-ss/import', [SsController::class, 'import'])->name('ss.import');
         Route::post('/analisis-ss/sync', [SsController::class, 'syncFromDatabase'])->name('ss.sync');
+        Route::post('/analisis-ss/sync-all', [SsController::class, 'syncAllFromDatabase'])->name('ss.sync-all');
 
         // Analisis Tipologi Routes
         Route::get('/analisis-tipologi', [TipologiController::class, 'index'])->name('tipologi.index');
@@ -71,4 +72,5 @@ Route::middleware([
         Route::delete('/analisis-klassen/{id}', [KlassenController::class, 'destroy'])->name('klassen.destroy');
         Route::post('/analisis-klassen/import', [KlassenController::class, 'import'])->name('klassen.import');
         Route::post('/analisis-klassen/sync', [KlassenController::class, 'syncFromDatabase'])->name('klassen.sync');
+        Route::post('/analisis-klassen/sync-all', [KlassenController::class, 'syncAllFromDatabase'])->name('klassen.sync-all');
     });

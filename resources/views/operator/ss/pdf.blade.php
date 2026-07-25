@@ -6,7 +6,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 9px;
+            font-size: 9.5px;
             color: #333;
             line-height: 1.35;
             margin: 0;
@@ -46,7 +46,7 @@
         }
         .title-block p {
             margin: 0;
-            font-size: 10px;
+            font-size: 9px;
             color: #555;
         }
         table {
@@ -56,7 +56,7 @@
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 5px 6px;
+            padding: 5px 7px;
             text-align: left;
         }
         th {

@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <title>Laporan Analisis Klassen Typology</title>
     <style>
+        body, table {
+            font-family: Arial, sans-serif;
+        }
         table {
             border-collapse: collapse;
             width: 100%;
