@@ -11,7 +11,8 @@ use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\MoneyCurrencyController;
 use App\Http\Controllers\Admin\DataKbkiController;
 
-Route::prefix('admin')
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
