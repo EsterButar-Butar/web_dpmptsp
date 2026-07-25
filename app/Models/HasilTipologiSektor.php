@@ -8,23 +8,34 @@ class HasilTipologiSektor extends Model
 {
     protected $table = 'hasil_tipologi_sektor';
 
-    protected $guarded = [];
+    protected $primaryKey = 'id';
 
-    public $timestamps = false;
+    protected $fillable = [
+        'hasil_lq_id',
+        'hasil_ssa_id',
+        'kuadran',
+        'tahun',
+        'kab_id',
+        'sektor_id',
+        'lq',
+        'cij',
+    ];
 
-    /**
-     * Relasi ke Kabupaten
-     */
-    public function kabupaten()
-    {
-        return $this->belongsTo(Kabupaten::class, 'kab_id', 'kab_id');
-    }
-
-    /**
-     * Relasi ke Sektor
-     */
     public function sektor()
     {
-        return $this->belongsTo(Sektor::class, 'sektor_id', 'sektor_id');
+        return $this->belongsTo(
+            Sektor::class,
+            'sektor_id',
+            'sektor_id'
+        );
+    }
+
+    public function kabupaten()
+    {
+        return $this->belongsTo(
+            Kabupaten::class,
+            'kab_id',
+            'kab_id'
+        );
     }
 }
