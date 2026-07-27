@@ -389,20 +389,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const navbar = document.getElementById("navbar");
 
-window.addEventListener("scroll", () => {
+if (navbar) {
 
-    if (window.scrollY > 80) {
+    window.addEventListener("scroll", () => {
 
-        navbar.classList.add("scrolled");
+        if (window.scrollY > 80) {
+            navbar.classList.add("scrolled");
+        } else {
+            navbar.classList.remove("scrolled");
+        }
 
-    } else {
+    });
 
-        navbar.classList.remove("scrolled");
-
-    }
-
-});
-
+}
 
 /* ==========================================
         COUNTER
@@ -448,20 +447,23 @@ const statSection = document.querySelector(".stats");
 
 let counterStarted = false;
 
-window.addEventListener("scroll", () => {
+if (statSection) {
 
-    const top = statSection.getBoundingClientRect().top;
+    window.addEventListener("scroll", () => {
 
-    if (top < window.innerHeight - 120 && !counterStarted) {
+        const top = statSection.getBoundingClientRect().top;
 
-        counterStarted = true;
+        if (top < window.innerHeight - 120 && !counterStarted) {
 
-        startCounter();
+            counterStarted = true;
 
-    }
+            startCounter();
 
-});
+        }
 
+    });
+
+}
 
 /* ==========================================
         FAQ
@@ -495,34 +497,37 @@ faqs.forEach(item => {
 /* ==========================================
         BACK TO TOP
 ========================================== */
-
 const topBtn = document.getElementById("topBtn");
 
-window.addEventListener("scroll", () => {
+if (topBtn) {
 
-    if (window.scrollY > 500) {
+    window.addEventListener("scroll", () => {
 
-        topBtn.style.display = "block";
+        if (window.scrollY > 500) {
 
-    } else {
+            topBtn.style.display = "block";
 
-        topBtn.style.display = "none";
+        } else {
 
-    }
+            topBtn.style.display = "none";
 
-});
-
-topBtn.onclick = () => {
-
-    window.scrollTo({
-
-        top:0,
-
-        behavior:"smooth"
+        }
 
     });
 
-};
+    topBtn.onclick = () => {
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth"
+
+        });
+
+    };
+
+}
 
 
 /* ==========================================
@@ -649,12 +654,16 @@ cards.forEach(card=>{
 
 window.addEventListener("scroll",()=>{
 
-    const hero=document.querySelector(".hero");
+    const hero = document.querySelector(".hero");
 
-    hero.style.backgroundPositionY=window.scrollY*0.4+"px";
+    if(hero){
+
+        hero.style.backgroundPositionY =
+            window.scrollY * 0.4 + "px";
+
+    }
 
 });
-
 
 /* ==========================================
         LOADING EFFECT
