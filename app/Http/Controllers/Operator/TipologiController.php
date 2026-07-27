@@ -24,11 +24,14 @@ class TipologiController extends Controller
                 'provinsi' => $item->tingkat_wilayah === 'Provinsi' ? $item->daerah_analisis : $item->daerah_pembanding,
                 'kabupaten' => $item->tingkat_wilayah === 'Provinsi' ? '' : $item->daerah_analisis,
                 'sektor' => $item->sektor->nama_sektor ?? '-',
-                'tahun' => $item->tahun_akhir, // Hanya menggunakan tahun akhir
-                'nilai_ss' => $item->nilai_ss,
+                'tahun' => $item->tahun_awal === $item->tahun_akhir ? $item->tahun_awal : ($item->tahun_awal . ' - ' . $item->tahun_akhir),
+                'tahun_awal' => $item->tahun_awal,
+                'tahun_akhir' => $item->tahun_akhir,                'nilai_ss' => $item->nilai_ss,
                 'nilai_lq' => $item->nilai_lq,
                 'tipologi' => $item->tipologi,
-                'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+                'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
+                    ? 'Ditambah ' . $item->created_at->format('d-m-Y')
+                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
             ];
         })->toArray();
     }
@@ -304,10 +307,10 @@ class TipologiController extends Controller
                 }
 
                 $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
+                $hasTahun = isset($item['tahun']) || (isset($item['tahunawal']) && isset($item['tahunakhir']));
 
                 // Also accept 'sektor' and 'tahun_awal', 'tahun_akhir', 'nilailq', 'nilaiss'
-                if (!$hasProvinsi || !isset($item['sektor']) || !isset($item['tahunawal']) || !isset($item['tahunakhir']) || !isset($item['nilailq']) || !isset($item['nilaiss'])) {
-                    continue;
+                if (!$hasProvinsi || !isset($item['sektor']) || !$hasTahun || !isset($item['nilailq']) || !isset($item['nilaiss'])) {                    continue;
                 }
 
                 $resolved = $this->resolveRegionNames($rawItem); // Use rawItem for resolving because it expects the original keys
@@ -327,13 +330,26 @@ class TipologiController extends Controller
                     $sektorId = $sektorModel->sektor_id;
                 }
 
+                $tahunRaw = trim((string)($item['tahun'] ?? ''));
+                $tahunAwal = null;
+                $tahunAkhir = null;
+                if (!empty($tahunRaw)) {
+                    if (preg_match('/(\d{4})\s*[\-\/]\s*(\d{4})/', $tahunRaw, $matches)) {
+                        $tahunAwal = (int) $matches[1];
+                        $tahunAkhir = (int) $matches[2];
+                    } elseif (preg_match('/(\d{4})/', $tahunRaw, $matches)) {
+                        $tahunAwal = (int) $matches[1];
+                        $tahunAkhir = (int) $matches[1];
+                    }
+                }
+
                 $mappedItem = [
                     'tingkat_wilayah' => $tingkat,
                     'provinsi' => $provinsi,
                     'kabupaten' => $kabupaten,
                     'sektor' => $sektorName,
-                    'tahun_awal' => $item['tahunawal'],
-                    'tahun_akhir' => $item['tahunakhir'],
+                    'tahun_awal' => $item['tahunawal'] ?? $tahunAwal,
+                    'tahun_akhir' => $item['tahunakhir'] ?? $tahunAkhir,
                     'nilai_lq' => $item['nilailq'],
                     'nilai_ss' => $item['nilaiss'],
                 ];

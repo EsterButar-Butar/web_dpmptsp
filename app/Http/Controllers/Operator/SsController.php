@@ -32,17 +32,18 @@ class SsController extends Controller
                 'pdrb_sektor_pembanding_akhir' => $item->pdrb_sektor_pembanding_akhir,
                 'total_pdrb_pembanding_awal' => $item->total_pdrb_pembanding_awal,
                 'total_pdrb_pembanding_akhir' => $item->total_pdrb_pembanding_akhir,
-                'rij' => number_format((float) $item->rij, 4, '.', ''),
-                'rin' => number_format((float) $item->rin, 4, '.', ''),
-                'rn' => number_format((float) $item->rn, 4, '.', ''),
+                'rij' => number_format((float) $item->rij, 2, '.', ''),
+                'rin' => number_format((float) $item->rin, 2, '.', ''),
+                'rn' => number_format((float) $item->rn, 2, '.', ''),
                 'nij' => $item->nij,
                 'mij' => $item->mij,
                 'cij' => $item->cij,
                 'dij' => $item->dij,
                 'status_pertumbuhan' => $item->status_pertumbuhan,
                 'status_daya_saing' => $item->status_daya_saing,
-                'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
-            ];
+                'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
+                    ? 'Ditambah ' . $item->created_at->format('d-m-Y')
+                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),            ];
         })->toArray();
     }
 

@@ -31,8 +31,9 @@ class LqController extends Controller
                 'nilai_lq' => $item->nilai_lq,
                 'keterangan' => $item->keterangan,
                 'kategori' => $item->kategori,
-                'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
-            ];
+                'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
+                    ? 'Ditambah ' . $item->created_at->format('d-m-Y')
+                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),            ];
         })->toArray();
     }
 

@@ -426,14 +426,17 @@
                         let isSideBySide = false;
                         if (provIdx !== -1 && kabIdx !== -1 && sektorIdx !== -1 && tahunIdx !== -1) {
                             let emptyKabCount = 0;
+                            let nonEmptyKabCount = 0;
                             let totalRowsToCheck = Math.min(rows.length, 100);
                             for (let r = 1; r < totalRowsToCheck; r++) {
-                                if (!rows[r] || rows[r][kabIdx] === undefined || rows[r][kabIdx] === null || String(rows[r][kabIdx]).trim() === '') {
-                                    emptyKabCount++;
+                        if (!rows[r]) continue;
+                                const val = rows[r][kabIdx];
+                                if (val === undefined || val === null || String(val).trim() === '' || String(val).trim() === '-') {                                    emptyKabCount++;
+                                } else {
+                                    nonEmptyKabCount++;
                                 }
                             }
-                            if (emptyKabCount > (totalRowsToCheck - 1) * 0.5) {
-                                isSideBySide = true;
+                        if (nonEmptyKabCount > 0 && emptyKabCount > (totalRowsToCheck - 1) * 0.5) {                                isSideBySide = true;
                             }
                         }
                         

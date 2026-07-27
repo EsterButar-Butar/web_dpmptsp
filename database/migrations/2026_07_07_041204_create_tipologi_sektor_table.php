@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('tipologi_sektor', function (Blueprint $table) {
+        Schema::create('hasil_tipologi_sektor', function (Blueprint $table) {
 
             $table->id();
 
@@ -70,6 +70,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('tipologi_sektor');
+        Schema::dropIfExists('hasil_tipologi_sektor');
     }
 };
