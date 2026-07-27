@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
-use App\Models\LQ;
+use App\Models\Lq;
 use App\Models\Sektor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -38,7 +38,7 @@ class LqController extends Controller
 
     public function index(Request $request)
     {
-        $query = LQ::with('sektor');
+        $query = Lq::with('sektor');
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
@@ -151,7 +151,7 @@ class LqController extends Controller
 
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
 
-        LQ::create([
+        Lq::create([
             'user_id' => Auth::id() ?? 1,
             'sektor_id' => $sektorModel->sektor_id,
             'tingkat_wilayah' => $newData['tingkat_wilayah'],
@@ -174,7 +174,7 @@ class LqController extends Controller
 
     public function update(Request $request, $id)
     {
-        $lq = LQ::find($id);
+        $lq = Lq::find($id);
         if (!$lq) {
             return redirect()->route('operator.lq.index')->with('error', 'Data tidak ditemukan!');
         }
@@ -209,7 +209,7 @@ class LqController extends Controller
 
     public function destroy($id)
     {
-        $lq = LQ::find($id);
+        $lq = Lq::find($id);
         
         if ($lq) {
             $daerah = $lq->daerah_analisis;
@@ -222,7 +222,7 @@ class LqController extends Controller
 
     public function empty()
     {
-        LQ::truncate();
+        Lq::truncate();
         OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus semua data perhitungan LQ");
         return back()->with('success', 'Semua data perhitungan LQ berhasil dihapus secara permanen!');
     }
@@ -232,7 +232,7 @@ class LqController extends Controller
         $ids = $request->input('ids');
         if (!empty($ids)) {
             $count = count($ids);
-            LQ::whereIn('id', $ids)->delete();
+            Lq::whereIn('id', $ids)->delete();
             OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus {$count} data perhitungan LQ secara massal");
             return back()->with('success', "{$count} data perhitungan LQ berhasil dihapus secara massal!");
         }
@@ -299,7 +299,7 @@ class LqController extends Controller
                     $newData = $this->calculateLQData($requestObj);
                     
                     if ($newData) {
-                        LQ::create([
+                        Lq::create([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
                             'tingkat_wilayah' => $newData['tingkat_wilayah'],
@@ -333,7 +333,7 @@ class LqController extends Controller
                     $newDataAwal = $this->calculateLQData($requestObjAwal);
                     
                     if ($newDataAwal) {
-                        LQ::create([
+                        Lq::create([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
                             'tingkat_wilayah' => $newDataAwal['tingkat_wilayah'],
@@ -367,7 +367,7 @@ class LqController extends Controller
                     $newDataAkhir = $this->calculateLQData($requestObjAkhir);
                     
                     if ($newDataAkhir) {
-                        LQ::create([
+                        Lq::create([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
                             'tingkat_wilayah' => $newDataAkhir['tingkat_wilayah'],

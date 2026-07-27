@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class LQ extends Model
+class Lq extends Model
 {
     protected $table = 'analisis_lq';
     protected $guarded = [];

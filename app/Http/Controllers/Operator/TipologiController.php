@@ -413,7 +413,7 @@ class TipologiController extends Controller
             ->where('tahun_akhir', $tahunAkhir)
             ->get();
 
-        $lqData = \App\Models\LQ::where('daerah_analisis', $daerah)
+        $lqData = \App\Models\Lq::where('daerah_analisis', $daerah)
             ->where('tahun', $tahunAkhir)
             ->get();
 
