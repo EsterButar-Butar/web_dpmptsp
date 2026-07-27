@@ -217,15 +217,14 @@
                                 <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Daerah Analisis</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Provinsi</th>
-                            <th class="px-4 py-4 min-w-[200px]">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Tahun Awal</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Tahun Akhir</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Nilai SS (Dij)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Nilai LQ (Rasio Kontribusi)</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Tipologi (Kuadran)</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Daerah Analisis</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Provinsi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider min-w-[200px]">Sektor</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Nilai SS (Dij)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Nilai LQ (Rasio Kontribusi)</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tipologi (Kuadran)</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
@@ -238,8 +237,9 @@
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-4">{{ $data['tahun_awal'] ?? '-' }}</td>
-                                <td class="px-4 py-4">{{ $data['tahun_akhir'] ?? '-' }}</td>
+                                <td class="px-4 py-4 text-center text-slate-500 whitespace-nowrap font-medium">
+                                    {{ $data['tahun'] }}
+                                </td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_ss'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap text-center">
@@ -286,7 +286,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="13" class="px-4 py-8 text-center text-slate-500 font-medium">
+                                <td colspan="12" class="px-4 py-8 text-center text-slate-500 font-medium">
                                     Belum ada data perhitungan Tipologi Sektor.
                                 </td>
                             </tr>
@@ -296,7 +296,7 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6 flex items-center justify-between">
+            <div class="mt-6 px-4">
                     @php $paginator = $tipologiData; @endphp
                     @if ($paginator->hasPages())
                         @php

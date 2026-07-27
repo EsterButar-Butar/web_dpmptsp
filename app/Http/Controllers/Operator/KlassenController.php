@@ -55,7 +55,9 @@ class KlassenController extends Controller
                 'y' => number_format((float) $item->y, 3, '.', ''),
                 'kuadran' => $kuadran,
                 'klasifikasi' => $item->klasifikasi,
-                'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+                'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
+                    ? 'Ditambah ' . $item->created_at->format('d-m-Y')
+                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
             ];
         })->toArray();
     }

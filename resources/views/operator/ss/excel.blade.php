@@ -57,9 +57,9 @@
                     <td>{{ $item['daerah_pembanding'] }}</td>
                     <td>{{ $item['sektor'] }}</td>
                     <td>{{ $item['tahun'] }}</td>
-                    <td>{{ number_format($item['rij'], 4, ',', '.') }}</td>
-                    <td>{{ number_format($item['rin'], 4, ',', '.') }}</td>
-                    <td>{{ number_format($item['rn'], 4, ',', '.') }}</td>
+                    <td>{{ number_format($item['rij'], 2, ',', '.') }}</td>
+                    <td>{{ number_format($item['rin'], 2, ',', '.') }}</td>
+                    <td>{{ number_format($item['rn'], 2, ',', '.') }}</td>
                     <td>{{ number_format($item['nij'], 0, ',', '.') }}</td>
                     <td>{{ number_format($item['mij'], 0, ',', '.') }}</td>
                     <td>{{ number_format($item['cij'], 0, ',', '.') }}</td>

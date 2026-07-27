@@ -210,16 +210,15 @@
                                 <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Tingkat Wilayah</th>
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">KAB/KOTA</th>
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">PROVINSI</th>
-                            <th class="px-4 py-4 font-semibold min-w-[200px]">SEKTOR</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">TAHUN</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">NILAI LQ</th>
-                            <th class="px-4 py-4 font-semibold min-w-[250px]">KETERANGAN</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">KATEGORI</th>
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">RIWAYAT</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">AKSI</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">KAB/KOTA</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">PROVINSI</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider min-w-[200px]">SEKTOR</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">TAHUN</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">NILAI LQ</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider min-w-[250px]">KETERANGAN</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">KATEGORI</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">RIWAYAT</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
@@ -229,7 +228,6 @@
                                     <input type="checkbox" class="row-checkbox rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" value="{{ $data['id'] }}">
                                 </td>
                                 <td class="px-4 py-4">{{ ($lqData->currentPage() - 1) * $lqData->perPage() + $loop->iteration }}</td>
-                                <td class="px-4 py-4">{{ $data['tingkat_wilayah'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['sektor'] }}</td>
@@ -275,7 +273,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-8 text-center text-slate-500">
+                                <td colspan="11" class="px-4 py-8 text-center text-slate-500">
                                     Belum ada data perhitungan LQ.
                                 </td>
                             </tr>

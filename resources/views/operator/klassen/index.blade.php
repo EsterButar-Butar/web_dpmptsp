@@ -282,22 +282,23 @@
             <div class="overflow-x-auto border border-slate-200 rounded-xl">
                 <table id="klassenTable" class="w-full text-left border-collapse min-w-[1200px]">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
-                        <tr>
+                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-12 text-center">
                                 <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-4 py-4 min-w-[200px]">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kab/Kota</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Provinsi</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Laju Pertumbuhan Sektor Analisis (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Laju Pertumbuhan Sektor Pembanding (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kontribusi Sektor Analisis (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kontribusi Sektor Pembanding (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kuadran</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Klasifikasi</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Riwayat</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider min-w-[200px]">Sektor</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kab/Kota</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Provinsi</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Laju Pertumbuhan Sektor Analisis (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Laju Pertumbuhan Sektor Pembanding (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kontribusi Sektor Analisis (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kontribusi Sektor Pembanding (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kuadran</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Klasifikasi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Riwayat</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
@@ -310,6 +311,9 @@
                                 <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
+                                <td class="px-4 py-4 text-center text-slate-500 whitespace-nowrap">
+                                    {{ $data['tahun_awal'] ?? '' }} - {{ $data['tahun_akhir'] ?? '' }}
+                                </td>
                                 <td class="px-4 py-4">{{ number_format($data['ri'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['r'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['yi'] ?? 0, 2, ',', '.') }}</td>
@@ -360,7 +364,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="13" class="px-4 py-8 text-center text-slate-500 font-medium">
+                                <td colspan="14" class="px-4 py-8 text-center text-slate-500 font-medium">
                                     Belum ada data perhitungan Analisis Klassen.
                                 </td>
                             </tr>
@@ -370,7 +374,7 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6 flex items-center justify-between">
+            <div class="mt-6 px-4">
                     @php $paginator = $klassenData; @endphp
                     @if ($paginator->hasPages())
                         @php

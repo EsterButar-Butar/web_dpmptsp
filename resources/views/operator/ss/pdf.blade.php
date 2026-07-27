@@ -155,9 +155,9 @@
                     <td>{{ $item['daerah_pembanding'] }}</td>
                     <td>{{ $item['sektor'] }}</td>
                     <td class="text-center">{{ $item['tahun_awal'] }} - {{ $item['tahun_akhir'] }}</td>
-                    <td class="text-right">{{ $item['rij'] }}</td>
-                    <td class="text-right">{{ $item['rin'] }}</td>
-                    <td class="text-right">{{ $item['rn'] }}</td>
+                    <td class="text-right">{{ number_format($item['rij'], 2, ',', '.') }}</td>
+                    <td class="text-right">{{ number_format($item['rin'], 2, ',', '.') }}</td>
+                    <td class="text-right">{{ number_format($item['rn'], 2, ',', '.') }}</td>
                     <td class="text-right">{{ number_format($item['nij'], 2, ',', '.') }}</td>
                     <td class="text-right">{{ number_format($item['mij'], 2, ',', '.') }}</td>
                     <td class="text-right">{{ number_format($item['cij'], 2, ',', '.') }}</td>

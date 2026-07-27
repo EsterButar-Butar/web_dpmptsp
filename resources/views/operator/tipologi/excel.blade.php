@@ -53,7 +53,7 @@
                     <td>{{ $item['tahun'] }}</td>
                     <td>{{ number_format($item['nilai_ss'], 0, ',', '.') }}</td>
                     <td>{{ number_format($item['nilai_lq'], 4, ',', '.') }}</td>
-                    <td>{{ $item['kuadran'] }}</td>
+                    <td>{{ $item['tipologi'] }}</td>
                 </tr>
             @empty
                 <tr>

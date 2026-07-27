@@ -37,6 +37,7 @@
                 <th>Sektor</th>
                 <th>Kab/Kota</th>
                 <th>Provinsi</th>
+                <th>Tahun</th>
                 <th>Laju Pertumbuhan Sektor Analisis (%)</th>
                 <th>Laju Pertumbuhan Sektor Pembanding (%)</th>
                 <th>Kontribusi Sektor Analisis (%)</th>
@@ -50,18 +51,19 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $item['sektor'] }}</td>
-                    <td>{{ $item['kabupaten'] }}</td>
-                    <td>{{ $item['provinsi'] }}</td>
-                    <td>{{ number_format($item['g_sektor_analisis'], 4, ',', '.') }}</td>
-                    <td>{{ number_format($item['g_sektor_pembanding'], 4, ',', '.') }}</td>
-                    <td>{{ number_format($item['s_sektor_analisis'], 4, ',', '.') }}</td>
-                    <td>{{ number_format($item['s_sektor_pembanding'], 4, ',', '.') }}</td>
+                    <td>{{ $item['kabupaten'] ?? $item['daerah_analisis'] ?? '-' }}</td>
+                    <td>{{ $item['provinsi'] ?? $item['daerah_pembanding'] ?? '-' }}</td>
+                    <td>{{ $item['tahun_awal'] }} - {{ $item['tahun_akhir'] }}</td>
+                    <td>{{ number_format((float) ($item['ri'] ?? 0), 4, ',', '.') }}</td>
+                    <td>{{ number_format((float) ($item['r'] ?? 0), 4, ',', '.') }}</td>
+                    <td>{{ number_format((float) ($item['yi'] ?? 0), 4, ',', '.') }}</td>
+                    <td>{{ number_format((float) ($item['y'] ?? 0), 4, ',', '.') }}</td>
                     <td>{{ $item['kuadran'] }}</td>
                     <td>{{ $item['klasifikasi'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10">Tidak ada data analisis Klassen Typology.</td>
+                    <td colspan="11">Tidak ada data analisis Klassen Typology.</td>
                 </tr>
             @endforelse
         </tbody>

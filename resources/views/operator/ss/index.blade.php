@@ -281,21 +281,21 @@
                                 <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Daerah Analisis</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Daerah Pembanding</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Tahun</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Rij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Rin</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Rn</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Nij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Mij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Cij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Dij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Status Pertumbuhan</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Status Daya Saing</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Riwayat</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Daerah Analisis</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Daerah Pembanding</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Sektor</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Rij</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Rin</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Rn</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Nij</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Mij</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Cij</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Dij</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status Pertumbuhan</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status Daya Saing</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Riwayat</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
@@ -309,9 +309,9 @@
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
                                 <td class="px-4 py-4 text-center text-slate-500 whitespace-nowrap">{{ $data['tahun_awal'] ?? '' }} - {{ $data['tahun_akhir'] ?? '' }}</td>
-                                <td class="px-4 py-4">{{ $data['rij'] }}</td>
-                                <td class="px-4 py-4">{{ $data['rin'] }}</td>
-                                <td class="px-4 py-4">{{ $data['rn'] }}</td>
+                                <td class="px-4 py-4">{{ number_format($data['rij'], 2, ',', '.') }}</td>
+                                <td class="px-4 py-4">{{ number_format($data['rin'], 2, ',', '.') }}</td>
+                                <td class="px-4 py-4">{{ number_format($data['rn'], 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['nij'], 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['mij'], 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['cij'], 2, ',', '.') }}</td>
@@ -370,7 +370,7 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6 flex items-center justify-between">
+            <div class="mt-6 px-4">
                     @php $paginator = $ssData; @endphp
                     @if ($paginator->hasPages())
                         @php

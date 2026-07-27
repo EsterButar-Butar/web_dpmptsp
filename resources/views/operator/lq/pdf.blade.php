@@ -149,9 +149,9 @@
                     <td>{{ $item['daerah_pembanding'] }}</td>
                     <td>{{ $item['sektor'] }}</td>
                     <td class="text-center">{{ $item['tahun'] }}</td>
-                    <td class="text-right">{{ number_format($item['nilai_lq'], 4) }}</td>
+                    <td class="text-right">{{ number_format($item['nilai_lq'], 2, ',', '.') }}</td>
                     <td class="text-center">
-                        <span class="badge {{ $item['kategori'] === 'Basis' ? 'badge-basis' : 'badge-non-basis' }}">
+                        <span class="badge {{ strtoupper($item['kategori']) === 'BASIS' ? 'badge-basis' : 'badge-non-basis' }}">
                             {{ $item['kategori'] }}
                         </span>
                     </td>
