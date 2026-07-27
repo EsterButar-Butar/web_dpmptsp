@@ -1,3 +1,4 @@
+{{-- Halaman Indeks Analisis Klassen Typology untuk Operator --}}
 @extends('partials.layouts.operator')
 
 @section('content')
@@ -48,11 +49,16 @@
             <!-- Form -->
             <form action="{{ $editData ? route('operator.klassen.update', $editData['id']) : route('operator.klassen.store') }}" method="POST" class="space-y-6" x-data="{ 
                 tingkat_wilayah: '{{ old('tingkat_wilayah', $editData['tingkat_wilayah'] ?? 'Kabupaten/Kota') }}',
-                provinsi: '{{ old('provinsi', $editData['provinsi'] ?? '') }}',
-                get listKabupaten() {
-                    return window.daftarWilayah[this.provinsi] || [];
+                provinsi: '{{ old('provinsi', $editData['provinsi'] ?? 'Sumatera Utara') }}',
+                listKabupaten: [],
+                init() {
+                    this.listKabupaten = window.daftarWilayah[this.provinsi] || [];
+                    this.$watch('provinsi', value => {
+                        this.listKabupaten = window.daftarWilayah[value] || [];
+                    });
                 },
-                years: [
+                years: @if($editData)
+                [
                     { 
                         tahun: '{{ old('tahun_awal', $editData['tahun_awal'] ?? '') }}', 
                         pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_awal', $editData['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], 
@@ -69,7 +75,16 @@
                         total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_akhir', $editData['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0],
                         pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: ''
                     }
-                ],
+                ]
+                @else
+                [
+                    { tahun: '2021', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2022', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2023', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2024', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' },
+                    { tahun: '2025', pdrb_sektor_analisis: '', total_pdrb_analisis: '', pdrb_sektor_pembanding: '', total_pdrb_pembanding: '', pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: '' }
+                ]
+                @endif,
                 format(v) { 
                     if (v === undefined || v === null || v === '') return '';
                     let raw = v.toString().replace(/[^0-9]/g, ''); 
@@ -131,12 +146,12 @@
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Provinsi</label>
                 <div class="relative">
-                    <input list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
-                    <datalist id="provinsi-list">
+                    <select name="provinsi" x-model="provinsi" class="op-input op-input-icon op-select" required>
+                        <option value="" disabled selected>Pilih Provinsi</option>
                         <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                            <option :value="prov"></option>
+                            <option :value="prov" x-text="prov"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
@@ -149,12 +164,12 @@
             <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
                 <label class="op-label">Kabupaten / Kota</label>
                 <div class="relative">
-                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editData['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
-                    <datalist id="kabupaten-list">
+                    <select name="kabupaten" class="op-input op-input-icon op-select" :required="tingkat_wilayah === 'Kabupaten/Kota'">
+                        <option value="" disabled selected x-text="provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
                         <template x-for="kab in listKabupaten" :key="kab">
-                            <option :value="kab"></option>
+                            <option :value="kab" x-text="kab" :selected="kab === '{{ old('kabupaten', $editData['kabupaten'] ?? '') }}'"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
@@ -170,7 +185,17 @@
                 <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                     <div class="flex items-center gap-3">
                         <span class="bg-[#145239] text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap" x-text="'Data Tahun ' + (index + 1)"></span>
-                        <input type="number" name="tahun[]" x-model="year.tahun" min="1900" max="2100" class="op-input !w-32 !py-1 !text-sm" placeholder="Tahun" required>
+                        <div class="relative">
+                            <select name="tahun[]" x-model="year.tahun" class="op-input op-input-icon op-select !w-32 !py-1 !text-sm" required>
+                                <option value="" disabled>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
+                                <svg class="w-3 h-3 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                     <button type="button" @click="removeYear(index)" x-show="years.length > 2" class="text-red-500 hover:text-red-700 p-1.5 bg-red-100 rounded-md transition-colors" title="Hapus Tahun">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -257,22 +282,23 @@
             <div class="overflow-x-auto border border-slate-200 rounded-xl">
                 <table id="klassenTable" class="w-full text-left border-collapse min-w-[1200px]">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
-                        <tr>
+                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-12 text-center">
                                 <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-4 py-4 min-w-[200px]">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kab/Kota</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Provinsi</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Laju Pertumbuhan Sektor Analisis (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Laju Pertumbuhan Sektor Pembanding (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kontribusi Sektor Analisis (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kontribusi Sektor Pembanding (%)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Kuadran</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Klasifikasi</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Riwayat</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider min-w-[200px]">Sektor</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kab/Kota</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Provinsi</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Laju Pertumbuhan Sektor Analisis (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Laju Pertumbuhan Sektor Pembanding (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kontribusi Sektor Analisis (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kontribusi Sektor Pembanding (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kuadran</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Klasifikasi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Riwayat</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
@@ -285,6 +311,9 @@
                                 <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
+                                <td class="px-4 py-4 text-center text-slate-500 whitespace-nowrap">
+                                    {{ $data['tahun_awal'] ?? '' }} - {{ $data['tahun_akhir'] ?? '' }}
+                                </td>
                                 <td class="px-4 py-4">{{ number_format($data['ri'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['r'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['yi'] ?? 0, 2, ',', '.') }}</td>
@@ -335,7 +364,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="13" class="px-4 py-8 text-center text-slate-500 font-medium">
+                                <td colspan="14" class="px-4 py-8 text-center text-slate-500 font-medium">
                                     Belum ada data perhitungan Analisis Klassen.
                                 </td>
                             </tr>
@@ -345,13 +374,73 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6 flex items-center justify-between">
-                <div class="text-sm text-slate-500">
-                    Menampilkan {{ $klassenData->firstItem() ?? 0 }}-{{ $klassenData->lastItem() ?? 0 }} data dari {{ $klassenData->total() }} data
-                </div>
-                <div>
-                    {{ $klassenData->links('pagination::tailwind') }}
-                </div>
+            <div class="mt-6 px-4">
+                    @php $paginator = $klassenData; @endphp
+                    @if ($paginator->hasPages())
+                        @php
+                            $current = $paginator->currentPage();
+                            $last = $paginator->lastPage();
+                            
+                            $pages = [];
+                            if ($last <= 3) {
+                                for ($i = 1; $i <= $last; $i++) {
+                                    $pages[] = $i;
+                                }
+                            } else {
+                                if ($current <= 2) {
+                                    $pages = [1, 2, '...'];
+                                } elseif ($current >= $last - 1) {
+                                    $pages = ['...', $last - 1, $last];
+                                } else {
+                                    $pages = ['...', $current, '...'];
+                                }
+                            }
+                        @endphp
+
+                        <section class="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                            <p class="m-0 text-sm text-slate-500">
+                                Menampilkan
+                                <span class="font-semibold text-slate-700">{{ $paginator->firstItem() }}</span>
+                                sampai
+                                <span class="font-semibold text-slate-700">{{ $paginator->lastItem() }}</span>
+                                dari
+                                <span class="font-semibold text-slate-700">{{ $paginator->total() }}</span>
+                                data
+                            </p>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                @if ($paginator->onFirstPage())
+                                    <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                        <i class="fa-solid fa-chevron-left"></i> Prev
+                                    </span>
+                                @else
+                                    <a href="{{ $paginator->previousPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                        <i class="fa-solid fa-chevron-left"></i> Prev
+                                    </a>
+                                @endif
+
+                                @foreach ($pages as $page)
+                                    @if ($page === '...')
+                                        <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">...</span>
+                                    @elseif ($page == $current)
+                                        <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#FFD54F] bg-[#FFD54F] px-3 text-xs font-bold text-emerald-900">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $paginator->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+
+                                @if ($paginator->hasMorePages())
+                                    <a href="{{ $paginator->nextPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                        Next <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                @else
+                                    <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                        Next <i class="fa-solid fa-chevron-right"></i>
+                                    </span>
+                                @endif
+                            </div>
+                        </section>
+                    @endif
             </div>
 
             <!-- Legend / Keterangan -->
@@ -379,12 +468,19 @@
                     </button>
                 </form>
 
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{{ route('operator.klassen.excel', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh (Excel)
-                </button>
+                </a>
+                
+                <a href="{{ route('operator.klassen.pdf', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Unduh PDF
+                </a>
 
                 <form action="{{ route('operator.klassen.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                     @csrf
@@ -403,11 +499,15 @@
     <x-import-modal action="{{ route('operator.klassen.import') }}" type="klassen" />
 
     <!-- Sync Modal -->
-    <div id="syncModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" style="display: none;" x-data="{
+    <div id="syncModal" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm px-4 py-8" style="display: none;" x-data="{
         sync_tingkat_wilayah: 'Kabupaten/Kota',
         sync_provinsi: 'Sumatera Utara',
-        get syncListKabupaten() {
-            return window.daftarWilayah[this.sync_provinsi] || [];
+        syncListKabupaten: [],
+        init() {
+            this.syncListKabupaten = window.daftarWilayah[this.sync_provinsi] || [];
+            this.$watch('sync_provinsi', value => {
+                this.syncListKabupaten = window.daftarWilayah[value] || [];
+            });
         }
     }">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden relative">
@@ -435,12 +535,12 @@
                 <div class="space-y-2">
                     <label class="op-label">Provinsi</label>
                     <div class="relative">
-                        <input list="sync-provinsi-list" id="sync_provinsi" x-model="sync_provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
-                        <datalist id="sync-provinsi-list">
+                        <select id="sync_provinsi" name="provinsi" x-model="sync_provinsi" class="op-input op-input-icon op-select" required>
+                            <option value="" disabled selected>Pilih Provinsi</option>
                             <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                                <option :value="prov"></option>
+                                <option :value="prov" x-text="prov"></option>
                             </template>
-                        </datalist>
+                        </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                             <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                         </div>
@@ -450,47 +550,48 @@
                 <div class="space-y-2" x-show="sync_tingkat_wilayah === 'Kabupaten/Kota'">
                     <label class="op-label">Kabupaten / Kota</label>
                     <div class="relative">
-                        <input list="sync-kabupaten-list" id="sync_kabupaten" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
-                        <datalist id="sync-kabupaten-list">
+                        <select id="sync_kabupaten" name="kabupaten" class="op-input op-input-icon op-select" :required="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                            <option value="" disabled selected x-text="sync_provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
                             <template x-for="kab in syncListKabupaten" :key="kab">
-                                <option :value="kab"></option>
+                                <option :value="kab" x-text="kab"></option>
                             </template>
-                        </datalist>
+                        </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                             <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <label class="op-label">Sektor</label>
-                    <div class="relative">
-                        <input list="sync-sektor-list" id="sync_sektor" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
-                        <datalist id="sync-sektor-list">
-                            <option value="PERTANIAN, KEHUTANAN, DAN PERIKANAN">
-                            <option value="PERTAMBANGAN DAN PENGGALIAN">
-                            <option value="INDUSTRI PENGOLAHAN">
-                            <option value="PENGADAAN LISTRIK DAN GAS">
-                            <option value="KONSTRUKSI">
-                            <option value="PERDAGANGAN BESAR DAN ECERAN">
-                            <option value="TRANSPORTASI DAN PERGUDANGAN">
-                            <option value="INFORMASI DAN KOMUNIKASI">
-                            <option value="JASA KEUANGAN DAN ASURANSI">
-                        </datalist>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
-                        </div>
-                    </div>
-                </div>
+                <!-- Sektor input removed for bulk sync -->
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="op-label">Tahun Awal</label>
-                        <input type="number" id="sync_tahun_awal" min="1900" max="2100" class="op-input" placeholder="Tahun Awal">
+                        <div class="relative">
+                            <select id="sync_tahun_awal" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <label class="op-label">Tahun Akhir</label>
-                        <input type="number" id="sync_tahun_akhir" min="1900" max="2100" class="op-input" placeholder="Tahun Akhir">
+                        <div class="relative">
+                            <select id="sync_tahun_akhir" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -504,30 +605,30 @@
         </div>
     </div>
 
+
 <script>
     async function processSync() {
         const tingkat = document.getElementById('sync_tingkat_wilayah').value;
         const provinsi = document.getElementById('sync_provinsi').value;
         const kabupaten = document.getElementById('sync_kabupaten').value;
-        const sektor = document.getElementById('sync_sektor').value;
         const tahunAwal = document.getElementById('sync_tahun_awal').value;
         const tahunAkhir = document.getElementById('sync_tahun_akhir').value;
         const statusEl = document.getElementById('syncStatus');
         const processBtn = document.getElementById('processSyncBtn');
 
-        if (!provinsi || !sektor || !tahunAwal || !tahunAkhir || (tingkat === 'Kabupaten/Kota' && !kabupaten)) {
+        if (!provinsi || !tahunAwal || !tahunAkhir || (tingkat === 'Kabupaten/Kota' && !kabupaten)) {
             statusEl.textContent = 'Harap lengkapi semua isian terlebih dahulu!';
             statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
             return;
         }
 
         processBtn.disabled = true;
-        processBtn.textContent = 'Mencari Data...';
-        statusEl.textContent = 'Mencari data PDRB di database...';
+        processBtn.textContent = 'Mencari & Menghitung Data...';
+        statusEl.textContent = 'Mencari data PDRB di database dan menghitung Tipologi Klassen...';
         statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
 
         try {
-            const response = await fetch("{{ route('operator.klassen.sync') }}", {
+            const response = await fetch("{{ route('operator.klassen.sync-all') }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -538,7 +639,6 @@
                     tingkat_wilayah: tingkat,
                     provinsi: provinsi,
                     kabupaten: kabupaten,
-                    sektor: sektor,
                     tahun_awal: tahunAwal,
                     tahun_akhir: tahunAkhir
                 })
@@ -547,55 +647,11 @@
             const result = await response.json();
             
             if (result.success) {
-                statusEl.textContent = 'Data ditemukan! Mengisi form otomatis...';
-                
-                // Get the main Alpine data component on the form
-                const formEl = document.querySelector('form');
-                
-                // We dispatch events to update non-alpine selects
-                const tingkatSelect = document.querySelector('select[name="tingkat_wilayah"]');
-                tingkatSelect.value = tingkat;
-                tingkatSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                statusEl.textContent = result.message + ' Memuat ulang halaman...';
                 
                 setTimeout(() => {
-                    const provinsiInput = document.querySelector('input[name="provinsi"]');
-                    provinsiInput.value = provinsi;
-                    provinsiInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    
-                    if (tingkat === 'Kabupaten/Kota') {
-                        const kabInput = document.querySelector('input[name="kabupaten"]');
-                        if (kabInput) kabInput.value = kabupaten;
-                    }
-                    
-                    const sektorInput = document.querySelector('input[name="sektor"]');
-                    if (sektorInput) sektorInput.value = sektor;
-                    
-                    // Access Alpine Component Data safely and set years array
-                    if (formEl.__x) {
-                        const component = formEl.__x.$data;
-                        const newYears = result.data.map(y => ({
-                            tahun: y.tahun,
-                            pdrb_sektor_analisis: y.pdrb_sektor_analisis.toString().split('.')[0],
-                            total_pdrb_analisis: y.total_pdrb_analisis.toString().split('.')[0],
-                            pdrb_sektor_pembanding: y.pdrb_sektor_pembanding.toString().split('.')[0],
-                            total_pdrb_pembanding: y.total_pdrb_pembanding.toString().split('.')[0],
-                            pdrb_sektor_analisis_fmt: component.format(y.pdrb_sektor_analisis.toString().split('.')[0]),
-                            total_pdrb_analisis_fmt: component.format(y.total_pdrb_analisis.toString().split('.')[0]),
-                            pdrb_sektor_pembanding_fmt: component.format(y.pdrb_sektor_pembanding.toString().split('.')[0]),
-                            total_pdrb_pembanding_fmt: component.format(y.total_pdrb_pembanding.toString().split('.')[0])
-                        }));
-                        
-                        component.years = newYears;
-                    }
-
-                    statusEl.textContent = 'Selesai!';
-                    setTimeout(() => {
-                        document.getElementById('syncModal').style.display='none';
-                        statusEl.className = 'text-sm font-medium mt-2 hidden';
-                        processBtn.disabled = false;
-                        processBtn.textContent = 'Mulai Tarik Data';
-                    }, 1000);
-                }, 100);
+                    window.location.reload();
+                }, 1500);
             } else {
                 throw new Error(result.message || 'Gagal mencari data.');
             }

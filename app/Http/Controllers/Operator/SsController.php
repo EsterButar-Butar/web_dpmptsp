@@ -43,7 +43,8 @@ class SsController extends Controller
                 'status_daya_saing' => $item->status_daya_saing,
                 'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
                     ? 'Ditambah ' . $item->created_at->format('d-m-Y')
-                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),            ];
+                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+            ];
         })->toArray();
     }
 

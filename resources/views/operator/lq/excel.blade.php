@@ -1,3 +1,4 @@
+{{-- Halaman Indeks Analisis Location Quotient (LQ) untuk Operator --}}
 @extends('partials.layouts.operator')
 
 @section('content')
@@ -97,7 +98,17 @@
                     <!-- Tahun -->
                     <div class="space-y-2 col-span-1">
                         <label class="op-label">Tahun</label>
-                        <input type="number" name="tahun" value="{{ old('tahun', $editItem['tahun'] ?? '') }}" class="op-input" placeholder="Contoh: 2024" required>
+                        <div class="relative">
+                            <select name="tahun" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled {{ old('tahun', $editItem['tahun'] ?? '') == '' ? 'selected' : '' }}>Pilih Tahun</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}" {{ old('tahun', $editItem['tahun'] ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                     <!-- Provinsi -->
                     <div class="space-y-2 col-span-1">
@@ -273,7 +284,72 @@
 
             <!-- Pagination Section -->
             <div class="mt-6 px-4">
-                {{ $lqData->links('pagination::tailwind') }}
+            @php $paginator = $lqData; @endphp
+            @if ($paginator->hasPages())
+                @php
+                    $current = $paginator->currentPage();
+                    $last = $paginator->lastPage();
+                    
+                    $pages = [];
+                    if ($last <= 3) {
+                        for ($i = 1; $i <= $last; $i++) {
+                            $pages[] = $i;
+                        }
+                    } else {
+                        if ($current <= 2) {
+                            $pages = [1, 2, '...'];
+                        } elseif ($current >= $last - 1) {
+                            $pages = ['...', $last - 1, $last];
+                        } else {
+                            $pages = ['...', $current, '...'];
+                        }
+                    }
+                @endphp
+
+                <section class="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <p class="m-0 text-sm text-slate-500">
+                        Menampilkan
+                        <span class="font-semibold text-slate-700">{{ $paginator->firstItem() }}</span>
+                        sampai
+                        <span class="font-semibold text-slate-700">{{ $paginator->lastItem() }}</span>
+                        dari
+                        <span class="font-semibold text-slate-700">{{ $paginator->total() }}</span>
+                        data
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if ($paginator->onFirstPage())
+                            <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                <i class="fa-solid fa-chevron-left"></i> Prev
+                            </span>
+                        @else
+                            <a href="{{ $paginator->previousPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                <i class="fa-solid fa-chevron-left"></i> Prev
+                            </a>
+                        @endif
+
+                        @foreach ($pages as $page)
+                            @if ($page === '...')
+                                <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">...</span>
+                            @elseif ($page == $current)
+                                <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#FFD54F] bg-[#FFD54F] px-3 text-xs font-bold text-emerald-900">{{ $page }}</span>
+                            @else
+                                <a href="{{ $paginator->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        @if ($paginator->hasMorePages())
+                            <a href="{{ $paginator->nextPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                Next <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        @else
+                            <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                Next <i class="fa-solid fa-chevron-right"></i>
+                            </span>
+                        @endif
+                    </div>
+                </section>
+            @endif
             </div>
 
             <div class="mt-8 border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-end gap-3 w-full">
@@ -289,12 +365,19 @@
                     </button>
                 </form>
 
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                <a href="{{ route('operator.lq.excel', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh Hasil Analisis (Excel)
-                </button>
+                </a>
+                
+                <a href="{{ route('operator.lq.pdf', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Unduh PDF
+                </a>
 
                 <form action="{{ route('operator.lq.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                     @csrf
@@ -314,6 +397,7 @@
     </div>
 
     <x-import-modal action="{{ route('operator.lq.import') }}" type="lq" />
+
 
 <script>
     function exportToExcel() {

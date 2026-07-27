@@ -26,7 +26,8 @@ class TipologiController extends Controller
                 'sektor' => $item->sektor->nama_sektor ?? '-',
                 'tahun' => $item->tahun_awal === $item->tahun_akhir ? $item->tahun_awal : ($item->tahun_awal . ' - ' . $item->tahun_akhir),
                 'tahun_awal' => $item->tahun_awal,
-                'tahun_akhir' => $item->tahun_akhir,                'nilai_ss' => $item->nilai_ss,
+                'tahun_akhir' => $item->tahun_akhir,
+                'nilai_ss' => $item->nilai_ss,
                 'nilai_lq' => $item->nilai_lq,
                 'tipologi' => $item->tipologi,
                 'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
@@ -310,7 +311,8 @@ class TipologiController extends Controller
                 $hasTahun = isset($item['tahun']) || (isset($item['tahunawal']) && isset($item['tahunakhir']));
 
                 // Also accept 'sektor' and 'tahun_awal', 'tahun_akhir', 'nilailq', 'nilaiss'
-                if (!$hasProvinsi || !isset($item['sektor']) || !$hasTahun || !isset($item['nilailq']) || !isset($item['nilaiss'])) {                    continue;
+                if (!$hasProvinsi || !isset($item['sektor']) || !$hasTahun || !isset($item['nilailq']) || !isset($item['nilaiss'])) {
+                    continue;
                 }
 
                 $resolved = $this->resolveRegionNames($rawItem); // Use rawItem for resolving because it expects the original keys

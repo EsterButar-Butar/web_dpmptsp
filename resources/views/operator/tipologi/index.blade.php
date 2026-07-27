@@ -1,3 +1,4 @@
+{{-- Halaman Indeks Analisis Tipologi Sektor untuk Operator --}}
 @extends('partials.layouts.operator')
 
 @section('content')
@@ -48,9 +49,13 @@
             <!-- Form -->
             <form action="{{ $editItem ? route('operator.tipologi.update', $editItem['id']) : route('operator.tipologi.store') }}" method="POST" class="space-y-6" x-data="{ 
                 tingkat_wilayah: '{{ old('tingkat_wilayah', $editItem['tingkat_wilayah'] ?? 'Kabupaten/Kota') }}',
-                provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? '') }}',
-                get listKabupaten() {
-                    return window.daftarWilayah[this.provinsi] || [];
+                provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? 'Sumatera Utara') }}',
+                listKabupaten: [],
+                init() {
+                    this.listKabupaten = window.daftarWilayah[this.provinsi] || [];
+                    this.$watch('provinsi', value => {
+                        this.listKabupaten = window.daftarWilayah[value] || [];
+                    });
                 }
             }">
         @csrf
@@ -96,21 +101,17 @@
                     </div>
                 </div>
             </div>
-            <!-- Tahun -->
-            <div class="space-y-2 col-span-1">
-                <label class="op-label">Tahun</label>
-                <input type="number" name="tahun" value="{{ old('tahun', $editItem['tahun'] ?? '') }}" min="1900" max="2100" class="op-input" placeholder="Pilih Tahun" required>
-            </div>
+            
             <!-- Provinsi -->
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Provinsi</label>
                 <div class="relative">
-                    <input list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
-                    <datalist id="provinsi-list">
+                    <select name="provinsi" x-model="provinsi" class="op-input op-input-icon op-select" required>
+                        <option value="" disabled selected>Pilih Provinsi</option>
                         <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                            <option :value="prov"></option>
+                            <option :value="prov" x-text="prov"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
@@ -123,18 +124,41 @@
             <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
                 <label class="op-label">Kabupaten / Kota</label>
                 <div class="relative">
-                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
-                    <datalist id="kabupaten-list">
+                    <select name="kabupaten" class="op-input op-input-icon op-select" :required="tingkat_wilayah === 'Kabupaten/Kota'">
+                        <option value="" disabled selected x-text="provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
                         <template x-for="kab in listKabupaten" :key="kab">
-                            <option :value="kab"></option>
+                            <option :value="kab" x-text="kab" :selected="kab === '{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}'"></option>
                         </template>
-                    </datalist>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                         <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z" />
                         </svg>
                     </div>
                 </div>
+            </div>
+
+            <!-- Row 3: Tahun Awal & Akhir -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 col-span-full">
+                <div class="space-y-2">
+                    <label class="op-label">Tahun Awal</label>
+                    <input type="number" name="tahun_awal" value="{{ old('tahun_awal', $editItem['tahun_awal'] ?? '') }}" class="op-input" required placeholder="Contoh: 2018" min="1900" max="2099">
+                </div>
+                <div class="space-y-2">
+                    <label class="op-label">Tahun Akhir</label>
+                    <input type="number" name="tahun_akhir" value="{{ old('tahun_akhir', $editItem['tahun_akhir'] ?? '') }}" class="op-input" required placeholder="Contoh: 2023" min="1900" max="2099">
+                </div>
+            </div>
+
+            <!-- Row 4: Sektor -->
+            <div class="space-y-2 col-span-full">
+                <label class="op-label">Sektor</label>
+                <input list="sektor-list" name="sektor" value="{{ old('sektor', $editItem['sektor']['nama_sektor'] ?? '') }}" class="op-input" required placeholder="Pilih atau ketik Sektor" autocomplete="off">
+                <datalist id="sektor-list">
+                    @foreach (\App\Models\Sektor::orderBy('nama_sektor', 'asc')->get() as $s)
+                        <option value="{{ $s->nama_sektor }}"></option>
+                    @endforeach
+                </datalist>
             </div>
 
             <!-- Nilai LQ -->
@@ -193,15 +217,14 @@
                                 <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Daerah Analisis</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Provinsi</th>
-                            <th class="px-4 py-4 min-w-[200px]">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Tahun</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Nilai SS (Dij)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Nilai LQ (Rasio Kontribusi)</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Tipologi (Kuadran)</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Riwayat</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Daerah Analisis</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Provinsi</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider min-w-[200px]">Sektor</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Nilai SS (Dij)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Nilai LQ (Rasio Kontribusi)</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tipologi (Kuadran)</th>
+                            <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
@@ -214,7 +237,9 @@
                                 <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
                                 <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
                                 <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-4">{{ $data['tahun'] ?? '-' }}</td>
+                                <td class="px-4 py-4 text-center text-slate-500 whitespace-nowrap font-medium">
+                                    {{ $data['tahun'] }}
+                                </td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_ss'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap text-center">
@@ -240,9 +265,6 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-xs text-slate-500">
-                                    {{ $data['riwayat'] ?? '-' }}
-                                </td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('operator.tipologi.index', ['edit' => $data['id']]) }}" class="p-1.5 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm" title="Edit">
@@ -264,7 +286,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="13" class="px-4 py-8 text-center text-slate-500 font-medium">
+                                <td colspan="12" class="px-4 py-8 text-center text-slate-500 font-medium">
                                     Belum ada data perhitungan Tipologi Sektor.
                                 </td>
                             </tr>
@@ -274,13 +296,73 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6 flex items-center justify-between">
-                <div class="text-sm text-slate-500">
-                    Menampilkan {{ $tipologiData->firstItem() ?? 0 }}-{{ $tipologiData->lastItem() ?? 0 }} data dari {{ $tipologiData->total() }} data
-                </div>
-                <div>
-                    {{ $tipologiData->links('pagination::tailwind') }}
-                </div>
+            <div class="mt-6 px-4">
+                    @php $paginator = $tipologiData; @endphp
+                    @if ($paginator->hasPages())
+                        @php
+                            $current = $paginator->currentPage();
+                            $last = $paginator->lastPage();
+                            
+                            $pages = [];
+                            if ($last <= 3) {
+                                for ($i = 1; $i <= $last; $i++) {
+                                    $pages[] = $i;
+                                }
+                            } else {
+                                if ($current <= 2) {
+                                    $pages = [1, 2, '...'];
+                                } elseif ($current >= $last - 1) {
+                                    $pages = ['...', $last - 1, $last];
+                                } else {
+                                    $pages = ['...', $current, '...'];
+                                }
+                            }
+                        @endphp
+
+                        <section class="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                            <p class="m-0 text-sm text-slate-500">
+                                Menampilkan
+                                <span class="font-semibold text-slate-700">{{ $paginator->firstItem() }}</span>
+                                sampai
+                                <span class="font-semibold text-slate-700">{{ $paginator->lastItem() }}</span>
+                                dari
+                                <span class="font-semibold text-slate-700">{{ $paginator->total() }}</span>
+                                data
+                            </p>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                @if ($paginator->onFirstPage())
+                                    <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                        <i class="fa-solid fa-chevron-left"></i> Prev
+                                    </span>
+                                @else
+                                    <a href="{{ $paginator->previousPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                        <i class="fa-solid fa-chevron-left"></i> Prev
+                                    </a>
+                                @endif
+
+                                @foreach ($pages as $page)
+                                    @if ($page === '...')
+                                        <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">...</span>
+                                    @elseif ($page == $current)
+                                        <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#FFD54F] bg-[#FFD54F] px-3 text-xs font-bold text-emerald-900">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $paginator->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+
+                                @if ($paginator->hasMorePages())
+                                    <a href="{{ $paginator->nextPageUrl() }}" class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                                        Next <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                @else
+                                    <span class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400">
+                                        Next <i class="fa-solid fa-chevron-right"></i>
+                                    </span>
+                                @endif
+                            </div>
+                        </section>
+                    @endif
             </div>
 
             <!-- Legend / Keterangan -->
@@ -308,12 +390,19 @@
                     </button>
                 </form>
 
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{{ route('operator.tipologi.excel', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh (Excel)
-                </button>
+                </a>
+
+                <a href="{{ route('operator.tipologi.pdf', ['search' => request('search')]) }}" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Unduh PDF
+                </a>
 
                 <form action="{{ route('operator.tipologi.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                     @csrf
@@ -332,7 +421,17 @@
     <x-import-modal action="{{ route('operator.tipologi.import') }}" type="tipologi" />
 
     <!-- Sync Modal -->
-    <div id="syncModal" class="fixed inset-0 z-[99] hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity" style="display: none;">
+    <div id="syncModal" class="fixed inset-0 z-[99] hidden items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm px-4 py-8 transition-opacity" style="display: none;" x-data="{
+        sync_tingkat_wilayah: 'Kabupaten/Kota',
+        sync_provinsi: 'Sumatera Utara',
+        syncListKabupaten: [],
+        init() {
+            this.syncListKabupaten = window.daftarWilayah[this.sync_provinsi] || [];
+            this.$watch('sync_provinsi', value => {
+                this.syncListKabupaten = window.daftarWilayah[value] || [];
+            });
+        }
+    }">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all scale-100 opacity-100">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -350,33 +449,81 @@
             <form action="{{ route('operator.tipologi.sync') }}" method="POST" class="p-6 space-y-4">
                 @csrf
                 <p class="text-sm text-slate-600 mb-4">Sistem akan secara otomatis menyinkronkan (mengambil) hasil perhitungan LQ dan SS untuk menghasilkan Kuadran Tipologi.</p>
+                
                 <div class="space-y-2">
-                    <label class="op-label">Pilih Daerah Analisis</label>
+                    <label class="op-label">Tingkat Wilayah</label>
                     <div class="relative">
-                        <input list="sync-daerah-list" name="daerah_analisis" class="op-input op-input-icon op-datalist" placeholder="Ketik atau pilih daerah" required>
-                        <datalist id="sync-daerah-list">
-                            <template x-for="kab in Object.keys(window.daftarWilayah).flatMap(p => window.daftarWilayah[p])" :key="kab">
-                                <option :value="kab"></option>
-                            </template>
-                            <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
-                                <option :value="prov"></option>
-                            </template>
-                        </datalist>
+                        <select name="tingkat_wilayah" x-model="sync_tingkat_wilayah" class="op-input op-input-icon op-select">
+                            <option value="Kabupaten/Kota">Kabupaten/Kota</option>
+                            <option value="Provinsi">Provinsi</option>
+                        </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
-                                <path d="M7 10l5 5 5-5z" />
-                            </svg>
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                         </div>
                     </div>
                 </div>
+
+                <div class="space-y-2">
+                    <label class="op-label">Provinsi</label>
+                    <div class="relative">
+                        <select name="provinsi" x-model="sync_provinsi" class="op-input op-input-icon op-select" required>
+                            <option value="" disabled selected>Pilih Provinsi</option>
+                            <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
+                                <option :value="prov" x-text="prov"></option>
+                            </template>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2" x-show="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                    <label class="op-label">Kabupaten / Kota</label>
+                    <div class="relative">
+                        <select name="kabupaten" class="op-input op-input-icon op-select" :required="sync_tingkat_wilayah === 'Kabupaten/Kota'">
+                            <option value="" disabled selected x-text="sync_provinsi ? 'Pilih Kabupaten/Kota' : 'Silakan Pilih Provinsi Dulu'"></option>
+                            <template x-for="kab in syncListKabupaten" :key="kab">
+                                <option :value="kab" x-text="kab"></option>
+                            </template>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                            <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
+                    <!-- Tahun Awal -->
                     <div class="space-y-2">
                         <label class="op-label">Tahun Awal</label>
-                        <input type="number" name="tahun_awal" class="op-input" placeholder="Contoh: 2021" required>
+                        <div class="relative">
+                            <select name="tahun_awal" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun Awal</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Tahun Akhir -->
                     <div class="space-y-2">
                         <label class="op-label">Tahun Akhir</label>
-                        <input type="number" name="tahun_akhir" class="op-input" placeholder="Contoh: 2025" required>
+                        <div class="relative">
+                            <select name="tahun_akhir" class="op-input op-input-icon op-select" required>
+                                <option value="" disabled selected>Pilih Tahun Akhir</option>
+                                @for($i = 2021; $i <= 2045; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -393,6 +540,7 @@
             </form>
         </div>
     </div>
+
 
 <script>
     function exportToExcel() {

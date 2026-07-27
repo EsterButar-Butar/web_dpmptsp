@@ -17,7 +17,7 @@
             
             <div class="border-t border-slate-200 pt-4 mt-2">
                 <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih File Excel (.xlsx)</label>
-                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                <input type="file" id="excelFileInput" multiple accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
             </div>
             <div id="importStatus" class="text-sm font-medium mt-2 hidden"></div>
         </div>
@@ -54,18 +54,20 @@
         } else if (type === 'ss') {
             wsData = [
                 [
-                    "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun Awal", "Tahun Akhir", 
-                    "PDRB Sektor Analisis Awal", "PDRB Sektor Analisis Akhir", 
-                    "PDRB Sektor Pembanding Awal", "PDRB Sektor Pembanding Akhir", 
-                    "Total PDRB Pembanding Awal", "Total PDRB Pembanding Akhir"
+                    "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun", 
+                    "PDRB Sektor", "PDRB Sektor Pembanding", "Total PDRB Pembanding"
                 ],
                 [
-                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2021", "2022", 
-                    "15000", "16000", "50000", "52000", "200000", "210000"
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2021", 
+                    "15000", "50000", "200000"
+                ],
+                [
+                    "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2022", 
+                    "16000", "52000", "210000"
                 ]
             ];
             filename = "Template_Analisis_SS.xlsx";
-            colCount = 11;
+            colCount = 7;
         } else if (type === 'tipologi') {
             wsData = [
                 [
@@ -142,12 +144,20 @@
         statusEl.textContent = 'Membaca file Excel...';
         statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
 
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-
-        reader.onload = async function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
+        try {
+            let allJsonData = [];
+            
+            for (let fIdx = 0; fIdx < fileInput.files.length; fIdx++) {
+                const file = fileInput.files[fIdx];
+                statusEl.textContent = `Membaca file ${fIdx + 1} dari ${fileInput.files.length}: ${file.name}...`;
+                
+                const data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(new Uint8Array(e.target.result));
+                    reader.onerror = e => reject(new Error('Gagal membaca file ' + file.name));
+                    reader.readAsArrayBuffer(file);
+                });
+                
                 const workbook = XLSX.read(data, {type: 'array'});
                 let jsonData = [];
                 
@@ -429,14 +439,16 @@
                             let nonEmptyKabCount = 0;
                             let totalRowsToCheck = Math.min(rows.length, 100);
                             for (let r = 1; r < totalRowsToCheck; r++) {
-                        if (!rows[r]) continue;
+                                if (!rows[r]) continue;
                                 const val = rows[r][kabIdx];
-                                if (val === undefined || val === null || String(val).trim() === '' || String(val).trim() === '-') {                                    emptyKabCount++;
+                                if (val === undefined || val === null || String(val).trim() === '' || String(val).trim() === '-') {
+                                    emptyKabCount++;
                                 } else {
                                     nonEmptyKabCount++;
                                 }
                             }
-                        if (nonEmptyKabCount > 0 && emptyKabCount > (totalRowsToCheck - 1) * 0.5) {                                isSideBySide = true;
+                            if (nonEmptyKabCount > 0 && emptyKabCount > (totalRowsToCheck - 1) * 0.5) {
+                                isSideBySide = true;
                             }
                         }
                         
@@ -583,8 +595,8 @@
                             throw new Error("Data PDRB harus memiliki minimal 2 tahun data untuk analisis.");
                         }
                         
-                        if (type === 'klassen') {
-                            // Output all data rows for Klassen
+                        if (type === 'klassen' || type === 'ss') {
+                            // Output all data rows for Klassen/SS
                             statusEl.textContent = `Mengonversi ${dataRows.length} baris data tahunan untuk Klassen...`;
                             
                             // Calculate Total PDRB per region per year
@@ -676,10 +688,14 @@
                 }
                 
                 if (jsonData.length === 0) {
-                    throw new Error('Data Excel kosong atau format tidak sesuai.');
+                    throw new Error(`Data Excel kosong atau format tidak sesuai pada file ${file.name}.`);
                 }
                 
-                statusEl.textContent = 'Menyimpan ' + jsonData.length + ' baris data ke sistem...';
+                if (fileInput.files.length === 1) {
+                    statusEl.textContent = `Menyimpan ${jsonData.length} baris data ke sistem...`;
+                } else {
+                    statusEl.textContent = `Menyimpan ${jsonData.length} baris data (file ${fIdx + 1}) ke sistem...`;
+                }
 
                 const response = await fetch("{{ $action }}", {
                     method: 'POST',
@@ -693,29 +709,20 @@
 
                 const result = await response.json();
                 
-                if (result.success) {
-                    statusEl.textContent = result.message || 'Berhasil! Memuat ulang halaman...';
-                    statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    throw new Error(result.message || 'Terjadi kesalahan saat menyimpan data.');
+                if (!result.success) {
+                    throw new Error(`Gagal menyimpan data file ${file.name}: ${result.message}`);
                 }
-            } catch (err) {
-                statusEl.textContent = 'Gagal: ' + err.message;
-                statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
-                processBtn.disabled = false;
-                processBtn.textContent = 'Mulai Unggah';
-            }
-        };
-
-        reader.onerror = function() {
-            statusEl.textContent = 'Gagal membaca file dari komputer Anda.';
+            } // End of file loop
+            
+            statusEl.textContent = 'Berhasil! Memuat ulang halaman...';
+            statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
+            setTimeout(() => window.location.reload(), 1000);
+        } catch (err) {
+            statusEl.textContent = 'Gagal: ' + err.message;
             statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
             processBtn.disabled = false;
             processBtn.textContent = 'Mulai Unggah';
-        };
-
-        reader.readAsArrayBuffer(file);
+        }
     }
 </script>
 @endonce

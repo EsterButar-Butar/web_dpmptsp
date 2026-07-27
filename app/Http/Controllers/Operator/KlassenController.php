@@ -57,7 +57,8 @@ class KlassenController extends Controller
                 'klasifikasi' => $item->klasifikasi,
                 'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
                     ? 'Ditambah ' . $item->created_at->format('d-m-Y')
-                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),            ];
+                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+            ];
         })->toArray();
     }
 
