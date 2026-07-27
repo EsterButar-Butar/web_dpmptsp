@@ -361,99 +361,10 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($dataKbli as $item)
-                            @php
-                                $level = (int) $item->level;
-                                $indent = max(0, ($level - 1) * 28);
-                                $hasChildren = (int) $item->child_count > 0;
-                                $badgeStyle = $badgeStyles[$item->struktur] ?? 'border-slate-200 bg-slate-50 text-slate-700';
-                            @endphp
-                            <tr
-                                data-kbli-row
-                                data-code="{{ $item->kode }}"
-                                data-parent="{{ $item->kode_induk }}"
-                                data-level="{{ $level }}"
-                                @if ($level === 1) id="kategori-{{ $item->kode }}" @endif
-                                @if ($hierarchyMode && $level > 1) hidden @endif
-                                class="transition {{ $level === 1 ? 'bg-slate-50/80 hover:bg-emerald-50/60' : 'hover:bg-slate-50/80' }}"
-                            >
-                                <td class="kbli-tree-cell px-5 py-4">
-                                    @for ($treeLevel = 1; $treeLevel < $level; $treeLevel++)
-                                        <span class="kbli-tree-line" style="left: {{ 22 + (($treeLevel - 1) * 28) }}px"></span>
-                                    @endfor
-                                    @if ($level > 1)
-                                        <span class="kbli-tree-elbow" style="left: {{ 22 + (($level - 2) * 28) }}px; width: 20px"></span>
-                                    @endif
-                                    <div class="relative flex items-center gap-2" style="padding-left: {{ $indent }}px">
-                                        @if ($hasChildren && $hierarchyMode)
-                                            <button
-                                                type="button"
-                                                data-tree-toggle="{{ $item->kode }}"
-                                                aria-label="Buka atau tutup turunan {{ $item->kode }}"
-                                                aria-expanded="{{ $hierarchyMode ? 'false' : 'true' }}"
-                                                class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-[10px] text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
-                                            >
-                                                <i class="fa-solid {{ $hierarchyMode ? 'fa-chevron-right' : 'fa-chevron-down' }}"></i>
-                                            </button>
-                                        @else
-                                            <span class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center text-[8px] text-slate-300">
-                                                <i class="fa-solid fa-circle"></i>
-                                            </span>
-                                        @endif
-                                        <span class="inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold {{ $badgeStyle }}">
-                                            {{ $item->struktur }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="inline-flex rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-mono text-xs font-black text-emerald-700">
-                                        {{ $item->kode }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="max-w-[390px] font-semibold leading-relaxed text-slate-700" title="{{ $item->judul }}">
-                                        {{ $item->judul }}
-                                    </div>
-                                    @if ($item->catatan)
-                                        <div class="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700" title="{{ $item->catatan }}">
-                                            <i class="fa-solid fa-circle-info"></i>
-                                            Ada catatan data
-                                        </div>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4 align-top">
-                                    <div class="kbli-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500" title="{{ $item->cakupan }}">
-                                        {{ $item->cakupan ?: '-' }}
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 align-top">
-                                    <div class="kbli-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500" title="{{ $item->tidak_cakupan }}">
-                                        {{ $item->tidak_cakupan ?: '-' }}
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a
-                                            href="{{ route('admin.data-kbli.index', array_merge(request()->query(), ['edit' => $item->id, 'mode' => 'edit'])) }}"
-                                            title="Edit data"
-                                            class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
-                                        >
-                                            <i class="fa-regular fa-pen-to-square"></i>
-                                        </a>
-                                        <button
-                                            type="button"
-                                            title="Hapus data"
-                                            data-delete-kbli
-                                            data-delete-url="{{ route('admin.data-kbli.destroy', $item->id) }}"
-                                            data-delete-code="{{ $item->kode }}"
-                                            data-delete-title="{{ $item->judul }}"
-                                            data-delete-children="{{ (int) $item->child_count }}"
-                                            class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                                        >
-                                            <i class="fa-regular fa-trash-can"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                            @include('admin.partials.data-kbli-row', [
+                                'item' => $item,
+                                'hierarchyMode' => $hierarchyMode,
+                            ])
                         @empty
                             <tr>
                                 <td colspan="6" class="px-5 py-16 text-center">
@@ -809,115 +720,122 @@
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const hierarchyMode = @json($hierarchyMode);
-                const rows = Array.from(document.querySelectorAll('[data-kbli-row]'));
-                const childrenByParent = new Map();
-                const toggleByCode = new Map();
+                const childrenUrl = @json(route('admin.data-kbli.children'));
+                const tableBody = document.querySelector('#adminKbliTable tbody');
 
-                rows.forEach(function (row) {
-                    const parent = row.dataset.parent;
-
-                    if (! parent) {
-                        return;
-                    }
-
-                    if (! childrenByParent.has(parent)) {
-                        childrenByParent.set(parent, []);
-                    }
-
-                    childrenByParent.get(parent).push(row);
-                });
-
-                document.querySelectorAll('[data-tree-toggle]').forEach(function (button) {
-                    toggleByCode.set(button.dataset.treeToggle, button);
-                });
-
-                function setToggleState(code, expanded) {
-                    const button = toggleByCode.get(code);
-
-                    if (! button) {
-                        return;
-                    }
-
+                function setToggleState(button, expanded) {
                     button.dataset.expanded = expanded ? '1' : '0';
                     button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-
                     const icon = button.querySelector('i');
-
                     if (icon) {
                         icon.classList.toggle('fa-chevron-down', expanded);
                         icon.classList.toggle('fa-chevron-right', ! expanded);
                     }
                 }
 
-                function hideDescendants(code) {
-                    const children = childrenByParent.get(code) || [];
+                function descendantRows(parentRow) {
+                    const parentLevel = Number(parentRow.dataset.level);
+                    const result = [];
+                    let current = parentRow.nextElementSibling;
 
-                    children.forEach(function (child) {
-                        child.hidden = true;
-                        setToggleState(child.dataset.code, false);
-                        hideDescendants(child.dataset.code);
-                    });
+                    while (current && current.matches('[data-kbli-row]')) {
+                        const currentLevel = Number(current.dataset.level);
+                        if (currentLevel <= parentLevel) break;
+                        result.push(current);
+                        current = current.nextElementSibling;
+                    }
+
+                    return result;
                 }
 
-                function showDirectChildren(code) {
-                    const children = childrenByParent.get(code) || [];
-
-                    children.forEach(function (child) {
-                        child.hidden = false;
-                        setToggleState(child.dataset.code, false);
-                        hideDescendants(child.dataset.code);
+                function collapseRow(parentRow, button) {
+                    descendantRows(parentRow).forEach(function (row) {
+                        row.hidden = true;
+                        const childToggle = row.querySelector('[data-tree-toggle]');
+                        if (childToggle) setToggleState(childToggle, false);
                     });
+                    setToggleState(button, false);
                 }
 
-                function collapseAll() {
-                    rows.forEach(function (row) {
-                        row.hidden = Number(row.dataset.level) > 1;
+                function showDirectChildren(parentRow, button) {
+                    const parentLevel = Number(parentRow.dataset.level);
+                    descendantRows(parentRow).forEach(function (row) {
+                        const rowLevel = Number(row.dataset.level);
+                        row.hidden = rowLevel !== parentLevel + 1;
+                        if (rowLevel > parentLevel + 1) {
+                            const childToggle = row.querySelector('[data-tree-toggle]');
+                            if (childToggle) setToggleState(childToggle, false);
+                        }
                     });
-
-                    toggleByCode.forEach(function (button, code) {
-                        setToggleState(code, false);
-                    });
+                    setToggleState(button, true);
                 }
 
-                if (hierarchyMode) {
-                    collapseAll();
+                async function loadChildren(parentRow, button) {
+                    const code = parentRow.dataset.code;
+                    button.disabled = true;
+                    const icon = button.querySelector('i');
 
-                    toggleByCode.forEach(function (button, code) {
-                        button.addEventListener('click', function () {
-                            const expanded = button.dataset.expanded === '1';
+                    if (icon) {
+                        icon.classList.remove('fa-chevron-right', 'fa-chevron-down');
+                        icon.classList.add('fa-spinner', 'fa-spin');
+                    }
 
-                            if (expanded) {
-                                hideDescendants(code);
-                                setToggleState(code, false);
-                            } else {
-                                showDirectChildren(code);
-                                setToggleState(code, true);
-                            }
+                    try {
+                        const query = new URLSearchParams({ parent: code });
+                        const response = await fetch(childrenUrl + '?' + query.toString(), {
+                            headers: {
+                                Accept: 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
                         });
+
+                        const result = await response.json();
+
+                        if (! response.ok) {
+                            throw new Error(result.message || 'Gagal memuat data turunan.');
+                        }
+
+                        if (result.html) {
+                            parentRow.insertAdjacentHTML('afterend', result.html);
+                        }
+
+                        button.dataset.loaded = '1';
+                        showDirectChildren(parentRow, button);
+                    } catch (error) {
+                        console.error(error);
+                        alert(error.message || 'Gagal memuat data turunan.');
+                        setToggleState(button, false);
+                    } finally {
+                        button.disabled = false;
+                        if (icon) icon.classList.remove('fa-spinner', 'fa-spin');
+                        setToggleState(button, button.dataset.expanded === '1');
+                    }
+                }
+
+                if (hierarchyMode && tableBody) {
+                    tableBody.addEventListener('click', async function (event) {
+                        const button = event.target.closest('[data-tree-toggle]');
+                        if (! button) return;
+
+                        const parentRow = button.closest('[data-kbli-row]');
+                        if (! parentRow) return;
+
+                        if (button.dataset.expanded === '1') {
+                            collapseRow(parentRow, button);
+                        } else if (button.dataset.loaded !== '1') {
+                            await loadChildren(parentRow, button);
+                        } else {
+                            showDirectChildren(parentRow, button);
+                        }
                     });
                 }
 
-                document.getElementById('collapseAllKbli')?.addEventListener('click', collapseAll);
-
-                document.getElementById('jumpCategory')?.addEventListener('change', function (event) {
-                    const code = event.target.value;
-
-                    if (! code) {
-                        return;
-                    }
-
-                    const row = document.getElementById('kategori-' + code);
-
-                    if (! row) {
-                        return;
-                    }
-
-                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    row.classList.add('kbli-category-focus');
-
-                    window.setTimeout(function () {
-                        row.classList.remove('kbli-category-focus');
-                    }, 1600);
+                document.getElementById('collapseAllKbli')?.addEventListener('click', function () {
+                    document.querySelectorAll('[data-kbli-row]').forEach(function (row) {
+                        if (Number(row.dataset.level) > 1) row.hidden = true;
+                        const button = row.querySelector('[data-tree-toggle]');
+                        if (button) setToggleState(button, false);
+                    });
                 });
 
                 const deleteModal = document.getElementById('deleteKbliModal');
@@ -934,8 +852,12 @@
                     document.body.style.overflow = '';
                 }
 
-                document.querySelectorAll('[data-delete-kbli]').forEach(function (button) {
-                    button.addEventListener('click', function () {
+                document.addEventListener('click', function (event) {
+                    const button = event.target.closest('[data-delete-kbli]');
+
+                    if (! button) {
+                        return;
+                    }
                         const childCount = Number(button.dataset.deleteChildren || 0);
 
                         if (deleteForm) {
@@ -959,7 +881,6 @@
                         deleteModal?.classList.remove('hidden');
                         deleteModal?.classList.add('flex');
                         document.body.style.overflow = 'hidden';
-                    });
                 });
 
                 cancelDelete?.addEventListener('click', closeDeleteModal);

@@ -73,6 +73,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         | Data KBLI
         |--------------------------------------------------------------------------
         */
+        Route::get('/data-kbli/children', [DataKbliController::class, 'children'])
+            ->name('data-kbli.children');
 
         Route::get('/data-kbli', [DataKbliController::class, 'index'])
             ->name('data-kbli.index');
@@ -91,6 +93,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         | Data KBKI
         |--------------------------------------------------------------------------
         */
+
+        Route::get('/data-kbki/children', [DataKbkiController::class, 'children'])
+            ->name('data-kbki.children');
+
 
         Route::get('/data-kbki', [DataKbkiController::class, 'index'])
             ->name('data-kbki.index');
