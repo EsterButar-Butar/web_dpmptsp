@@ -222,6 +222,38 @@ class ComparisonService
 
     private function getSummary(Collection $rows): array
     {
+        if ($rows->isEmpty()) {
+            return [
+                'growth' => [
+                    'average' => 0,
+                    'highest' => [
+                        'tahun' => null,
+                        'nilai' => 0,
+                    ],
+                ],
+
+                'contribution' => [
+                    'average' => 0,
+                    'highest' => [
+                        'tahun' => null,
+                        'nilai' => 0,
+                    ],
+                ],
+
+                'lq' => [
+                    'nilai' => 0,
+                    'tahun' => null,
+                    'status' => '-',
+                    'change' => 0,
+                ],
+
+                'tipologi' => [
+                    'kuadran' => '-',
+                    'kategori' => '-',
+                    'movement' => 'Data analisis tidak tersedia',
+                ],
+            ];
+        }
         $last = $rows->last();
         $contributionAvg = $rows->avg(fn ($row) =>
             ((float) ($row->indikatorKabupaten?->kontribusi ?? 0)) * 100

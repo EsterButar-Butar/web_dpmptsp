@@ -50,13 +50,13 @@ class OperatorController extends Controller
 
     public function index()
     {
-        $countLq = \App\Models\LQ::count();
+        $countLq = \App\Models\Lq::count();
         $countSs = \App\Models\ShiftShare::count();
         $countTipologi = \App\Models\Tipologi::count();
         $countKlassen = \App\Models\Klassen::count();
         $totalAnalisa = $countLq + $countSs + $countTipologi + $countKlassen;
 
-        $statusLq = $this->getLatestStatus(\App\Models\LQ::class);
+        $statusLq = $this->getLatestStatus(\App\Models\Lq::class);
         $statusSs = $this->getLatestStatus(\App\Models\ShiftShare::class);
         $statusTipologi = $this->getLatestStatus(\App\Models\Tipologi::class);
         $statusKlassen = $this->getLatestStatus(\App\Models\Klassen::class);

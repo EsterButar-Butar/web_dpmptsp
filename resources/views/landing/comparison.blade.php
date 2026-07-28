@@ -37,7 +37,7 @@
         action="{{ route('comparison') }}"
         class="comparison-filter"
     >
-        <select name="provinsi">
+        <select id="provinsi" name="provinsi">
 
             <option value="">
                 Pilih Provinsi
@@ -56,7 +56,7 @@
 
         </select>
 
-        <select name="kabupaten">
+        <select id="kabupaten" name="kabupaten">
 
             <option value="">
                 Pilih Kabupaten / Kota

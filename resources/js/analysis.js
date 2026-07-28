@@ -52,6 +52,18 @@ Chart.register(centerTextPlugin);
 
 Chart.register(centerTextPlugin);
 
+document.addEventListener('DOMContentLoaded', function () {
+
+    const provinsi = document.getElementById('provinsi');
+
+    if (!provinsi) return;
+
+    provinsi.addEventListener('change', function () {
+        this.form.submit();
+    });
+
+});
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const charts = window.dashboardCharts ?? {};

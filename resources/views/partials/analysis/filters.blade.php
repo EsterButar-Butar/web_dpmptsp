@@ -6,7 +6,7 @@
     {{-- =========================
         Provinsi
     ========================== --}}
-    <select name="provinsi">
+    <select id="provinsi" name="provinsi">
 
         <option value="">
             Pilih Provinsi
@@ -28,7 +28,7 @@
     {{-- =========================
         Kabupaten
     ========================== --}}
-    <select name="kabupaten">
+    <select id="kabupaten" name="kabupaten">
 
         <option value="">
             Pilih Kabupaten / Kota

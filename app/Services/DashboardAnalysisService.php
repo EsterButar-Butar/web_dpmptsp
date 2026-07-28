@@ -211,6 +211,14 @@ class DashboardAnalysisService
 
         $total = $basis + $nonBasis;
 
+        $basisPercent = $total > 0
+            ? round($basis / $total * 100, 2)
+            : 0;
+
+        $nonBasisPercent = $total > 0
+            ? round($nonBasis / $total * 100, 2)
+            : 0;
+
         return [
 
             'type'  => 'doughnut',
@@ -257,14 +265,14 @@ class DashboardAnalysisService
                 [
                     'label' => 'Sektor Basis',
                     'value' => $basis,
-                    'percent' => round($basis / $total * 100, 2),
+                    'percent' => $basisPercent,
                     'color' => '#00663f',
                 ],
 
                 [
                     'label' => 'Sektor Non Basis',
                     'value' => $nonBasis,
-                    'percent' => round($nonBasis / $total * 100, 2),
+                    'percent' => $nonBasisPercent,
                     'color' => '#efc53a',
                 ],
 
@@ -365,50 +373,65 @@ class DashboardAnalysisService
     }
 
     private function getSsaSummary(Collection $rows): array
-    {
-        $cepat  = $this->countBy($rows, 'kategori_pertumbuhan', 'Pertumbuhan Cepat');
-        $lambat = $this->countBy($rows, 'kategori_pertumbuhan', 'Pertumbuhan Lambat');
-        $baik   = $this->countBy($rows, 'kategori_daya_saing', 'Daya Saing Baik', 'Tidak Dapat Bersaing');
-        $terbaik = $this->maximum($rows, 'dij');
+        {
+            $cepat = $this->countBy(
+                $rows,
+                'kategori_pertumbuhan',
+                'Pertumbuhan Cepat'
+            );
 
-        return [
-            [
-                'title' => 'Pertumbuhan Cepat',
-                'value' => 15,
-                'icon' => 'fa-solid fa-arrow-trend-up',
-                'color' => 'success',
-                'description' =>
-                'Sektor dengan pertumbuhan lebih cepat dibanding rata-rata provinsi.'
-            ],
+            $lambat = $this->countBy(
+                $rows,
+                'kategori_pertumbuhan',
+                'Pertumbuhan Lambat'
+            );
 
-            [
-                'title' => 'Pertumbuhan Lambat',
-                'value' => 2,
-                'icon' => 'fa-solid fa-arrow-trend-down',
-                'color' => 'warning',
-                'description' =>
-                'Sektor dengan pertumbuhan lebih lambat dibanding rata-rata provinsi.'
-            ],
+            $baik = $this->countBy(
+                $rows,
+                'kategori_daya_saing',
+                'Daya Saing Baik'
+            );
 
-            [
-                'title' => 'Daya Saing Baik',
-                'value' => 8,
-                'icon' => 'fas fa-trophy',
-                'color' => 'primary',
-                'description' =>
-                'Sektor memiliki keunggulan kompetitif dibanding rata-rata provinsi.'
-            ],
+            $tidakBersaing = $this->countBy(
+                $rows,
+                'kategori_daya_saing',
+                'Tidak Dapat Bersaing'
+            );
 
-            [
-                'title' => 'Tidak Dapat Bersaing',
-                'value' => 9,
-                'icon' => 'fas fa-triangle-exclamation',
-                'color' => 'danger',
-                'description' =>
-                'Sektor belum memiliki keunggulan kompetitif dibanding rata-rata provinsi.'
-            ]
-        ];
-    }
+            return [
+                [
+                    'title' => 'Pertumbuhan Cepat',
+                    'value' => $cepat,
+                    'icon' => 'fa-solid fa-arrow-trend-up',
+                    'color' => 'success',
+                    'description' => 'Sektor dengan pertumbuhan lebih cepat dibanding rata-rata provinsi.',
+                ],
+
+                [
+                    'title' => 'Pertumbuhan Lambat',
+                    'value' => $lambat,
+                    'icon' => 'fa-solid fa-arrow-trend-down',
+                    'color' => 'warning',
+                    'description' => 'Sektor dengan pertumbuhan lebih lambat dibanding rata-rata provinsi.',
+                ],
+
+                [
+                    'title' => 'Daya Saing Baik',
+                    'value' => $baik,
+                    'icon' => 'fas fa-trophy',
+                    'color' => 'primary',
+                    'description' => 'Sektor memiliki keunggulan kompetitif dibanding rata-rata provinsi.',
+                ],
+
+                [
+                    'title' => 'Tidak Dapat Bersaing',
+                    'value' => $tidakBersaing,
+                    'icon' => 'fas fa-triangle-exclamation',
+                    'color' => 'danger',
+                    'description' => 'Sektor belum memiliki keunggulan kompetitif dibanding rata-rata provinsi.',
+                ],
+            ];
+        }
 
     private function getSsaDoughnutGrowth(Collection $rows): array
     {
