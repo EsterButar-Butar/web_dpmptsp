@@ -253,8 +253,8 @@
                         let valStr = String(d.nilai || '0').replace(/\./g, '').replace(/,/g, '.');
                         const nilaiKab = parseFloat(valStr || 0);
                         
-                        // Populate Klassen specific array (all years)
-                        if (type === 'klassen' && tahunList.includes(th)) {
+                        // Populate Klassen / SS specific array (all years)
+                        if ((type === 'klassen' || type === 'ss') && tahunList.includes(th)) {
                             klassenRows.push({
                                 'Provinsi': provMap[provId] || 'SUMATERA UTARA',
                                 'Kabupaten/Kota': kabMap[kid] || '-',
@@ -303,7 +303,7 @@
                         let valStr = String(d.nilai || '0').replace(/\./g, '').replace(/,/g, '.');
                         const nilaiProv = parseFloat(valStr || 0);
                         
-                        if (type === 'klassen' && tahunList.includes(th)) {
+                        if ((type === 'klassen' || type === 'ss') && tahunList.includes(th)) {
                             // Find matching klassenRow
                             klassenRows.forEach(row => {
                                 const provId = Object.keys(provMap).find(key => provMap[key] === row['Provinsi']) || pid;
@@ -332,7 +332,7 @@
                         });
                     });
                     
-                    jsonData = type === 'klassen' ? klassenRows : Object.values(combinedRows);
+                    jsonData = (type === 'klassen' || type === 'ss') ? klassenRows : Object.values(combinedRows);
                 } else {
                     const firstSheet = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheet];
