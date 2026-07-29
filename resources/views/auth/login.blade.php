@@ -227,6 +227,8 @@
                         id="remember"
                         type="checkbox"
                         name="remember"
+                        value="1"
+                        @checked(old('remember'))
                         class="
                             w-4
                             h-4

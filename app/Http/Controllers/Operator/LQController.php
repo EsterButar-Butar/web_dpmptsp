@@ -262,7 +262,13 @@ class LqController extends Controller
 
                 $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
 
-                $isLqSpecific = isset($item['tahun']) && isset($item['pdrbsektoranalisis']);
+                // `normalizeKeys()` keeps the generic names used by the LQ template:
+                // "PDRB Sektor Analisis" -> pdrbsektor and
+                // "Total PDRB Analisis" -> totalpdrb.
+                // Keep the more explicit aliases as well for previously exported files.
+                $pdrbSektorAnalisis = $item['pdrbsektor'] ?? $item['pdrbsektoranalisis'] ?? null;
+                $totalPdrbAnalisis = $item['totalpdrb'] ?? $item['totalpdrbanalisis'] ?? null;
+                $isLqSpecific = isset($item['tahun']) && $pdrbSektorAnalisis !== null && $totalPdrbAnalisis !== null;
                 $isMasterFormat = isset($item['tahunawal']) && isset($item['pdrbsektoranalisisawal']);
 
                 if (!$hasProvinsi || !isset($item['sektor']) || (!$isLqSpecific && !$isMasterFormat)) {
@@ -293,8 +299,8 @@ class LqController extends Controller
                         'kabupaten' => $kabupaten,
                         'sektor' => $sektorName,
                         'tahun' => $item['tahun'],
-                        'pdrb_sektor_analisis' => $item['pdrbsektoranalisis'] ?? 0,
-                        'total_pdrb_analisis' => $item['totalpdrbanalisis'] ?? 0,
+                        'pdrb_sektor_analisis' => $pdrbSektorAnalisis,
+                        'total_pdrb_analisis' => $totalPdrbAnalisis,
                         'pdrb_sektor_pembanding' => $item['pdrbsektorpembanding'] ?? 0,
                         'total_pdrb_pembanding' => $item['totalpdrbpembanding'] ?? 0,
                     ];

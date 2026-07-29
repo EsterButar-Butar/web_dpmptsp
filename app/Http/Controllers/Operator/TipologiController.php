@@ -300,7 +300,7 @@ class TipologiController extends Controller
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($payload, &$successCount, &$sektorsCache) {
             foreach ($payload as $rawItem) {
-                // Normalize keys (lowercase and remove spaces/underscores)
+                // Normalize keys (lowercase and remove spaces)
                 $item = [];
                 foreach ($rawItem as $key => $val) {
                     $normalizedKey = str_replace([' ', '_'], '', strtolower(trim($key)));
@@ -308,95 +308,21 @@ class TipologiController extends Controller
                 }
 
                 $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
-                if (!$hasProvinsi || !isset($item['sektor'])) {
+                $hasTahun = isset($item['tahun']) || (isset($item['tahunawal']) && isset($item['tahunakhir']));
+
+                // Also accept 'sektor' and 'tahun_awal', 'tahun_akhir', 'nilailq', 'nilaiss'
+                if (!$hasProvinsi || !isset($item['sektor']) || !$hasTahun || !isset($item['nilailq']) || !isset($item['nilaiss'])) {
                     continue;
                 }
 
-                $resolved = $this->resolveRegionNames($rawItem);
+                $resolved = $this->resolveRegionNames($rawItem); // Use rawItem for resolving because it expects the original keys
                 $provinsi = $resolved['provinsi'];
                 $kabupaten = $resolved['kabupaten'];
+
                 $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
 
                 $sektorName = $this->resolveSektorName($rawItem);
                 $sektorKey = strtolower(trim($sektorName));
-
-                // Determine Tahun Awal & Tahun Akhir
-                $tahunAwal = $item['tahunawal'] ?? null;
-                $tahunAkhir = $item['tahunakhir'] ?? null;
-
-                if (!$tahunAwal || !$tahunAkhir) {
-                    $tahunRaw = trim((string)($item['tahun'] ?? ''));
-                    if (!empty($tahunRaw)) {
-                        if (preg_match('/(\d{4})\s*[\-\/]\s*(\d{4})/', $tahunRaw, $matches)) {
-                            $tahunAwal = (int) $matches[1];
-                            $tahunAkhir = (int) $matches[2];
-                        } elseif (preg_match('/(\d{4})/', $tahunRaw, $matches)) {
-                            $tahunAwal = (int) $matches[1];
-                            $tahunAkhir = (int) $matches[1];
-                        }
-                    }
-                }
-
-                if (!$tahunAwal && !$tahunAkhir) {
-                    continue;
-                }
-                if (!$tahunAwal) $tahunAwal = $tahunAkhir;
-                if (!$tahunAkhir) $tahunAkhir = $tahunAwal;
-
-                // Check if Nilai LQ & SS are explicitly provided (Tipologi Template)
-                $nilaiLq = $item['nilailq'] ?? $item['lq'] ?? $item['nilailqsektor'] ?? null;
-                $nilaiSs = $item['nilaiss'] ?? $item['ss'] ?? $item['nilaisssektor'] ?? null;
-
-                // If LQ or SS not provided, calculate from Master Template PDRB values
-                if ($nilaiLq === null || $nilaiSs === null) {
-                    $pdrbSektorAnalisisAkhir = $item['pdrbsektoranalisisakhir'] ?? $item['pdrbsektoranalisis'] ?? $item['pdrbsektor'] ?? null;
-                    $totalPdrbAnalisisAkhir = $item['totalpdrbanalisisakhir'] ?? $item['totalpdrbanalisis'] ?? $item['totalpdrb'] ?? null;
-                    $pdrbSektorPembandingAkhir = $item['pdrbsektorpembandingakhir'] ?? $item['pdrbsektorpembanding'] ?? null;
-                    $totalPdrbPembandingAkhir = $item['totalpdrbpembandingakhir'] ?? $item['totalpdrbpembanding'] ?? null;
-
-                    $pdrbSektorAnalisisAwal = $item['pdrbsektoranalisisawal'] ?? $pdrbSektorAnalisisAkhir;
-                    $pdrbSektorPembandingAwal = $item['pdrbsektorpembandingawal'] ?? $pdrbSektorPembandingAkhir;
-                    $totalPdrbPembandingAwal = $item['totalpdrbpembandingawal'] ?? $totalPdrbPembandingAkhir;
-
-                    if (
-                        $pdrbSektorAnalisisAkhir !== null && $totalPdrbAnalisisAkhir !== null &&
-                        $pdrbSektorPembandingAkhir !== null && $totalPdrbPembandingAkhir !== null
-                    ) {
-                        // Calculate LQ
-                        $xij = $this->parseExcelNumber($pdrbSektorAnalisisAkhir);
-                        $rvj = $this->parseExcelNumber($totalPdrbAnalisisAkhir);
-                        $xi = $this->parseExcelNumber($pdrbSektorPembandingAkhir);
-                        $rvi = $this->parseExcelNumber($totalPdrbPembandingAkhir);
-
-                        if ($rvj > 0 && $rvi > 0) {
-                            $pembagi = $xi / $rvi;
-                            $nilaiLq = $pembagi > 0 ? round(($xij / $rvj) / $pembagi, 2) : ($xij > 0 ? 99.99 : 0);
-                        }
-
-                        // Calculate SS (Shift Share Net Shift)
-                        $xijAwal = $this->parseExcelNumber($pdrbSektorAnalisisAwal);
-                        $xijAkhir = $xij;
-                        $xiAwal = $this->parseExcelNumber($pdrbSektorPembandingAwal);
-                        $xiAkhir = $xi;
-                        $pdrbTotalPembandingAwal = $this->parseExcelNumber($totalPdrbPembandingAwal);
-                        $pdrbTotalPembandingAkhir = $rvi;
-
-                        $rn = $pdrbTotalPembandingAwal > 0 ? ($pdrbTotalPembandingAkhir - $pdrbTotalPembandingAwal) / $pdrbTotalPembandingAwal : 0;
-                        $nij = $xijAwal * $rn;
-
-                        $rin = $xiAwal > 0 ? ($xiAkhir - $xiAwal) / $xiAwal : ($xiAkhir > 0 ? 1 : 0);
-                        $mij = $xijAwal * ($rin - $rn);
-
-                        $ri = $xijAwal > 0 ? ($xijAkhir - $xijAwal) / $xijAwal : ($xijAkhir > 0 ? 1 : 0);
-                        $cij = $xijAwal * ($ri - $rin);
-
-                        $nilaiSs = round($nij + $mij + $cij, 2);
-                    }
-                }
-
-                if ($nilaiLq === null || $nilaiSs === null) {
-                    continue;
-                }
 
                 if (isset($sektorsCache[$sektorKey])) {
                     $sektorId = $sektorsCache[$sektorKey];
@@ -406,15 +332,28 @@ class TipologiController extends Controller
                     $sektorId = $sektorModel->sektor_id;
                 }
 
+                $tahunRaw = trim((string)($item['tahun'] ?? ''));
+                $tahunAwal = null;
+                $tahunAkhir = null;
+                if (!empty($tahunRaw)) {
+                    if (preg_match('/(\d{4})\s*[\-\/]\s*(\d{4})/', $tahunRaw, $matches)) {
+                        $tahunAwal = (int) $matches[1];
+                        $tahunAkhir = (int) $matches[2];
+                    } elseif (preg_match('/(\d{4})/', $tahunRaw, $matches)) {
+                        $tahunAwal = (int) $matches[1];
+                        $tahunAkhir = (int) $matches[1];
+                    }
+                }
+
                 $mappedItem = [
                     'tingkat_wilayah' => $tingkat,
                     'provinsi' => $provinsi,
                     'kabupaten' => $kabupaten,
                     'sektor' => $sektorName,
-                    'tahun_awal' => (int) $tahunAwal,
-                    'tahun_akhir' => (int) $tahunAkhir,
-                    'nilai_lq' => $nilaiLq,
-                    'nilai_ss' => $nilaiSs,
+                    'tahun_awal' => $item['tahunawal'] ?? $tahunAwal,
+                    'tahun_akhir' => $item['tahunakhir'] ?? $tahunAkhir,
+                    'nilai_lq' => $item['nilailq'],
+                    'nilai_ss' => $item['nilaiss'],
                 ];
 
                 $newData = $this->calculateTipologiData($mappedItem);
@@ -446,13 +385,13 @@ class TipologiController extends Controller
         });
 
         if ($successCount > 0) {
-            OperatorController::logActivity('Analisis Tipologi', 'diimpor', "Mengimpor {$successCount} data Analisis Tipologi Sektor secara massal.");
+            OperatorController::logActivity('Analisis Tipologi', 'diimpor', "Mengimpor {$successCount} data Analisis Tipologi Sektor secara massal dari Template Master.");
             session()->flash('success', "Berhasil mengimpor $successCount data baru!");
 
             return response()->json(['success' => true]);
         }
 
-        return response()->json(['success' => false, 'message' => 'Tidak ada data valid yang dapat diimpor. Pastikan format kolom sesuai dengan Template Master atau Template Tipologi.']);
+        return response()->json(['success' => false, 'message' => 'Tidak ada data valid yang dapat diimpor. Pastikan format kolom sesuai dengan Template Master.']);
     }
 
     public function syncFromDatabase(Request $request)
@@ -469,12 +408,15 @@ class TipologiController extends Controller
         $tahunAwal = $request->tahun_awal;
         $tahunAkhir = $request->tahun_akhir;
 
-        $ssData = \App\Models\ShiftShare::where('daerah_analisis', $daerah)
-            ->where('tahun_awal', $tahunAwal)
-            ->where('tahun_akhir', $tahunAkhir)
+        // Cari data SS YoY yang masuk dalam rentang tahun ini
+        $ssData = \App\Models\ShiftShare::with('sektor')
+            ->where('daerah_analisis', $daerah)
+            ->where('tahun_awal', '>=', $tahunAwal)
+            ->where('tahun_akhir', '<=', $tahunAkhir)
             ->get();
 
-        $lqData = \App\Models\Lq::where('daerah_analisis', $daerah)
+        // Cari data LQ untuk tahun akhir
+        $lqData = \App\Models\LQ::where('daerah_analisis', $daerah)
             ->where('tahun', $tahunAkhir)
             ->get();
 
@@ -483,23 +425,28 @@ class TipologiController extends Controller
         }
 
         $successCount = 0;
+        $groupedSs = $ssData->groupBy('sektor_id');
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($ssData, $lqData, &$successCount) {
-            foreach ($ssData as $ss) {
-                // Find matching LQ
-                $lq = $lqData->first(function ($item) use ($ss) {
-                    return $item->sektor_id == $ss->sektor_id && $item->tahun == $ss->tahun_akhir;
-                });
+        \Illuminate\Support\Facades\DB::transaction(function () use ($groupedSs, $lqData, $tahunAwal, $tahunAkhir, &$successCount) {
+            foreach ($groupedSs as $sektorId => $ssItems) {
+                // Find matching LQ for this sector at the end year
+                $lq = $lqData->firstWhere('sektor_id', $sektorId);
 
                 if ($lq) {
+                    // Sum up dij values from all years in the range
+                    $totalDij = $ssItems->sum('dij');
+                    
+                    // Take the first ss item to extract general metadata
+                    $firstSs = $ssItems->first();
+
                     $item = [
-                        'tingkat_wilayah' => $ss->tingkat_wilayah,
-                        'provinsi' => $ss->daerah_pembanding === 'Nasional' ? $ss->daerah_analisis : $ss->daerah_pembanding, // Aproksimasi
-                        'kabupaten' => $ss->tingkat_wilayah === 'Kabupaten/Kota' ? $ss->daerah_analisis : '-',
-                        'sektor' => $ss->sektor->nama_sektor,
-                        'tahun_awal' => $ss->tahun_awal,
-                        'tahun_akhir' => $ss->tahun_akhir,
-                        'nilai_ss' => $ss->dij,
+                        'tingkat_wilayah' => $firstSs->tingkat_wilayah,
+                        'provinsi' => $firstSs->daerah_pembanding === 'Nasional' ? $firstSs->daerah_analisis : $firstSs->daerah_pembanding,
+                        'kabupaten' => $firstSs->tingkat_wilayah === 'Kabupaten/Kota' ? $firstSs->daerah_analisis : '-',
+                        'sektor' => $firstSs->sektor->nama_sektor ?? '-',
+                        'tahun_awal' => $tahunAwal,
+                        'tahun_akhir' => $tahunAkhir,
+                        'nilai_ss' => $totalDij,
                         'nilai_lq' => $lq->nilai_lq
                     ];
 
@@ -507,14 +454,15 @@ class TipologiController extends Controller
                     if ($newData) {
                         // Cek apakah sudah ada untuk menghindari duplikat
                         $existing = Tipologi::where('daerah_analisis', $newData['daerah_analisis'])
-                            ->where('sektor_id', $ss->sektor_id)
-                            ->where('tahun_akhir', $newData['tahun_akhir'])
+                            ->where('sektor_id', $sektorId)
+                            ->where('tahun_awal', $tahunAwal)
+                            ->where('tahun_akhir', $tahunAkhir)
                             ->first();
 
                         if (!$existing) {
                             Tipologi::create([
                                 'user_id' => Auth::id() ?? 1,
-                                'sektor_id' => $ss->sektor_id,
+                                'sektor_id' => $sektorId,
                                 'tingkat_wilayah' => $newData['tingkat_wilayah'],
                                 'daerah_analisis' => $newData['daerah_analisis'],
                                 'daerah_pembanding' => $newData['daerah_pembanding'],

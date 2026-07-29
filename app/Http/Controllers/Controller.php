@@ -33,6 +33,15 @@ abstract class Controller
         $normalized = [];
         foreach ($item as $key => $value) {
             $cleanKey = strtolower(preg_replace('/[^a-z0-9]/i', '', $key));
+            
+            // Map aliases to standard keys for backward compatibility
+            if ($cleanKey === 'pdrbsektoranalisis') {
+                $cleanKey = 'pdrbsektor';
+            }
+            if ($cleanKey === 'totalpdrbanalisis') {
+                $cleanKey = 'totalpdrb';
+            }
+            
             $normalized[$cleanKey] = $value;
         }
         return $normalized;
