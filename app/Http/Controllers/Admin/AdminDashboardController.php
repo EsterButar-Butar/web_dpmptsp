@@ -4,600 +4,115 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class AdminDashboardController extends Controller
 {
+    /**
+     * Dashboard previously made dozens of schema-inspection and database calls.
+     * This is expensive with the remote PostgreSQL connection, so the complete
+     * snapshot is fetched in two queries and cached briefly.
+     */
     public function index()
     {
-        $wilayah = $this->countWilayah();
-        $kbli = $this->countTable('data_kbli');
-        $kbki = $this->countTable('data_kbki');
-        $hsCode = $this->countHsCode();
-        $pengguna = $this->countTable('users');
+        $dashboardData = Cache::remember(
+            'admin.dashboard.snapshot.v1',
+            now()->addMinutes(5),
+            fn (): array => $this->dashboardData(),
+        );
 
-        $stats = [
-            [
-                'key' => 'total',
-                'label' => 'Total Data',
-                'value' => $wilayah + $kbli + $kbki + $hsCode + $pengguna,
-                'icon' => 'fa-clipboard-list',
-                'color' => 'green',
-                'url' => null,
-            ],
-            [
-                'key' => 'wilayah',
-                'label' => 'Data Wilayah',
-                'value' => $wilayah,
-                'icon' => 'fa-location-dot',
-                'color' => 'purple',
-                'url' => $this->routeLink('admin.data-wilayah.index'),
-            ],
-            [
-                'key' => 'kbli',
-                'label' => 'Kode KBLI',
-                'value' => $kbli,
-                'icon' => 'fa-table-cells-large',
-                'color' => 'blue',
-                'url' => $this->routeLink('admin.data-kbli.index'),
-            ],
-            [
-                'key' => 'kbki',
-                'label' => 'Kode KBKI',
-                'value' => $kbki,
-                'icon' => 'fa-boxes-stacked',
-                'color' => 'purple',
-                'url' => $this->routeLink('admin.data-kbki.index'),
-            ],
-            [
-                'key' => 'hs',
-                'label' => 'Kode HS',
-                'value' => $hsCode,
-                'icon' => 'fa-link',
-                'color' => 'teal',
-                'url' => $this->routeLink('admin.hs-code.index'),
-            ],
-            [
-                'key' => 'pengguna',
-                'label' => 'Pengguna',
-                'value' => $pengguna,
-                'icon' => 'fa-users',
-                'color' => 'cyan',
-                'url' => $this->routeLink('admin.pengguna.index'),
-            ],
-        ];
+        // The view uses Collection helpers such as take(). This also keeps
+        // snapshots written by older requests compatible with the view.
+        $dashboardData['activities'] = collect($dashboardData['activities'] ?? []);
 
-        $activityData = $this->buildActivities();
-
-        $summaryRows = [
-            [
-                'label' => 'Data Wilayah',
-                'data_terakhir' => $activityData['latestByCategory']['wilayah']['title'] ?? '-',
-                'total' => $wilayah,
-                'url' => $this->routeLink('admin.data-wilayah.index'),
-            ],
-            [
-                'label' => 'Kode KBLI',
-                'data_terakhir' => $activityData['latestByCategory']['kbli']['title'] ?? '-',
-                'total' => $kbli,
-                'url' => $this->routeLink('admin.data-kbli.index'),
-            ],
-            [
-                'label' => 'Kode KBKI',
-                'data_terakhir' => $activityData['latestByCategory']['kbki']['title'] ?? '-',
-                'total' => $kbki,
-                'url' => $this->routeLink('admin.data-kbki.index'),
-            ],
-            [
-                'label' => 'Kode HS',
-                'data_terakhir' => $activityData['latestByCategory']['hs']['title'] ?? '-',
-                'total' => $hsCode,
-                'url' => $this->routeLink('admin.hs-code.index'),
-            ],
-            [
-                'label' => 'Pengguna',
-                'data_terakhir' => $activityData['latestByCategory']['pengguna']['title'] ?? '-',
-                'total' => $pengguna,
-                'url' => $this->routeLink('admin.pengguna.index'),
-            ],
-        ];
-
-        return view('admin.dashboard', [
-            'stats' => $stats,
-            'summaryRows' => $summaryRows,
-            'activities' => $activityData['recent'],
-        ]);
+        return view('admin.dashboard', $dashboardData);
     }
 
-    private function countTable(string $table): int
+    private function dashboardData(): array
     {
-        if (! Schema::hasTable($table)) {
-            return 0;
-        }
+        $counts = $this->counts();
+        $wilayah = $counts['provinsi'] + $counts['kabupaten'] + $counts['kecamatan'] + $counts['kelurahan_desa'];
+        $stats = [
+            $this->stat('total', 'Total Data', $wilayah + $counts['data_kbli'] + $counts['data_kbki'] + $counts['data_hs_code'] + $counts['users'], 'fa-clipboard-list', 'green'),
+            $this->stat('wilayah', 'Data Wilayah', $wilayah, 'fa-location-dot', 'purple', 'admin.data-wilayah.index'),
+            $this->stat('kbli', 'Kode KBLI', $counts['data_kbli'], 'fa-table-cells-large', 'blue', 'admin.data-kbli.index'),
+            $this->stat('kbki', 'Kode KBKI', $counts['data_kbki'], 'fa-boxes-stacked', 'purple', 'admin.data-kbki.index'),
+            $this->stat('hs', 'Kode HS', $counts['data_hs_code'], 'fa-link', 'teal', 'admin.hs-code.index'),
+            $this->stat('pengguna', 'Pengguna', $counts['users'], 'fa-users', 'cyan', 'admin.pengguna.index'),
+        ];
+
+        $activities = $this->activities();
+        $latest = collect($activities)->keyBy('category');
+        $summaryRows = [
+            $this->summary('Data Wilayah', $latest->get('wilayah')['title'] ?? '-', $wilayah, 'admin.data-wilayah.index'),
+            $this->summary('Kode KBLI', $latest->get('kbli')['title'] ?? '-', $counts['data_kbli'], 'admin.data-kbli.index'),
+            $this->summary('Kode KBKI', $latest->get('kbki')['title'] ?? '-', $counts['data_kbki'], 'admin.data-kbki.index'),
+            $this->summary('Kode HS', $latest->get('hs')['title'] ?? '-', $counts['data_hs_code'], 'admin.hs-code.index'),
+            $this->summary('Pengguna', $latest->get('pengguna')['title'] ?? '-', $counts['users'], 'admin.pengguna.index'),
+        ];
+
+        return compact('stats', 'summaryRows', 'activities');
+    }
+
+    private function counts(): array
+    {
+        $tables = ['provinsi', 'kabupaten', 'kecamatan', 'kelurahan_desa', 'data_kbli', 'data_kbki', 'data_hs_code', 'users'];
+        $selects = collect($tables)->map(fn (string $table) => sprintf('(SELECT COUNT(*) FROM "%s") AS "%s"', $table, $table))->implode(', ');
 
         try {
-            return DB::table($table)->count();
+            return (array) DB::selectOne("SELECT {$selects}");
         } catch (Throwable $exception) {
             report($exception);
 
-            return 0;
+            return array_fill_keys($tables, 0);
         }
     }
 
-    private function countWilayah(): int
+    private function activities(): array
     {
-        return collect([
-            'provinsi',
-            'kabupaten',
-            'kecamatan',
-            'kelurahan_desa',
-        ])->sum(function (string $table): int {
-            return $this->countTable($table);
-        });
-    }
-
-    private function countHsCode(): int
-    {
-        $table = $this->hsTable();
-
-        return $table ? $this->countTable($table) : 0;
-    }
-
-    private function hsTable(): ?string
-    {
-        foreach ([
-            'hs_codes',
-            'data_hs_code',
-            'hs_code',
-            'hscode',
-        ] as $table) {
-            if (Schema::hasTable($table)) {
-                return $table;
-            }
-        }
-
-        return null;
-    }
-
-    private function routeLink(string $routeName): ?string
-    {
-        return Route::has($routeName)
-            ? route($routeName)
-            : null;
-    }
-
-    private function buildActivities(): array
-    {
-        $activities = collect();
-
-        $this->appendUserActivities($activities);
-        $this->appendWilayahActivities($activities);
-        $this->appendKbliActivities($activities);
-        $this->appendKbkiActivities($activities);
-        $this->appendHsActivities($activities);
-
-        $activities = $activities
-            ->filter(fn (array $activity) => $activity['time'] !== null)
-            ->sortByDesc('time')
-            ->values();
-
-        $latestByCategory = [];
-
-        foreach ([
-            'wilayah',
-            'kbli',
-            'kbki',
-            'hs',
-            'pengguna',
-        ] as $category) {
-            $latestByCategory[$category] = $activities
-                ->firstWhere('category', $category);
-        }
-
-        return [
-            'recent' => $activities->take(5)->values(),
-            'latestByCategory' => $latestByCategory,
-        ];
-    }
-
-    private function appendUserActivities(Collection $activities): void
-    {
-        if (! Schema::hasTable('users')) {
-            return;
-        }
-
-        $nameColumn = $this->firstExistingColumn('users', [
-            'name',
-            'nama',
-        ]);
-
-        $emailColumn = $this->firstExistingColumn('users', [
-            'email',
-        ]);
-
-        $roleColumn = $this->firstExistingColumn('users', [
-            'role',
-        ]);
-
-        $timeColumn = $this->timeColumn('users');
-
-        if (! $timeColumn) {
-            return;
-        }
-
-        $rows = DB::table('users')
-            ->select([
-                $this->selectAlias($nameColumn, 'name'),
-                $this->selectAlias($emailColumn, 'email'),
-                $this->selectAlias($roleColumn, 'role'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
-            ->limit(3)
-            ->get();
-
-        foreach ($rows as $row) {
-            $name = $row->name ?: ($row->email ?: 'Pengguna');
-            $role = ucfirst(strtolower((string) ($row->role ?: 'user')));
-            $time = $this->parseDate($row->activity_time ?? null);
-
-            $activities->push([
-                'category' => 'pengguna',
-                'category_label' => 'Pengguna',
-                'title' => $name,
-                'aktivitas' => $name . ' terdaftar sebagai ' . $role . '.',
-                'icon' => 'fa-user',
-                'color' => 'orange',
-                'time' => $time,
-                'waktu' => $this->formatDate($time),
-            ]);
-        }
-    }
-
-    private function appendWilayahActivities(Collection $activities): void
-    {
-        $tableConfigs = [
-            'provinsi' => [
-                'name_columns' => [
-                    'nama_provinsi',
-                    'name',
-                ],
-                'label' => 'Provinsi',
-            ],
-
-            'kabupaten' => [
-                'name_columns' => [
-                    'nama_kabupaten',
-                    'nama_kabupaten_kota',
-                    'name',
-                ],
-                'label' => 'Kabupaten/Kota',
-            ],
-
-            'kecamatan' => [
-                'name_columns' => [
-                    'nama_kecamatan',
-                    'name',
-                ],
-                'label' => 'Kecamatan',
-            ],
-
-            'kelurahan_desa' => [
-                'name_columns' => [
-                    'nama_kelurahan_desa',
-                    'nama_desa',
-                    'nama_kelurahan',
-                    'name',
-                ],
-                'label' => 'Kelurahan/Desa',
-            ],
+        $sources = [
+            ['pengguna', 'Pengguna', 'users', 'id', "COALESCE(NULLIF(name, ''), email, 'Pengguna')", "COALESCE(NULLIF(name, ''), email, 'Pengguna') || ' terdaftar sebagai ' || INITCAP(COALESCE(role, 'user')) || '.'", 'fa-user', 'orange'],
+            ['wilayah', 'Wilayah', 'provinsi', 'provinsi_id', 'nama_provinsi', "'Provinsi ' || nama_provinsi || ' ditambahkan.'", 'fa-location-dot', 'green'],
+            ['wilayah', 'Wilayah', 'kabupaten', 'kab_id', 'nama_kabupaten', "'Kabupaten/Kota ' || nama_kabupaten || ' ditambahkan.'", 'fa-location-dot', 'green'],
+            ['wilayah', 'Wilayah', 'kecamatan', 'kec_id', 'nama_kecamatan', "'Kecamatan ' || nama_kecamatan || ' ditambahkan.'", 'fa-location-dot', 'green'],
+            ['wilayah', 'Wilayah', 'kelurahan_desa', 'desa_id', 'nama_kelurahan_desa', "'Kelurahan/Desa ' || nama_kelurahan_desa || ' ditambahkan.'", 'fa-location-dot', 'green'],
+            ['kbli', 'KBLI', 'data_kbli', 'id', "TRIM(kode || ' - ' || COALESCE(judul, 'Data KBLI'))", "'Kode KBLI ' || TRIM(kode || ' - ' || COALESCE(judul, 'Data KBLI')) || ' ditambahkan.'", 'fa-table-cells-large', 'blue'],
+            ['kbki', 'KBKI', 'data_kbki', 'id', "TRIM(kode || ' - ' || COALESCE(judul, 'Data KBKI'))", "'Kode KBKI ' || TRIM(kode || ' - ' || COALESCE(judul, 'Data KBKI')) || ' ditambahkan.'", 'fa-boxes-stacked', 'purple'],
+            ['hs', 'HS Code', 'data_hs_code', 'id', "TRIM(hs_code || ' - ' || COALESCE(uraian_barang, 'Data HS Code'))", "'Kode HS ' || TRIM(hs_code || ' - ' || COALESCE(uraian_barang, 'Data HS Code')) || ' ditambahkan.'", 'fa-link', 'purple'],
         ];
 
-        foreach ($tableConfigs as $table => $config) {
-            if (! Schema::hasTable($table)) {
-                continue;
-            }
-
-            $nameColumn = $this->firstExistingColumn(
-                $table,
-                $config['name_columns']
-            );
-
-            $timeColumn = $this->timeColumn($table);
-
-            if (! $nameColumn || ! $timeColumn) {
-                continue;
-            }
-
-            try {
-                $rows = DB::table($table)
-                    ->select([
-                        $this->selectAlias($nameColumn, 'nama'),
-                        $this->selectAlias(
-                            $timeColumn,
-                            'activity_time'
-                        ),
-                    ])
-                    ->orderByDesc($timeColumn)
-                    ->limit(3)
-                    ->get();
-
-                foreach ($rows as $row) {
-                    $title = $row->nama ?: $config['label'];
-                    $time = $this->parseDate(
-                        $row->activity_time ?? null
-                    );
-
-                    $activities->push([
-                        'category' => 'wilayah',
-                        'category_label' => 'Wilayah',
-                        'title' => $title,
-                        'aktivitas' =>
-                            $config['label'] .
-                            ' ' .
-                            $title .
-                            ' ditambahkan.',
-                        'icon' => 'fa-location-dot',
-                        'color' => 'green',
-                        'time' => $time,
-                        'waktu' => $this->formatDate($time),
-                    ]);
-                }
-            } catch (Throwable $exception) {
-                report($exception);
-            }
-        }
-    }
-
-    private function appendKbliActivities(Collection $activities): void
-    {
-        $table = 'data_kbli';
-
-        if (! Schema::hasTable($table)) {
-            return;
-        }
-
-        $kodeColumn = $this->firstExistingColumn($table, [
-            'kode',
-            'kode_kbli',
-            'Kode',
-        ]);
-
-        $judulColumn = $this->firstExistingColumn($table, [
-            'judul',
-            'judul_kbli',
-            'nama_kbli',
-            'Judul',
-        ]);
-
-        $timeColumn = $this->timeColumn($table);
-
-        if ((! $kodeColumn && ! $judulColumn) || ! $timeColumn) {
-            return;
-        }
-
-        $rows = DB::table($table)
-            ->select([
-                $this->selectAlias($kodeColumn, 'kode'),
-                $this->selectAlias($judulColumn, 'judul'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
-            ->limit(3)
-            ->get();
-
-        foreach ($rows as $row) {
-            $title = trim(
-                ($row->kode ? $row->kode . ' - ' : '') .
-                ($row->judul ?: 'Data KBLI')
-            );
-
-            $time = $this->parseDate($row->activity_time ?? null);
-
-            $activities->push([
-                'category' => 'kbli',
-                'category_label' => 'KBLI',
-                'title' => $title,
-                'aktivitas' => 'Kode KBLI ' . $title . ' ditambahkan.',
-                'icon' => 'fa-table-cells-large',
-                'color' => 'blue',
-                'time' => $time,
-                'waktu' => $this->formatDate($time),
-            ]);
-        }
-    }
-
-    private function appendKbkiActivities(Collection $activities): void
-    {
-        $table = 'data_kbki';
-
-        if (! Schema::hasTable($table)) {
-            return;
-        }
-
-        $kodeColumn = $this->firstExistingColumn($table, [
-            'kode',
-            'kode_kbki',
-            'Kode',
-        ]);
-
-        $judulColumn = $this->firstExistingColumn($table, [
-            'judul',
-            'judul_kbki',
-            'nama_kbki',
-            'Judul',
-        ]);
-
-        $timeColumn = $this->timeColumn($table);
-
-        if ((! $kodeColumn && ! $judulColumn) || ! $timeColumn) {
-            return;
-        }
-
-        $rows = DB::table($table)
-            ->select([
-                $this->selectAlias($kodeColumn, 'kode'),
-                $this->selectAlias($judulColumn, 'judul'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
-            ->limit(3)
-            ->get();
-
-        foreach ($rows as $row) {
-            $title = trim(
-                ($row->kode ? $row->kode . ' - ' : '') .
-                ($row->judul ?: 'Data KBKI')
-            );
-
-            $time = $this->parseDate($row->activity_time ?? null);
-
-            $activities->push([
-                'category' => 'kbki',
-                'category_label' => 'KBKI',
-                'title' => $title,
-                'aktivitas' => 'Kode KBKI ' . $title . ' ditambahkan.',
-                'icon' => 'fa-boxes-stacked',
-                'color' => 'purple',
-                'time' => $time,
-                'waktu' => $this->formatDate($time),
-            ]);
-        }
-    }
-
-    private function appendHsActivities(Collection $activities): void
-    {
-        $table = $this->hsTable();
-
-        if (! $table) {
-            return;
-        }
-
-        $kodeColumn = $this->firstExistingColumn($table, [
-            'hs_code',
-            'kode_hs',
-            'HS Code',
-            'kode',
-        ]);
-
-        $uraianColumn = $this->firstExistingColumn($table, [
-            'uraian_barang',
-            'Uraian Barang',
-            'uraian',
-            'deskripsi',
-        ]);
-
-        $timeColumn = $this->timeColumn($table);
-
-        if ((! $kodeColumn && ! $uraianColumn) || ! $timeColumn) {
-            return;
-        }
-
-        $rows = DB::table($table)
-            ->select([
-                $this->selectAlias($kodeColumn, 'kode'),
-                $this->selectAlias($uraianColumn, 'uraian'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
-            ->limit(3)
-            ->get();
-
-        foreach ($rows as $row) {
-            $title = trim(
-                ($row->kode ? $row->kode . ' - ' : '') .
-                ($row->uraian ?: 'Data HS Code')
-            );
-
-            $time = $this->parseDate($row->activity_time ?? null);
-
-            $activities->push([
-                'category' => 'hs',
-                'category_label' => 'HS Code',
-                'title' => $title,
-                'aktivitas' => 'Kode HS ' . $title . ' ditambahkan.',
-                'icon' => 'fa-link',
-                'color' => 'purple',
-                'time' => $time,
-                'waktu' => $this->formatDate($time),
-            ]);
-        }
-    }
-
-    private function firstExistingColumn(
-        string $table,
-        array $columns
-    ): ?string {
-        if (! Schema::hasTable($table)) {
-            return null;
-        }
-
-        $existingColumns = Schema::getColumnListing($table);
-
-        foreach ($columns as $candidate) {
-            foreach ($existingColumns as $existingColumn) {
-                if (
-                    strtolower($candidate) ===
-                    strtolower($existingColumn)
-                ) {
-                    return $existingColumn;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private function timeColumn(string $table): ?string
-    {
-        return $this->firstExistingColumn($table, [
-            'updated_at',
-            'created_at',
-        ]);
-    }
-
-    private function selectAlias(
-        ?string $column,
-        string $alias
-    ) {
-        if (! $column) {
-            return DB::raw('NULL AS "' . $alias . '"');
-        }
-
-        return DB::raw(
-            $this->quotedColumn($column) .
-            ' AS "' .
-            $alias .
-            '"'
-        );
-    }
-
-    private function quotedColumn(string $column): string
-    {
-        return '"' . str_replace('"', '""', $column) . '"';
-    }
-
-    private function parseDate($value): ?Carbon
-    {
-        if (! $value) {
-            return null;
-        }
+        $queries = collect($sources)->map(function (array $source): string {
+            [$category, $label, $table, $id, $title, $activity, $icon, $color] = $source;
+            return sprintf("(SELECT '%s' category, '%s' category_label, %s title, %s aktivitas, '%s' icon, '%s' color, created_at activity_time FROM \"%s\" ORDER BY \"%s\" DESC LIMIT 3)", $category, $label, $title, $activity, $icon, $color, $table, $id);
+        })->implode(' UNION ALL ');
 
         try {
-            return Carbon::parse($value);
+            return collect(DB::select("SELECT * FROM ({$queries}) AS dashboard_activities ORDER BY activity_time DESC NULLS LAST LIMIT 5"))
+                ->map(function (object $row): array {
+                    $time = $row->activity_time ? Carbon::parse($row->activity_time) : null;
+                    return ['category' => $row->category, 'category_label' => $row->category_label, 'title' => $row->title, 'aktivitas' => $row->aktivitas, 'icon' => $row->icon, 'color' => $row->color, 'time' => $time, 'waktu' => $time?->translatedFormat('d F Y, H:i') ?? '-'];
+                })->all();
         } catch (Throwable $exception) {
-            return null;
+            report($exception);
+            return [];
         }
     }
 
-    private function formatDate(?Carbon $date): string
+    private function stat(string $key, string $label, int $value, string $icon, string $color, ?string $route = null): array
     {
-        return $date
-            ? $date->translatedFormat('d F Y, H:i')
-            : '-';
+        return compact('key', 'label', 'value', 'icon', 'color') + ['url' => $route ? $this->routeLink($route) : null];
+    }
+
+    private function summary(string $label, string $last, int $total, string $route): array
+    {
+        return ['label' => $label, 'data_terakhir' => $last, 'total' => $total, 'url' => $this->routeLink($route)];
+    }
+
+    private function routeLink(string $route): ?string
+    {
+        return Route::has($route) ? route($route) : null;
     }
 }

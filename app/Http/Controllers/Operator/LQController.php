@@ -1,9 +1,10 @@
 <?php
 
+// Controller untuk mengelola analisis Location Quotient (LQ) bagi Operator
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lq;
+use App\Models\LQ;
 use App\Models\Sektor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -20,8 +21,8 @@ class LqController extends Controller
                 'tingkat_wilayah' => $item->tingkat_wilayah,
                 'daerah_analisis' => $item->daerah_analisis,
                 'daerah_pembanding' => $item->daerah_pembanding,
-                'provinsi' => $item->daerah_pembanding,
-                'kabupaten' => $item->daerah_analisis,
+                'provinsi' => $item->tingkat_wilayah === 'Provinsi' ? $item->daerah_analisis : $item->daerah_pembanding,
+                'kabupaten' => $item->tingkat_wilayah === 'Provinsi' ? '' : $item->daerah_analisis,
                 'sektor' => $item->sektor->nama_sektor ?? '-',
                 'tahun' => $item->tahun,
                 'pdrb_sektor_analisis' => $item->pdrb_sektor_analisis,
@@ -31,23 +32,25 @@ class LqController extends Controller
                 'nilai_lq' => $item->nilai_lq,
                 'keterangan' => $item->keterangan,
                 'kategori' => $item->kategori,
-                'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+                'riwayat' => $item->created_at->timestamp === $item->updated_at->timestamp
+                    ? 'Ditambah ' . $item->created_at->format('d-m-Y')
+                    : 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
             ];
         })->toArray();
     }
 
     public function index(Request $request)
     {
-        $query = Lq::with('sektor');
+        $query = LQ::with('sektor');
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('daerah_analisis', 'like', "%{$search}%")
-                  ->orWhere('daerah_pembanding', 'like', "%{$search}%")
-                  ->orWhereHas('sektor', function ($qSektor) use ($search) {
-                      $qSektor->where('nama_sektor', 'like', "%{$search}%");
-                  });
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -104,12 +107,12 @@ class LqController extends Controller
         }
 
         $pembagi = $xi / $rvi;
-        
+
         if ($pembagi > 0) {
             $lq = round(($xij / $rvj) / $pembagi, 2);
         } else {
             // Jika sektor di tingkat pembanding nilainya 0, tapi di daerah ada nilainya, LQ sangat tinggi secara teoritis
-            $lq = $xij > 0 ? 99.99 : 0; 
+            $lq = $xij > 0 ? 99.99 : 0;
         }
 
         if ($lq > 1) {
@@ -145,13 +148,13 @@ class LqController extends Controller
     {
         $newData = $this->calculateLQData($request);
 
-        if (! $newData) {
+        if (!$newData) {
             return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
         }
 
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
 
-        Lq::create([
+        LQ::create([
             'user_id' => Auth::id() ?? 1,
             'sektor_id' => $sektorModel->sektor_id,
             'tingkat_wilayah' => $newData['tingkat_wilayah'],
@@ -174,14 +177,14 @@ class LqController extends Controller
 
     public function update(Request $request, $id)
     {
-        $lq = Lq::find($id);
+        $lq = LQ::find($id);
         if (!$lq) {
             return redirect()->route('operator.lq.index')->with('error', 'Data tidak ditemukan!');
         }
 
         $updatedData = $this->calculateLQData($request);
 
-        if (! $updatedData) {
+        if (!$updatedData) {
             return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
         }
 
@@ -209,8 +212,8 @@ class LqController extends Controller
 
     public function destroy($id)
     {
-        $lq = Lq::find($id);
-        
+        $lq = LQ::find($id);
+
         if ($lq) {
             $daerah = $lq->daerah_analisis;
             $lq->delete();
@@ -222,7 +225,7 @@ class LqController extends Controller
 
     public function empty()
     {
-        Lq::truncate();
+        LQ::truncate();
         OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus semua data perhitungan LQ");
         return back()->with('success', 'Semua data perhitungan LQ berhasil dihapus secara permanen!');
     }
@@ -232,7 +235,7 @@ class LqController extends Controller
         $ids = $request->input('ids');
         if (!empty($ids)) {
             $count = count($ids);
-            Lq::whereIn('id', $ids)->delete();
+            LQ::whereIn('id', $ids)->delete();
             OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus {$count} data perhitungan LQ secara massal");
             return back()->with('success', "{$count} data perhitungan LQ berhasil dihapus secara massal!");
         }
@@ -244,7 +247,7 @@ class LqController extends Controller
     {
         set_time_limit(300);
         $payload = $request->json()->all();
-        if (! $payload || ! is_array($payload)) {
+        if (!$payload || !is_array($payload)) {
             return response()->json(['success' => false, 'message' => 'Data format tidak valid.']);
         }
 
@@ -256,9 +259,9 @@ class LqController extends Controller
         \Illuminate\Support\Facades\DB::transaction(function () use ($payload, &$successCount, &$sektorsCache) {
             foreach ($payload as $rawItem) {
                 $item = $this->normalizeKeys($rawItem);
-                
+
                 $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
-                
+
                 $isLqSpecific = isset($item['tahun']) && isset($item['pdrbsektoranalisis']);
                 $isMasterFormat = isset($item['tahunawal']) && isset($item['pdrbsektoranalisisawal']);
 
@@ -271,10 +274,10 @@ class LqController extends Controller
                 $kabupaten = $resolved['kabupaten'];
 
                 $tingkat = ($kabupaten != '-' && $kabupaten != '') ? 'Kabupaten/Kota' : 'Provinsi';
-                
+
                 $sektorName = $this->resolveSektorName($rawItem);
                 $sektorKey = strtolower(trim($sektorName));
-                
+
                 if (isset($sektorsCache[$sektorKey])) {
                     $sektorId = $sektorsCache[$sektorKey];
                 } else {
@@ -297,9 +300,9 @@ class LqController extends Controller
                     ];
                     $requestObj = new Request($mappedItem);
                     $newData = $this->calculateLQData($requestObj);
-                    
+
                     if ($newData) {
-                        Lq::create([
+                        LQ::create([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
                             'tingkat_wilayah' => $newData['tingkat_wilayah'],
@@ -331,9 +334,9 @@ class LqController extends Controller
                     ];
                     $requestObjAwal = new Request($mappedItemAwal);
                     $newDataAwal = $this->calculateLQData($requestObjAwal);
-                    
+
                     if ($newDataAwal) {
-                        Lq::create([
+                        LQ::create([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
                             'tingkat_wilayah' => $newDataAwal['tingkat_wilayah'],
@@ -365,9 +368,9 @@ class LqController extends Controller
                     ];
                     $requestObjAkhir = new Request($mappedItemAkhir);
                     $newDataAkhir = $this->calculateLQData($requestObjAkhir);
-                    
+
                     if ($newDataAkhir) {
-                        Lq::create([
+                        LQ::create([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
                             'tingkat_wilayah' => $newDataAkhir['tingkat_wilayah'],
@@ -396,5 +399,59 @@ class LqController extends Controller
 
         return response()->json(['success' => false, 'message' => 'Tidak ada data valid yang dapat diimpor. Pastikan format kolom sesuai dengan Template Master.']);
     }
-}
 
+    public function downloadPdf(Request $request)
+    {
+        $query = LQ::with('sektor');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('daerah_analisis', 'like', "%{$search}%")
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+        $lqData = $this->mapDbToView($rawDbData);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('operator.lq.pdf', [
+            'lqData' => $lqData,
+            'search' => $request->search ?? null,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-analisis-lq-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function downloadExcel(Request $request)
+    {
+        $query = LQ::with('sektor');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('daerah_analisis', 'like', "%{$search}%")
+                    ->orWhere('daerah_pembanding', 'like', "%{$search}%")
+                    ->orWhereHas('sektor', function ($qSektor) use ($search) {
+                        $qSektor->where('nama_sektor', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $rawDbData = $query->orderBy('created_at', 'desc')->orderBy('id', 'asc')->get();
+        $lqData = $this->mapDbToView($rawDbData);
+
+        $html = view('operator.lq.excel', [
+            'lqData' => $lqData,
+            'search' => $request->search ?? null,
+        ])->render();
+
+        return response($html)
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', 'attachment; filename="laporan-analisis-lq-' . now()->format('Y-m-d') . '.xls"')
+            ->header('Cache-Control', 'max-age=0');
+    }
+}

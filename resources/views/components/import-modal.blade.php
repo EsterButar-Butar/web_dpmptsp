@@ -1,6 +1,6 @@
 @props(['action', 'type' => 'master'])
 
-<div id="importModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" style="display: none;">
+<div id="importModal" data-action="{{ $action }}" data-type="{{ $type }}" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" style="display: none;">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden relative">
         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
             <h3 class="text-lg font-bold text-slate-800">Unggah Data Analisis</h3>
@@ -16,8 +16,8 @@
             </button>
             
             <div class="border-t border-slate-200 pt-4 mt-2">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih File Excel (.xlsx)</label>
-                <input type="file" id="excelFileInput" multiple accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih File Excel / CSV (.xlsx, .xls, .csv)</label>
+                <input type="file" id="excelFileInput" multiple accept=".xlsx, .xls, .csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
             </div>
             <div id="importStatus" class="text-sm font-medium mt-2 hidden"></div>
         </div>
@@ -128,7 +128,9 @@
     }
 
     async function processImport() {
-        const type = '{{ $type }}';
+        const modalEl = document.getElementById('importModal');
+        const type = modalEl ? (modalEl.dataset.type || '{{ $type }}') : '{{ $type }}';
+        const action = modalEl ? (modalEl.dataset.action || '{{ $action }}') : '{{ $action }}';
         const fileInput = document.getElementById('excelFileInput');
         const statusEl = document.getElementById('importStatus');
         const processBtn = document.getElementById('processBtn');
@@ -697,7 +699,7 @@
                     statusEl.textContent = `Menyimpan ${jsonData.length} baris data (file ${fIdx + 1}) ke sistem...`;
                 }
 
-                const response = await fetch("{{ $action }}", {
+                const response = await fetch(action, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -707,11 +709,20 @@
                     body: JSON.stringify(jsonData)
                 });
 
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(`Gagal menyimpan data file ${file.name}: ${result.message}`);
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error(text);
+                    throw new Error(
+                        "HTTP " + response.status + "\n\n" + text
+                    );
                 }
+
+                const result = await response.json();
+
+                if (!result.success){
+                    throw new Error(result.message || 'Gagal memproses data.');
+                }
+                            
             } // End of file loop
             
             statusEl.textContent = 'Berhasil! Memuat ulang halaman...';
