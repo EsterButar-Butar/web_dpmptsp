@@ -187,5 +187,13 @@
         </tbody>
     </table>
 
+    <div style="margin-top: 10px; font-size: 8.5px; color: #555; line-height: 1.4;">
+        <strong>Keterangan Simbol:</strong><br>
+        • <strong>ri</strong> : Rata-Rata Laju Pertumbuhan Sektor Analisis (%)<br>
+        • <strong>r</strong> &nbsp;: Rata-Rata Laju Pertumbuhan Sektor Pembanding (%)<br>
+        • <strong>yi</strong> : Rata-Rata Kontribusi Sektor Analisis (%)<br>
+        • <strong>y</strong> &nbsp;: Rata-Rata Kontribusi Sektor Pembanding (%)
+    </div>
+
 </body>
 </html>

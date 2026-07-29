@@ -38,10 +38,10 @@
                 <th>Kab/Kota</th>
                 <th>Provinsi</th>
                 <th>Tahun</th>
-                <th>Laju Pertumbuhan Sektor Analisis (%)</th>
-                <th>Laju Pertumbuhan Sektor Pembanding (%)</th>
-                <th>Kontribusi Sektor Analisis (%)</th>
-                <th>Kontribusi Sektor Pembanding (%)</th>
+                <th>Rata-Rata Laju Pertumbuhan Sektor Analisis (%)</th>
+                <th>Rata-Rata Laju Pertumbuhan Sektor Pembanding (%)</th>
+                <th>Rata-Rata Kontribusi Sektor Analisis (%)</th>
+                <th>Rata-Rata Kontribusi Sektor Pembanding (%)</th>
                 <th>Kuadran</th>
                 <th>Klasifikasi</th>
             </tr>

@@ -291,10 +291,10 @@
                             <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kab/Kota</th>
                             <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Provinsi</th>
                             <th class="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Tahun</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Laju Pertumbuhan Sektor Analisis (%)</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Laju Pertumbuhan Sektor Pembanding (%)</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kontribusi Sektor Analisis (%)</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kontribusi Sektor Pembanding (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Rata-Rata Laju Pertumbuhan Sektor Analisis (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Rata-Rata Laju Pertumbuhan Sektor Pembanding (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Rata-Rata Kontribusi Sektor Analisis (%)</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Rata-Rata Kontribusi Sektor Pembanding (%)</th>
                             <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Kuadran</th>
                             <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Klasifikasi</th>
                             <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Riwayat</th>

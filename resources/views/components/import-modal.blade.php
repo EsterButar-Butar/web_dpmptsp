@@ -416,10 +416,10 @@
                         // Explicit search for Nilai Provinsi and Nilai Kabupaten
                         headers.forEach((h, idx) => {
                             const cleanHeader = h.replace(/[^a-z0-9]/g, '');
-                            if (nilaiProvIdx === -1 && (cleanHeader.includes('nilaiprov') || cleanHeader.includes('nilaiprdbprov') || cleanHeader.includes('nilaipdrbprov') || cleanHeader.includes('pdrbprov') || cleanHeader === 'nilaiprovinsi')) {
+                            if (nilaiProvIdx === -1 && (cleanHeader.includes('nilaiprov') || cleanHeader.includes('nilaiprdbprov') || cleanHeader.includes('nilaipdrbprov') || cleanHeader.includes('pdrbprov') || cleanHeader === 'nilaiprovinsi' || cleanHeader.includes('pdrbsektorpembanding'))) {
                                 nilaiProvIdx = idx;
                             }
-                            if (nilaiKabIdx === -1 && (cleanHeader.includes('nilaikab') || cleanHeader.includes('nilaipdrbkab') || cleanHeader.includes('pdrbkab') || cleanHeader === 'nilaikabupaten')) {
+                            if (nilaiKabIdx === -1 && (cleanHeader.includes('nilaikab') || cleanHeader.includes('nilaipdrbkab') || cleanHeader.includes('pdrbkab') || cleanHeader === 'nilaikabupaten' || (cleanHeader.includes('pdrbsektor') && !cleanHeader.includes('pembanding')))) {
                                 nilaiKabIdx = idx;
                             }
                         });
@@ -429,6 +429,27 @@
                         headers.forEach((h, idx) => {
                             if (h.includes('nilai') || h.includes('pdrb')) {
                                 nilaiIndices.push(idx);
+                            }
+                        });
+
+                        // Search for Total columns
+                        let totalKabIdx = -1;
+                        let totalProvIdx = -1;
+                        headers.forEach((h, idx) => {
+                            const cleanHeader = h.replace(/[^a-z0-9]/g, '');
+                            const isTotalKab = cleanHeader.includes('totalpdrb') && 
+                                               !cleanHeader.includes('pembanding') && 
+                                               !cleanHeader.includes('prov') && 
+                                               !cleanHeader.includes('nasional');
+                            const isTotalProv = cleanHeader.includes('totalpdrbpembanding') || 
+                                                cleanHeader.includes('totalpdrbprov') || 
+                                                cleanHeader.includes('totalpdrbnasional');
+                            
+                            if (totalKabIdx === -1 && isTotalKab) {
+                                totalKabIdx = idx;
+                            }
+                            if (totalProvIdx === -1 && isTotalProv) {
+                                totalProvIdx = idx;
                             }
                         });
                         
@@ -555,13 +576,15 @@
                                 const nilaiProv = provPdrbMap[`${sektorName}_${tahun}`] || 0;
                                 const nilaiKab = parseNumberVal(row[nilaiKabIdx]);
                                 
-                                dataRows.push({
+                                 dataRows.push({
                                     provinsi: 'SUMATERA UTARA',
                                     kabupaten: kabName,
                                     sektor: sektorName,
                                     tahun: tahun,
                                     nilaiProv: nilaiProv,
-                                    nilaiKab: nilaiKab
+                                    nilaiKab: nilaiKab,
+                                    totalKab: 0,
+                                    totalProv: 0
                                 });
                             }
                         } else {
@@ -576,6 +599,8 @@
                                 const tahunVal = tahunIdx !== -1 ? parseInt(row[tahunIdx]) : NaN;
                                 const nilaiProvVal = nilaiProvIdx !== -1 ? parseNumberVal(row[nilaiProvIdx]) : 0;
                                 const nilaiKabVal = nilaiKabIdx !== -1 ? parseNumberVal(row[nilaiKabIdx]) : 0;
+                                const totalKabVal = totalKabIdx !== -1 ? parseNumberVal(row[totalKabIdx]) : 0;
+                                const totalProvVal = totalProvIdx !== -1 ? parseNumberVal(row[totalProvIdx]) : 0;
                                 
                                 if (isNaN(tahunVal)) continue;
                                 
@@ -585,7 +610,9 @@
                                     sektor: sektorVal,
                                     tahun: tahunVal,
                                     nilaiProv: nilaiProvVal,
-                                    nilaiKab: nilaiKabVal
+                                    nilaiKab: nilaiKabVal,
+                                    totalKab: totalKabVal,
+                                    totalProv: totalProvVal
                                 });
                             }
                         }
@@ -622,9 +649,9 @@
                                     'Sektor': r.sektor,
                                     'Tahun': r.tahun,
                                     'PDRB Sektor': r.nilaiKab,
-                                    'Total PDRB': totalKab[`${r.kabupaten}_${r.tahun}`] || 0,
+                                    'Total PDRB': r.totalKab || totalKab[`${r.kabupaten}_${r.tahun}`] || 0,
                                     'PDRB Sektor Pembanding': r.nilaiProv,
-                                    'Total PDRB Pembanding': totalProv[`${r.provinsi}_${r.tahun}`] || 0
+                                    'Total PDRB Pembanding': r.totalProv || totalProv[`${r.provinsi}_${r.tahun}`] || 0
                                 });
                             });
                             
