@@ -55,7 +55,7 @@
             wsData = [
                 [
                     "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun", 
-                    "PDRB Sektor", "PDRB Sektor Pembanding", "Total PDRB Pembanding"
+                    "PDRB Sektor Analisis", "PDRB Sektor Pembanding", "Total PDRB Pembanding"
                 ],
                 [
                     "Sumatera Utara", "Medan", "PERTANIAN, KEHUTANAN, DAN PERIKANAN", "2021", 
@@ -85,7 +85,7 @@
             wsData = [
                 [
                     "Provinsi", "Kabupaten/Kota", "Sektor", "Tahun", 
-                    "PDRB Sektor", "Total PDRB", 
+                    "PDRB Sektor Analisis", "Total PDRB Analisis", 
                     "PDRB Sektor Pembanding", "Total PDRB Pembanding"
                 ],
                 [
