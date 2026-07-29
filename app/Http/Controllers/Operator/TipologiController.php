@@ -408,11 +408,14 @@ class TipologiController extends Controller
         $tahunAwal = $request->tahun_awal;
         $tahunAkhir = $request->tahun_akhir;
 
-        $ssData = \App\Models\ShiftShare::where('daerah_analisis', $daerah)
-            ->where('tahun_awal', $tahunAwal)
-            ->where('tahun_akhir', $tahunAkhir)
+        // Cari data SS YoY yang masuk dalam rentang tahun ini
+        $ssData = \App\Models\ShiftShare::with('sektor')
+            ->where('daerah_analisis', $daerah)
+            ->where('tahun_awal', '>=', $tahunAwal)
+            ->where('tahun_akhir', '<=', $tahunAkhir)
             ->get();
 
+        // Cari data LQ untuk tahun akhir
         $lqData = \App\Models\LQ::where('daerah_analisis', $daerah)
             ->where('tahun', $tahunAkhir)
             ->get();
@@ -422,23 +425,28 @@ class TipologiController extends Controller
         }
 
         $successCount = 0;
+        $groupedSs = $ssData->groupBy('sektor_id');
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($ssData, $lqData, &$successCount) {
-            foreach ($ssData as $ss) {
-                // Find matching LQ
-                $lq = $lqData->first(function ($item) use ($ss) {
-                    return $item->sektor_id == $ss->sektor_id && $item->tahun == $ss->tahun_akhir;
-                });
+        \Illuminate\Support\Facades\DB::transaction(function () use ($groupedSs, $lqData, $tahunAwal, $tahunAkhir, &$successCount) {
+            foreach ($groupedSs as $sektorId => $ssItems) {
+                // Find matching LQ for this sector at the end year
+                $lq = $lqData->firstWhere('sektor_id', $sektorId);
 
                 if ($lq) {
+                    // Sum up dij values from all years in the range
+                    $totalDij = $ssItems->sum('dij');
+                    
+                    // Take the first ss item to extract general metadata
+                    $firstSs = $ssItems->first();
+
                     $item = [
-                        'tingkat_wilayah' => $ss->tingkat_wilayah,
-                        'provinsi' => $ss->daerah_pembanding === 'Nasional' ? $ss->daerah_analisis : $ss->daerah_pembanding, // Aproksimasi
-                        'kabupaten' => $ss->tingkat_wilayah === 'Kabupaten/Kota' ? $ss->daerah_analisis : '-',
-                        'sektor' => $ss->sektor->nama_sektor,
-                        'tahun_awal' => $ss->tahun_awal,
-                        'tahun_akhir' => $ss->tahun_akhir,
-                        'nilai_ss' => $ss->dij,
+                        'tingkat_wilayah' => $firstSs->tingkat_wilayah,
+                        'provinsi' => $firstSs->daerah_pembanding === 'Nasional' ? $firstSs->daerah_analisis : $firstSs->daerah_pembanding,
+                        'kabupaten' => $firstSs->tingkat_wilayah === 'Kabupaten/Kota' ? $firstSs->daerah_analisis : '-',
+                        'sektor' => $firstSs->sektor->nama_sektor ?? '-',
+                        'tahun_awal' => $tahunAwal,
+                        'tahun_akhir' => $tahunAkhir,
+                        'nilai_ss' => $totalDij,
                         'nilai_lq' => $lq->nilai_lq
                     ];
 
@@ -446,14 +454,15 @@ class TipologiController extends Controller
                     if ($newData) {
                         // Cek apakah sudah ada untuk menghindari duplikat
                         $existing = Tipologi::where('daerah_analisis', $newData['daerah_analisis'])
-                            ->where('sektor_id', $ss->sektor_id)
-                            ->where('tahun_akhir', $newData['tahun_akhir'])
+                            ->where('sektor_id', $sektorId)
+                            ->where('tahun_awal', $tahunAwal)
+                            ->where('tahun_akhir', $tahunAkhir)
                             ->first();
 
                         if (!$existing) {
                             Tipologi::create([
                                 'user_id' => Auth::id() ?? 1,
-                                'sektor_id' => $ss->sektor_id,
+                                'sektor_id' => $sektorId,
                                 'tingkat_wilayah' => $newData['tingkat_wilayah'],
                                 'daerah_analisis' => $newData['daerah_analisis'],
                                 'daerah_pembanding' => $newData['daerah_pembanding'],
