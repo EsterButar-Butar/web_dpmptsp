@@ -246,14 +246,15 @@ class KlassenController extends Controller
 
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        Klassen::create([
+        Klassen::updateOrCreate([
             'user_id' => Auth::id() ?? 1,
             'sektor_id' => $sektorModel->sektor_id,
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+        ], [
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
-            'tahun_awal' => $data['tahun_awal'],
-            'tahun_akhir' => $data['tahun_akhir'],
             'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
             'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
             'total_pdrb_analisis_awal' => $data['total_pdrb_analisis_awal'],
@@ -439,14 +440,15 @@ class KlassenController extends Controller
                         $sektorId = $sektorModel->sektor_id;
                     }
 
-                    Klassen::create([
+                    Klassen::updateOrCreate([
                         'user_id' => Auth::id() ?? 1,
                         'sektor_id' => $sektorId,
+                        'tahun_awal' => $newData['tahun_awal'],
+                        'tahun_akhir' => $newData['tahun_akhir'],
+                    ], [
                         'tingkat_wilayah' => $newData['tingkat_wilayah'],
                         'daerah_analisis' => $newData['daerah_analisis'],
                         'daerah_pembanding' => $newData['daerah_pembanding'],
-                        'tahun_awal' => $newData['tahun_awal'],
-                        'tahun_akhir' => $newData['tahun_akhir'],
                         'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
                         'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
                         'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],
@@ -586,14 +588,15 @@ class KlassenController extends Controller
                 $newData = $this->calculateKlassenData($yearsData, $request->tingkat_wilayah, $request->provinsi, $request->kabupaten, $sektorName);
 
                 if ($newData) {
-                    Klassen::create([
+                    Klassen::updateOrCreate([
                         'user_id' => Auth::id() ?? 1,
                         'sektor_id' => $sektorId,
+                        'tahun_awal' => $newData['tahun_awal'],
+                        'tahun_akhir' => $newData['tahun_akhir'],
+                    ], [
                         'tingkat_wilayah' => $newData['tingkat_wilayah'],
                         'daerah_analisis' => $newData['daerah_analisis'],
                         'daerah_pembanding' => $newData['daerah_pembanding'],
-                        'tahun_awal' => $newData['tahun_awal'],
-                        'tahun_akhir' => $newData['tahun_akhir'],
                         'pdrb_sektor_analisis_awal' => $newData['pdrb_sektor_analisis_awal'],
                         'pdrb_sektor_analisis_akhir' => $newData['pdrb_sektor_analisis_akhir'],
                         'total_pdrb_analisis_awal' => $newData['total_pdrb_analisis_awal'],

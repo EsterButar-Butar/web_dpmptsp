@@ -178,14 +178,15 @@ class TipologiController extends Controller
 
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $data['sektor']]);
 
-        Tipologi::create([
+        Tipologi::updateOrCreate([
             'user_id' => Auth::id() ?? 1,
             'sektor_id' => $sektorModel->sektor_id,
+            'tahun_awal' => $data['tahun_awal'],
+            'tahun_akhir' => $data['tahun_akhir'],
+        ], [
             'tingkat_wilayah' => $data['tingkat_wilayah'],
             'daerah_analisis' => $data['daerah_analisis'],
             'daerah_pembanding' => $data['daerah_pembanding'],
-            'tahun_awal' => $data['tahun_awal'],
-            'tahun_akhir' => $data['tahun_akhir'],
             'pdrb_sektor_analisis_awal' => $data['pdrb_sektor_analisis_awal'],
             'pdrb_sektor_analisis_akhir' => $data['pdrb_sektor_analisis_akhir'],
             'total_pdrb_analisis_awal' => $data['total_pdrb_analisis_awal'],
@@ -359,14 +360,15 @@ class TipologiController extends Controller
                 $newData = $this->calculateTipologiData($mappedItem);
 
                 if ($newData) {
-                    Tipologi::create([
+                    Tipologi::updateOrCreate([
                         'user_id' => Auth::id() ?? 1,
                         'sektor_id' => $sektorId,
+                        'tahun_awal' => $newData['tahun_awal'],
+                        'tahun_akhir' => $newData['tahun_akhir'],
+                    ], [
                         'tingkat_wilayah' => $newData['tingkat_wilayah'],
                         'daerah_analisis' => $newData['daerah_analisis'],
                         'daerah_pembanding' => $newData['daerah_pembanding'],
-                        'tahun_awal' => $newData['tahun_awal'],
-                        'tahun_akhir' => $newData['tahun_akhir'],
                         'pdrb_sektor_analisis_awal' => 0,
                         'pdrb_sektor_analisis_akhir' => 0,
                         'total_pdrb_analisis_awal' => 0,
@@ -416,7 +418,7 @@ class TipologiController extends Controller
             ->get();
 
         // Cari data LQ untuk tahun akhir
-        $lqData = \App\Models\LQ::where('daerah_analisis', $daerah)
+        $lqData = \App\Models\Lq::where('daerah_analisis', $daerah)
             ->where('tahun', $tahunAkhir)
             ->get();
 
@@ -452,36 +454,28 @@ class TipologiController extends Controller
 
                     $newData = $this->calculateTipologiData($item);
                     if ($newData) {
-                        // Cek apakah sudah ada untuk menghindari duplikat
-                        $existing = Tipologi::where('daerah_analisis', $newData['daerah_analisis'])
-                            ->where('sektor_id', $sektorId)
-                            ->where('tahun_awal', $tahunAwal)
-                            ->where('tahun_akhir', $tahunAkhir)
-                            ->first();
-
-                        if (!$existing) {
-                            Tipologi::create([
-                                'user_id' => Auth::id() ?? 1,
-                                'sektor_id' => $sektorId,
-                                'tingkat_wilayah' => $newData['tingkat_wilayah'],
-                                'daerah_analisis' => $newData['daerah_analisis'],
-                                'daerah_pembanding' => $newData['daerah_pembanding'],
-                                'tahun_awal' => $newData['tahun_awal'],
-                                'tahun_akhir' => $newData['tahun_akhir'],
-                                'pdrb_sektor_analisis_awal' => 0,
-                                'pdrb_sektor_analisis_akhir' => 0,
-                                'total_pdrb_analisis_awal' => 0,
-                                'total_pdrb_analisis_akhir' => 0,
-                                'pdrb_sektor_pembanding_awal' => 0,
-                                'pdrb_sektor_pembanding_akhir' => 0,
-                                'total_pdrb_pembanding_awal' => 0,
-                                'total_pdrb_pembanding_akhir' => 0,
-                                'nilai_ss' => $newData['nilai_ss'],
-                                'nilai_lq' => $newData['nilai_lq'],
-                                'tipologi' => $newData['tipologi']
-                            ]);
-                            $successCount++;
-                        }
+                        Tipologi::updateOrCreate([
+                            'user_id' => Auth::id() ?? 1,
+                            'sektor_id' => $sektorId,
+                            'tahun_awal' => $newData['tahun_awal'],
+                            'tahun_akhir' => $newData['tahun_akhir'],
+                        ], [
+                            'tingkat_wilayah' => $newData['tingkat_wilayah'],
+                            'daerah_analisis' => $newData['daerah_analisis'],
+                            'daerah_pembanding' => $newData['daerah_pembanding'],
+                            'pdrb_sektor_analisis_awal' => 0,
+                            'pdrb_sektor_analisis_akhir' => 0,
+                            'total_pdrb_analisis_awal' => 0,
+                            'total_pdrb_analisis_akhir' => 0,
+                            'pdrb_sektor_pembanding_awal' => 0,
+                            'pdrb_sektor_pembanding_akhir' => 0,
+                            'total_pdrb_pembanding_awal' => 0,
+                            'total_pdrb_pembanding_akhir' => 0,
+                            'nilai_ss' => $newData['nilai_ss'],
+                            'nilai_lq' => $newData['nilai_lq'],
+                            'tipologi' => $newData['tipologi']
+                        ]);
+                        $successCount++;
                     }
                 }
             }

@@ -139,6 +139,16 @@
             return;
         }
 
+        // Batasi ukuran file maksimal 10MB per file
+        const maxSizeBytes = 10 * 1024 * 1024; // 10 Megabytes
+        for (let i = 0; i < fileInput.files.length; i++) {
+            if (fileInput.files[i].size > maxSizeBytes) {
+                statusEl.textContent = `Gagal: File "${fileInput.files[i].name}" terlalu besar (Maksimal 10 MB).`;
+                statusEl.className = 'text-sm font-medium mt-2 text-red-600 block';
+                return;
+            }
+        }
+
         processBtn.disabled = true;
         processBtn.textContent = 'Memproses...';
         statusEl.textContent = 'Membaca file Excel...';

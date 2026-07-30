@@ -4,7 +4,7 @@
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
-use App\Models\LQ;
+use App\Models\Lq;
 use App\Models\Sektor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -41,7 +41,7 @@ class LqController extends Controller
 
     public function index(Request $request)
     {
-        $query = LQ::with('sektor');
+        $query = Lq::with('sektor');
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
@@ -154,13 +154,14 @@ class LqController extends Controller
 
         $sektorModel = Sektor::firstOrCreate(['nama_sektor' => $newData['sektor']]);
 
-        LQ::create([
+        Lq::updateOrCreate([
             'user_id' => Auth::id() ?? 1,
             'sektor_id' => $sektorModel->sektor_id,
+            'tahun' => $newData['tahun'],
+        ], [
             'tingkat_wilayah' => $newData['tingkat_wilayah'],
             'daerah_analisis' => $newData['daerah_analisis'],
             'daerah_pembanding' => $newData['daerah_pembanding'],
-            'tahun' => $newData['tahun'],
             'pdrb_sektor_analisis' => $newData['pdrb_sektor_analisis'],
             'total_pdrb_analisis' => $newData['total_pdrb_analisis'],
             'pdrb_sektor_pembanding' => $newData['pdrb_sektor_pembanding'],
@@ -177,7 +178,7 @@ class LqController extends Controller
 
     public function update(Request $request, $id)
     {
-        $lq = LQ::find($id);
+        $lq = Lq::find($id);
         if (!$lq) {
             return redirect()->route('operator.lq.index')->with('error', 'Data tidak ditemukan!');
         }
@@ -212,7 +213,7 @@ class LqController extends Controller
 
     public function destroy($id)
     {
-        $lq = LQ::find($id);
+        $lq = Lq::find($id);
 
         if ($lq) {
             $daerah = $lq->daerah_analisis;
@@ -225,7 +226,7 @@ class LqController extends Controller
 
     public function empty()
     {
-        LQ::truncate();
+        Lq::truncate();
         OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus semua data perhitungan LQ");
         return back()->with('success', 'Semua data perhitungan LQ berhasil dihapus secara permanen!');
     }
@@ -235,7 +236,7 @@ class LqController extends Controller
         $ids = $request->input('ids');
         if (!empty($ids)) {
             $count = count($ids);
-            LQ::whereIn('id', $ids)->delete();
+            Lq::whereIn('id', $ids)->delete();
             OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus {$count} data perhitungan LQ secara massal");
             return back()->with('success', "{$count} data perhitungan LQ berhasil dihapus secara massal!");
         }
@@ -262,7 +263,7 @@ class LqController extends Controller
 
                 $hasProvinsi = isset($item['provinsi']) || isset($item['kodeprovinsi']) || isset($item['kodewilayah']);
 
-                $isLqSpecific = isset($item['tahun']) && isset($item['pdrbsektoranalisis']);
+                $isLqSpecific = isset($item['tahun']) && (isset($item['pdrbsektor']) || isset($item['pdrbsektoranalisis']));
                 $isMasterFormat = isset($item['tahunawal']) && isset($item['pdrbsektoranalisisawal']);
 
                 if (!$hasProvinsi || !isset($item['sektor']) || (!$isLqSpecific && !$isMasterFormat)) {
@@ -293,8 +294,8 @@ class LqController extends Controller
                         'kabupaten' => $kabupaten,
                         'sektor' => $sektorName,
                         'tahun' => $item['tahun'],
-                        'pdrb_sektor_analisis' => $item['pdrbsektoranalisis'] ?? 0,
-                        'total_pdrb_analisis' => $item['totalpdrbanalisis'] ?? 0,
+                        'pdrb_sektor_analisis' => $item['pdrbsektor'] ?? $item['pdrbsektoranalisis'] ?? 0,
+                        'total_pdrb_analisis' => $item['totalpdrb'] ?? $item['totalpdrbanalisis'] ?? 0,
                         'pdrb_sektor_pembanding' => $item['pdrbsektorpembanding'] ?? 0,
                         'total_pdrb_pembanding' => $item['totalpdrbpembanding'] ?? 0,
                     ];
@@ -302,13 +303,14 @@ class LqController extends Controller
                     $newData = $this->calculateLQData($requestObj);
 
                     if ($newData) {
-                        LQ::create([
+                        Lq::updateOrCreate([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
+                            'tahun' => $newData['tahun'],
+                        ], [
                             'tingkat_wilayah' => $newData['tingkat_wilayah'],
                             'daerah_analisis' => $newData['daerah_analisis'],
                             'daerah_pembanding' => $newData['daerah_pembanding'],
-                            'tahun' => $newData['tahun'],
                             'pdrb_sektor_analisis' => $newData['pdrb_sektor_analisis'],
                             'total_pdrb_analisis' => $newData['total_pdrb_analisis'],
                             'pdrb_sektor_pembanding' => $newData['pdrb_sektor_pembanding'],
@@ -336,13 +338,14 @@ class LqController extends Controller
                     $newDataAwal = $this->calculateLQData($requestObjAwal);
 
                     if ($newDataAwal) {
-                        LQ::create([
+                        Lq::updateOrCreate([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
+                            'tahun' => $newDataAwal['tahun'],
+                        ], [
                             'tingkat_wilayah' => $newDataAwal['tingkat_wilayah'],
                             'daerah_analisis' => $newDataAwal['daerah_analisis'],
                             'daerah_pembanding' => $newDataAwal['daerah_pembanding'],
-                            'tahun' => $newDataAwal['tahun'],
                             'pdrb_sektor_analisis' => $newDataAwal['pdrb_sektor_analisis'],
                             'total_pdrb_analisis' => $newDataAwal['total_pdrb_analisis'],
                             'pdrb_sektor_pembanding' => $newDataAwal['pdrb_sektor_pembanding'],
@@ -370,13 +373,14 @@ class LqController extends Controller
                     $newDataAkhir = $this->calculateLQData($requestObjAkhir);
 
                     if ($newDataAkhir) {
-                        LQ::create([
+                        Lq::updateOrCreate([
                             'user_id' => Auth::id() ?? 1,
                             'sektor_id' => $sektorId,
+                            'tahun' => $newDataAkhir['tahun'],
+                        ], [
                             'tingkat_wilayah' => $newDataAkhir['tingkat_wilayah'],
                             'daerah_analisis' => $newDataAkhir['daerah_analisis'],
                             'daerah_pembanding' => $newDataAkhir['daerah_pembanding'],
-                            'tahun' => $newDataAkhir['tahun'],
                             'pdrb_sektor_analisis' => $newDataAkhir['pdrb_sektor_analisis'],
                             'total_pdrb_analisis' => $newDataAkhir['total_pdrb_analisis'],
                             'pdrb_sektor_pembanding' => $newDataAkhir['pdrb_sektor_pembanding'],
@@ -402,7 +406,7 @@ class LqController extends Controller
 
     public function downloadPdf(Request $request)
     {
-        $query = LQ::with('sektor');
+        $query = Lq::with('sektor');
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
@@ -428,7 +432,7 @@ class LqController extends Controller
 
     public function downloadExcel(Request $request)
     {
-        $query = LQ::with('sektor');
+        $query = Lq::with('sektor');
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
