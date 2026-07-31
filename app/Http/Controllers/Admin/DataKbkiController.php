@@ -29,7 +29,7 @@ class DataKbkiController extends Controller
         $columnsReady = $this->tableReady();
         $mode = $request->query('mode');
         $editData = null;
-        $perPageOptions = [5, 10, 25, 50];
+        $perPageOptions = [5, 10];
         $perPage = (int) $request->query('per_page', 10);
 
         if (! in_array($perPage, $perPageOptions, true)) {
@@ -37,16 +37,10 @@ class DataKbkiController extends Controller
         }
 
         if (! $columnsReady) {
-            $paginator = new LengthAwarePaginator(
-                [],
-                0,
-                $perPage,
-                1,
-                [
-                    'path' => $request->url(),
-                    'query' => $request->query(),
-                ]
-            );
+            $paginator = new LengthAwarePaginator([], 0, $perPage, 1, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
 
             return view('admin.data-kbki', [
                 'tableExists' => $tableExists,
@@ -73,51 +67,30 @@ class DataKbkiController extends Controller
             ->orderBy('kode')
             ->get(['kode', 'judul']);
 
-        $isFormOpen = in_array($mode, ['create', 'edit'], true)
-            || $request->filled('edit');
-
         $parentOptions = collect();
-
         $totalData = DB::table($this->table)->count();
+
         $hierarchyMode = ! $request->filled('search')
             && ! $request->filled('struktur')
             && ! $request->filled('status');
 
         if ($hierarchyMode) {
-            $sectionQuery = DB::table($this->table)
-                ->where('struktur', 'Seksi');
+            $query = $this->hierarchyRowsQuery()
+                ->where('k.level', 1);
 
             if ($request->filled('seksi')) {
-                $sectionQuery->where(
-                    'kode',
+                $query->where(
+                    'k.kode',
                     trim((string) $request->query('seksi'))
                 );
             }
 
-            $paginator = $sectionQuery
-                ->orderBy('kode')
+            $paginator = $query
+                ->orderBy('k.kode')
                 ->paginate($perPage)
                 ->withQueryString();
 
-            $sectionCodes = collect($paginator->items())
-                ->pluck('kode')
-                ->filter()
-                ->values();
-
-            if ($sectionCodes->isEmpty()) {
-                $dataKbki = collect();
-            } elseif ($isFormOpen) {
-                $dataKbki = $this->hierarchyRowsQuery()
-                    ->where('k.struktur', 'Seksi')
-                    ->whereIn('k.kode', $sectionCodes)
-                    ->orderBy('k.kode')
-                    ->get();
-            } else {
-                $dataKbki = $this->hierarchyRowsQuery()
-                    ->whereIn('k.seksi_kode', $sectionCodes)
-                    ->orderBy('k.kode')
-                    ->get();
-            }
+            $dataKbki = collect($paginator->items());
         } else {
             $paginator = $this->filteredQuery($request)
                 ->select($this->selectColumns())
@@ -155,6 +128,48 @@ class DataKbkiController extends Controller
             'hierarchyMode',
             'totalData'
         ));
+    }
+
+    public function children(Request $request)
+    {
+        abort_unless($request->expectsJson(), 404);
+
+        if (! $this->tableReady()) {
+            return response()->json([
+                'message' => 'Struktur tabel data_kbki belum sesuai.',
+                'html' => '',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'parent' => ['required', 'string', 'max:10'],
+        ]);
+
+        $parentCode = trim($validated['parent']);
+
+        if (! DB::table($this->table)->where('kode', $parentCode)->exists()) {
+            return response()->json([
+                'message' => 'Data induk tidak ditemukan.',
+                'html' => '',
+            ], 404);
+        }
+
+        $children = $this->hierarchyRowsQuery()
+            ->where('k.kode_induk', $parentCode)
+            ->orderBy('k.kode')
+            ->get();
+
+        $html = $children
+            ->map(fn ($item) => view('admin.partials.data-kbki-row', [
+                'item' => $item,
+                'hierarchyMode' => true,
+            ])->render())
+            ->implode('');
+
+        return response()->json([
+            'html' => $html,
+            'count' => $children->count(),
+        ]);
     }
 
     public function parentOptions(Request $request)

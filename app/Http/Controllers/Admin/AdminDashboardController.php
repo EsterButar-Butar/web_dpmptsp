@@ -130,17 +130,14 @@ class AdminDashboardController extends Controller
 
     private function countWilayah(): int
     {
-        foreach ([
-            'data_wilayah',
+        return collect([
+            'provinsi',
+            'kabupaten',
+            'kecamatan',
             'kelurahan_desa',
-            'desa_kelurahan',
-        ] as $table) {
-            if (Schema::hasTable($table)) {
-                return $this->countTable($table);
-            }
-        }
-
-        return 0;
+        ])->sum(function (string $table): int {
+            return $this->countTable($table);
+        });
     }
 
     private function countHsCode(): int
@@ -263,62 +260,96 @@ class AdminDashboardController extends Controller
 
     private function appendWilayahActivities(Collection $activities): void
     {
-        $table = null;
+        $tableConfigs = [
+            'provinsi' => [
+                'name_columns' => [
+                    'nama_provinsi',
+                    'name',
+                ],
+                'label' => 'Provinsi',
+            ],
 
-        foreach ([
-            'data_wilayah',
-            'kelurahan_desa',
-            'desa_kelurahan',
-        ] as $candidate) {
-            if (Schema::hasTable($candidate)) {
-                $table = $candidate;
-                break;
+            'kabupaten' => [
+                'name_columns' => [
+                    'nama_kabupaten',
+                    'nama_kabupaten_kota',
+                    'name',
+                ],
+                'label' => 'Kabupaten/Kota',
+            ],
+
+            'kecamatan' => [
+                'name_columns' => [
+                    'nama_kecamatan',
+                    'name',
+                ],
+                'label' => 'Kecamatan',
+            ],
+
+            'kelurahan_desa' => [
+                'name_columns' => [
+                    'nama_kelurahan_desa',
+                    'nama_desa',
+                    'nama_kelurahan',
+                    'name',
+                ],
+                'label' => 'Kelurahan/Desa',
+            ],
+        ];
+
+        foreach ($tableConfigs as $table => $config) {
+            if (! Schema::hasTable($table)) {
+                continue;
             }
-        }
 
-        if (! $table) {
-            return;
-        }
+            $nameColumn = $this->firstExistingColumn(
+                $table,
+                $config['name_columns']
+            );
 
-        $nameColumn = $this->firstExistingColumn($table, [
-            'nama_desa',
-            'nama_kelurahan',
-            'nama_kelurahan_desa',
-            'village_name',
-            'nama_kecamatan',
-            'nama_kabupaten',
-            'name',
-        ]);
+            $timeColumn = $this->timeColumn($table);
 
-        $timeColumn = $this->timeColumn($table);
+            if (! $nameColumn || ! $timeColumn) {
+                continue;
+            }
 
-        if (! $nameColumn || ! $timeColumn) {
-            return;
-        }
+            try {
+                $rows = DB::table($table)
+                    ->select([
+                        $this->selectAlias($nameColumn, 'nama'),
+                        $this->selectAlias(
+                            $timeColumn,
+                            'activity_time'
+                        ),
+                    ])
+                    ->orderByDesc($timeColumn)
+                    ->limit(3)
+                    ->get();
 
-        $rows = DB::table($table)
-            ->select([
-                $this->selectAlias($nameColumn, 'nama'),
-                $this->selectAlias($timeColumn, 'activity_time'),
-            ])
-            ->orderByDesc($timeColumn)
-            ->limit(3)
-            ->get();
+                foreach ($rows as $row) {
+                    $title = $row->nama ?: $config['label'];
+                    $time = $this->parseDate(
+                        $row->activity_time ?? null
+                    );
 
-        foreach ($rows as $row) {
-            $title = $row->nama ?: 'Data Wilayah';
-            $time = $this->parseDate($row->activity_time ?? null);
-
-            $activities->push([
-                'category' => 'wilayah',
-                'category_label' => 'Wilayah',
-                'title' => $title,
-                'aktivitas' => 'Data wilayah ' . $title . ' ditambahkan.',
-                'icon' => 'fa-location-dot',
-                'color' => 'green',
-                'time' => $time,
-                'waktu' => $this->formatDate($time),
-            ]);
+                    $activities->push([
+                        'category' => 'wilayah',
+                        'category_label' => 'Wilayah',
+                        'title' => $title,
+                        'aktivitas' =>
+                            $config['label'] .
+                            ' ' .
+                            $title .
+                            ' ditambahkan.',
+                        'icon' => 'fa-location-dot',
+                        'color' => 'green',
+                        'time' => $time,
+                        'waktu' => $this->formatDate($time),
+                    ]);
+                }
+            } catch (Throwable $exception) {
+                report($exception);
+            }
         }
     }
 

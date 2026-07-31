@@ -1,19 +1,27 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\PenggunaController;
-use App\Http\Controllers\Admin\DataWilayahController;
-use App\Http\Controllers\Admin\DataKbliController;
-use App\Http\Controllers\Admin\DataHsCodeController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSettingsController;
-use App\Http\Controllers\Admin\MoneyCurrencyController;
+use App\Http\Controllers\Admin\DataHsCodeController;
 use App\Http\Controllers\Admin\DataKbkiController;
+use App\Http\Controllers\Admin\DataKbliController;
+use App\Http\Controllers\Admin\DataWilayahController;
+use App\Http\Controllers\Admin\MoneyCurrencyController;
+use App\Http\Controllers\Admin\PenggunaController;
 
-Route::prefix('admin')
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard
+        |--------------------------------------------------------------------------
+        */
 
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
@@ -66,12 +74,14 @@ Route::prefix('admin')
         Route::delete('/data-wilayah/{dataWilayah}', [DataWilayahController::class, 'destroy'])
             ->name('data-wilayah.destroy');
 
-
         /*
         |--------------------------------------------------------------------------
         | Data KBLI
         |--------------------------------------------------------------------------
         */
+
+        Route::get('/data-kbli/children', [DataKbliController::class, 'children'])
+            ->name('data-kbli.children');
 
         Route::get('/data-kbli', [DataKbliController::class, 'index'])
             ->name('data-kbli.index');
@@ -80,9 +90,11 @@ Route::prefix('admin')
             ->name('data-kbli.store');
 
         Route::put('/data-kbli/{id}', [DataKbliController::class, 'update'])
+            ->whereNumber('id')
             ->name('data-kbli.update');
 
         Route::delete('/data-kbli/{id}', [DataKbliController::class, 'destroy'])
+            ->whereNumber('id')
             ->name('data-kbli.destroy');
 
         /*
@@ -91,6 +103,13 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
 
+        Route::get('/data-kbki/children', [DataKbkiController::class, 'children'])
+            ->name('data-kbki.children');
+
+
+        Route::get('/data-kbki/parent-options', [DataKbkiController::class, 'parentOptions'])
+            ->name('data-kbki.parent-options');
+
         Route::get('/data-kbki', [DataKbkiController::class, 'index'])
             ->name('data-kbki.index');
 
@@ -98,13 +117,12 @@ Route::prefix('admin')
             ->name('data-kbki.store');
 
         Route::put('/data-kbki/{id}', [DataKbkiController::class, 'update'])
+            ->whereNumber('id')
             ->name('data-kbki.update');
 
         Route::delete('/data-kbki/{id}', [DataKbkiController::class, 'destroy'])
+            ->whereNumber('id')
             ->name('data-kbki.destroy');
-
-        Route::get('/data-kbki/parent-options',[DataKbkiController::class, 'parentOptions'])
-            ->name('data-kbki.parent-options');
 
         /*
         |--------------------------------------------------------------------------
@@ -119,14 +137,16 @@ Route::prefix('admin')
             ->name('hs-code.store');
 
         Route::put('/hs-code/{id}', [DataHsCodeController::class, 'update'])
+            ->whereNumber('id')
             ->name('hs-code.update');
 
         Route::delete('/hs-code/{id}', [DataHsCodeController::class, 'destroy'])
+            ->whereNumber('id')
             ->name('hs-code.destroy');
 
         /*
         |--------------------------------------------------------------------------
-        | Profil Admin
+        | Profile
         |--------------------------------------------------------------------------
         */
 
@@ -138,30 +158,29 @@ Route::prefix('admin')
 
         /*
         |--------------------------------------------------------------------------
-        | Pengaturan Admin
+        | Settings
         |--------------------------------------------------------------------------
         */
 
         Route::get('/settings', [AdminSettingsController::class, 'index'])
             ->name('settings.index');
 
-        Route::put(
-            '/settings/password',
-            [AdminSettingsController::class, 'updatePassword']
-        )->name('settings.password');
+        Route::put('/settings/password', [AdminSettingsController::class, 'updatePassword'])
+            ->name('settings.password');
 
-        Route::put(
-            '/settings/two-factor',
-            [AdminSettingsController::class, 'toggleTwoFactor']
-        )->name('settings.2fa');
+        Route::put('/settings/two-factor', [AdminSettingsController::class, 'toggleTwoFactor'])
+            ->name('settings.2fa');
 
-        Route::get(
-            '/money-currency',
-            [MoneyCurrencyController::class, 'index']
-        )->name('money-currency.index');
+        /*
+        |--------------------------------------------------------------------------
+        | Money Currency
+        |--------------------------------------------------------------------------
+        */
 
-        Route::post(
-            '/money-currency/convert',
-            [MoneyCurrencyController::class, 'convert']
-        )->name('money-currency.convert');
-                    });
+        Route::get('/money-currency', [MoneyCurrencyController::class, 'index'])
+            ->name('money-currency.index');
+
+        Route::post('/money-currency/convert', [MoneyCurrencyController::class, 'convert'])
+            ->name('money-currency.convert');
+
+    });

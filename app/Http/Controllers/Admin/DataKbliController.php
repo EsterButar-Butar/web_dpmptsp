@@ -27,24 +27,18 @@ class DataKbliController extends Controller
         $columnsReady = $this->tableReady();
         $mode = $request->query('mode');
         $editData = null;
-        $perPageOptions = [10, 22, 50];
-        $perPage = (int) $request->query('per_page', 22);
+        $perPageOptions = [5, 10, 22];
+        $perPage = (int) $request->query('per_page', 10);
 
         if (! in_array($perPage, $perPageOptions, true)) {
-            $perPage = 22;
+            $perPage = 10;
         }
 
         if (! $columnsReady) {
-            $paginator = new LengthAwarePaginator(
-                [],
-                0,
-                $perPage,
-                1,
-                [
-                    'path' => $request->url(),
-                    'query' => $request->query(),
-                ]
-            );
+            $paginator = new LengthAwarePaginator([], 0, $perPage, 1, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
 
             return view('admin.data-kbli', [
                 'tableExists' => $tableExists,
@@ -87,37 +81,27 @@ class DataKbliController extends Controller
             ]);
 
         $totalData = DB::table($this->table)->count();
-        $hierarchyMode = ! $request->filled('search') && ! $request->filled('struktur');
+
+        $hierarchyMode = ! $request->filled('search')
+            && ! $request->filled('struktur');
 
         if ($hierarchyMode) {
-            $categoryQuery = DB::table($this->table)
-                ->where('struktur', 'Kategori');
+            $query = $this->hierarchyRowsQuery()
+                ->where('k.level', 1);
 
             if ($request->filled('kategori')) {
-                $categoryQuery->where(
-                    'kode',
+                $query->where(
+                    'k.kode',
                     strtoupper(trim((string) $request->query('kategori')))
                 );
             }
 
-            $paginator = $categoryQuery
-                ->orderBy('kode')
+            $paginator = $query
+                ->orderBy('k.kode')
                 ->paginate($perPage)
                 ->withQueryString();
 
-            $categoryCodes = collect($paginator->items())
-                ->pluck('kode')
-                ->filter()
-                ->values();
-
-            $dataKbli = $categoryCodes->isEmpty()
-                ? collect()
-                : $this->hierarchyRowsQuery()
-                    ->whereIn('k.kategori_kode', $categoryCodes)
-                    ->orderBy('k.kategori_kode')
-                    ->orderByRaw("CASE WHEN k.level = 1 THEN '' ELSE k.kode END")
-                    ->orderBy('k.level')
-                    ->get();
+            $dataKbli = collect($paginator->items());
         } else {
             $paginator = $this->filteredQuery($request)
                 ->select($this->selectColumns())
@@ -157,6 +141,48 @@ class DataKbliController extends Controller
             'hierarchyMode',
             'totalData'
         ));
+    }
+
+    public function children(Request $request)
+    {
+        abort_unless($request->expectsJson(), 404);
+
+        if (! $this->tableReady()) {
+            return response()->json([
+                'message' => 'Struktur tabel data_kbli belum sesuai.',
+                'html' => '',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'parent' => ['required', 'string', 'max:5'],
+        ]);
+
+        $parentCode = strtoupper(trim($validated['parent']));
+
+        if (! DB::table($this->table)->where('kode', $parentCode)->exists()) {
+            return response()->json([
+                'message' => 'Data induk tidak ditemukan.',
+                'html' => '',
+            ], 404);
+        }
+
+        $children = $this->hierarchyRowsQuery()
+            ->where('k.kode_induk', $parentCode)
+            ->orderBy('k.kode')
+            ->get();
+
+        $html = $children
+            ->map(fn ($item) => view('admin.partials.data-kbli-row', [
+                'item' => $item,
+                'hierarchyMode' => true,
+            ])->render())
+            ->implode('');
+
+        return response()->json([
+            'html' => $html,
+            'count' => $children->count(),
+        ]);
     }
 
     public function store(Request $request)
